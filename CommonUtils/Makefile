@@ -7,7 +7,12 @@ all:    ${SRC}
 		${CXX} -c $$file ${INCLUDE} ${CXXFLAGS};\
 	done
 	mkdir -p ${LIBDIR}
-	ar rvs ${LIBDIR}/lib$(NAME).a ${OBJS}
+
+ifeq ($(PLATFORM),Darwin)
+	${CXX} -dynamiclib -undefined suppress -flat_namespace ${OBJS} -o ${LIBDIR}/lib$(NAME).dylib
+else
+	ar rvs ${LIBDIR}/lib$(NAME).a ${OBJS} 
+endif
 
 clean:
 	rm -rf *.o

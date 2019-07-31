@@ -4,137 +4,147 @@
 #include "KeySearchDevice.h"
 #include "clContext.h"
 
-typedef struct CLTargetList_
-{
-    cl_ulong mask = 0;
-    cl_ulong size = 0;
-    cl_mem ptr = 0;
-}CLTargetList;
+typedef struct CLTargetList_ {
+	cl_ulong mask = 0;
+	cl_ulong size = 0;
+	cl_mem ptr = 0;
+} CLTargetList;
 
-class CLKeySearchDevice : public KeySearchDevice {
-
+class CLKeySearchDevice: public KeySearchDevice {
 private:
-    cl::CLContext *_clContext = NULL;
-    cl::CLProgram *_clProgram = NULL;
-    cl::CLKernel *_initKeysKernel = NULL;
-    cl::CLKernel *_stepKernel = NULL;
-    cl::CLKernel *_stepKernelWithDouble = NULL;
+	cl::CLContext *_clContext = NULL;
+	cl::CLProgram *_clProgram = NULL;
+	cl::CLKernel *_initKeysKernel = NULL;
+	cl::CLKernel *_stepKernel = NULL;
+	cl::CLKernel *_stepKernelWithDouble = NULL;
 
-    uint64_t _globalMemSize = 0;
-    uint64_t _pointsMemSize = 0;
-    uint64_t _targetMemSize = 0;
+	uint64_t _globalMemSize = 0;
+	uint64_t _pointsMemSize = 0;
+	uint64_t _targetMemSize = 0;
 
-    CLTargetList _deviceTargetList;
+	CLTargetList _deviceTargetList;
 
-    secp256k1::uint256 _start;
-    
-    std::vector<hash160> _targetList;
+	secp256k1::uint256 _start;
 
-    std::vector<KeySearchResult> _results;
+	secp256k1::uint256 _end;
 
-    int _blocks;
+	std::vector<hash160> _targetList;
 
-    int _threads;
+	std::vector<KeySearchResult> _results;
 
-    int _pointsPerThread;
+	int _blocks;
 
-    cl_device_id _device;
+	int _threads;
 
-    int _compression = PointCompressionType::COMPRESSED;
+	int _pointsPerThread;
 
-    uint64_t _iterations = 0;
+	cl_device_id _device;
 
-    secp256k1::uint256 _stride = 1;
+	int _compression = PointCompressionType::COMPRESSED;
 
-    std::string _deviceName;
+	bool _randomMode = false;
 
-    // Device memory pointers
-    cl_mem _chain = NULL;
+	uint64_t _iterations = 0;
 
-    cl_mem _x = NULL;
+	secp256k1::uint256 _stride = 1;
 
-    cl_mem _y = NULL;
+	std::string _deviceName;
 
-    cl_mem _xInc = NULL;
+	// Device memory pointers
+	cl_mem _chain = NULL;
 
-    cl_mem _yInc = NULL;
+	cl_mem _x = NULL;
 
-    cl_mem _privateKeys = NULL;
+	cl_mem _y = NULL;
 
-    cl_mem _xTable = NULL;
-    
-    cl_mem _yTable = NULL;
+	cl_mem _xInc = NULL;
 
-    cl_mem _deviceResults = NULL;
+	cl_mem _yInc = NULL;
 
-    cl_mem _deviceResultsCount = NULL;
+	cl_mem _privateKeys = NULL;
 
-    cl_mem _targets = NULL;
+	cl_mem _xTable = NULL;
 
-    void generateStartingPoints();
+	cl_mem _yTable = NULL;
 
-    void setIncrementor(secp256k1::ecpoint &p);
+	cl_mem _deviceResults = NULL;
 
-    void splatBigInt(secp256k1::uint256 &k, unsigned int *ptr);
+	cl_mem _deviceResultsCount = NULL;
 
-    void allocateBuffers();
+	cl_mem _targets = NULL;
 
-    void initializeBasePoints();
+	void generateStartingPoints();
 
-    int getIndex(int block, int thread, int idx);
+	void setIncrementor(secp256k1::ecpoint &p);
 
-    void splatBigInt(unsigned int *dest, int block, int thread, int idx, const secp256k1::uint256 &i);
-    secp256k1::uint256 readBigInt(unsigned int *src, int block, int thread, int idx);
+	void splatBigInt(secp256k1::uint256 &k, unsigned int *ptr);
 
-    void selfTest();
+	void allocateBuffers();
 
-    bool _useBloomFilter = false;
+	void initializeBasePoints();
 
-    void setTargetsInternal();
-    void setTargetsList();
-    void setBloomFilter();
+	int getIndex(int block, int thread, int idx);
 
-    void getResultsInternal();
+	void splatBigInt(unsigned int *dest, int block, int thread, int idx,
+			const secp256k1::uint256 &i);
 
-    bool isTargetInList(const unsigned int hash[5]);
+	secp256k1::uint256 readBigInt(unsigned int *src, int block, int thread,
+			int idx);
 
-    void removeTargetFromList(const unsigned int hash[5]);
+	void selfTest();
 
-    uint32_t getPrivateKeyOffset(int thread, int block, int idx);
+	bool _useBloomFilter = false;
 
-    void initializeBloomFilter(const std::vector<struct hash160> &targets, uint64_t mask);
+	void setTargetsInternal();
 
-    uint64_t getOptimalBloomFilterMask(double p, size_t n);
+	void setTargetsList();
+
+	void setBloomFilter();
+
+	void getResultsInternal();
+
+	bool isTargetInList(const unsigned int hash[5]);
+
+	void removeTargetFromList(const unsigned int hash[5]);
+
+	uint32_t getPrivateKeyOffset(int thread, int block, int idx);
+
+	void initializeBloomFilter(const std::vector<struct hash160> &targets,
+			uint64_t mask);
+
+	uint64_t getOptimalBloomFilterMask(double p, size_t n);
+
+	std::vector<secp256k1::uint256> exponents;
 
 public:
+	CLKeySearchDevice(uint64_t device, int threads, int pointsPerThread,
+			int blocks = 0);
+	virtual ~CLKeySearchDevice();
 
-    CLKeySearchDevice(uint64_t device, int threads, int pointsPerThread, int blocks = 0);
-    ~CLKeySearchDevice();
+	// Initialize the device
+	virtual void init(const secp256k1::uint256 &start,
+			const secp256k1::uint256 &end, int compression,
+			const secp256k1::uint256 &stride, bool randomMode);
 
+	// Perform one iteration
+	virtual void doStep();
 
-    // Initialize the device
-    virtual void init(const secp256k1::uint256 &start, int compression, const secp256k1::uint256 &stride);
+	// Tell the device which addresses to search for
+	virtual void setTargets(const std::set<KeySearchTarget> &targets);
 
-    // Perform one iteration
-    virtual void doStep();
+	// Get the private keys that have been found so far
+	virtual size_t getResults(std::vector<KeySearchResult> &results);
 
-    // Tell the device which addresses to search for
-    virtual void setTargets(const std::set<KeySearchTarget> &targets);
+	// The number of keys searched at each step
+	virtual uint64_t keysPerStep();
 
-    // Get the private keys that have been found so far
-    virtual size_t getResults(std::vector<KeySearchResult> &results);
+	// The name of the device
+	virtual std::string getDeviceName();
 
-    // The number of keys searched at each step
-    virtual uint64_t keysPerStep();
+	// Memory information for this device
+	virtual void getMemoryInfo(uint64_t &freeMem, uint64_t &totalMem);
 
-    // The name of the device
-    virtual std::string getDeviceName();
-
-    // Memory information for this device
-    virtual void getMemoryInfo(uint64_t &freeMem, uint64_t &totalMem);
-
-    virtual secp256k1::uint256 getNextKey();
+	virtual secp256k1::uint256 getNextKey();
 };
 
 #endif
-

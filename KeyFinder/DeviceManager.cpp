@@ -5,21 +5,20 @@
 #endif
 
 #ifdef BUILD_OPENCL
-#include "clutil.h"
+#include "clUtil.h"
 #endif
 
-std::vector<DeviceManager::DeviceInfo> DeviceManager::getDevices()
-{
-    int deviceId = 0;
+std::vector<DeviceManager::DeviceInfo> DeviceManager::getDevices() {
+	int deviceId = 0;
 
-    std::vector<DeviceManager::DeviceInfo> devices;
+	std::vector<DeviceManager::DeviceInfo> devices;
 
 #ifdef BUILD_CUDA
     // Get CUDA devices
     try {
         std::vector<cuda::CudaDeviceInfo> cudaDevices = cuda::getDevices();
 
-        for(int i = 0; i < cudaDevices.size(); i++) {
+        for (size_t i = 0; i < cudaDevices.size(); i++) {
             DeviceManager::DeviceInfo device;
             device.name = cudaDevices[i].name;
             device.type = DeviceType::CUDA;
@@ -31,7 +30,7 @@ std::vector<DeviceManager::DeviceInfo> DeviceManager::getDevices()
 
             deviceId++;
         }
-    } catch(cuda::CudaException ex) {
+    } catch (cuda::CudaException ex) {
         throw DeviceManager::DeviceManagerException(ex.msg);
     }
 #endif
@@ -41,7 +40,7 @@ std::vector<DeviceManager::DeviceInfo> DeviceManager::getDevices()
     try {
         std::vector<cl::CLDeviceInfo> clDevices = cl::getDevices();
 
-        for(int i = 0; i < clDevices.size(); i++) {
+        for (size_t i = 0; i < clDevices.size(); i++) {
             DeviceManager::DeviceInfo device;
             device.name = clDevices[i].name;
             device.type = DeviceType::OpenCL;
@@ -52,10 +51,10 @@ std::vector<DeviceManager::DeviceInfo> DeviceManager::getDevices()
             devices.push_back(device);
             deviceId++;
         }
-    } catch(cl::CLException ex) {
+    } catch (cl::CLException ex) {
         throw DeviceManager::DeviceManagerException(ex.msg);
     }
 #endif
 
-    return devices;
+	return devices;
 }

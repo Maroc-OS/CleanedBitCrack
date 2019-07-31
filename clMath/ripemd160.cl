@@ -1,14 +1,8 @@
 #ifndef _RIPEMD160_CL
 #define _RIPEMD160_CL
 
-
-__constant unsigned int _RIPEMD160_IV[5] = {
-    0x67452301,
-    0xefcdab89,
-    0x98badcfe,
-    0x10325476,
-    0xc3d2e1f0
-};
+__constant unsigned int _RIPEMD160_IV[5] = {0x67452301, 0xefcdab89, 0x98badcfe,
+                                            0x10325476, 0xc3d2e1f0};
 
 __constant unsigned int _K0 = 0x5a827999;
 __constant unsigned int _K1 = 0x6ed9eba1;
@@ -32,59 +26,57 @@ __constant unsigned int _K7 = 0x50a28be6;
 
 #define J(x, y, z) ((x) ^ ((y) | ~(z)))
 
-#define FF(a, b, c, d, e, m, s)\
-    a += (F((b), (c), (d)) + (m));\
-    a = (rotl((a), (s)) + (e));\
-    c = rotl((c), 10)
+#define FF(a, b, c, d, e, m, s)  \
+  a += (F((b), (c), (d)) + (m)); \
+  a = (rotl((a), (s)) + (e));    \
+  c = rotl((c), 10)
 
-#define GG(a, b, c, d, e, x, s)\
-    a += G((b), (c), (d)) + (x) + _K0;\
-    a = rotl((a), (s)) + (e);\
-    c = rotl((c), 10)
+#define GG(a, b, c, d, e, x, s)      \
+  a += G((b), (c), (d)) + (x) + _K0; \
+  a = rotl((a), (s)) + (e);          \
+  c = rotl((c), 10)
 
-#define HH(a, b, c, d, e, x, s)\
-    a += H((b), (c), (d)) + (x) + _K1;\
-    a = rotl((a), (s)) + (e);\
-    c = rotl((c), 10)
+#define HH(a, b, c, d, e, x, s)      \
+  a += H((b), (c), (d)) + (x) + _K1; \
+  a = rotl((a), (s)) + (e);          \
+  c = rotl((c), 10)
 
-#define II(a, b, c, d, e, x, s)\
-    a += I((b), (c), (d)) + (x) + _K2;\
-    a = rotl((a), (s)) + e;\
-    c = rotl((c), 10)
+#define II(a, b, c, d, e, x, s)      \
+  a += I((b), (c), (d)) + (x) + _K2; \
+  a = rotl((a), (s)) + e;            \
+  c = rotl((c), 10)
 
-#define JJ(a, b, c, d, e, x, s)\
-    a += J((b), (c), (d)) + (x) + _K3;\
-    a = rotl((a), (s)) + (e);\
-    c = rotl((c), 10)
+#define JJ(a, b, c, d, e, x, s)      \
+  a += J((b), (c), (d)) + (x) + _K3; \
+  a = rotl((a), (s)) + (e);          \
+  c = rotl((c), 10)
 
-#define FFF(a, b, c, d, e, x, s)\
-    a += F((b), (c), (d)) + (x);\
-    a = rotl((a), (s)) + (e);\
-    c = rotl((c), 10)
+#define FFF(a, b, c, d, e, x, s) \
+  a += F((b), (c), (d)) + (x);   \
+  a = rotl((a), (s)) + (e);      \
+  c = rotl((c), 10)
 
-#define GGG(a, b, c, d, e, x, s)\
-    a += G((b), (c), (d)) + x + _K4;\
-    a = rotl((a), (s)) + (e);\
-    c = rotl((c), 10)
+#define GGG(a, b, c, d, e, x, s)   \
+  a += G((b), (c), (d)) + x + _K4; \
+  a = rotl((a), (s)) + (e);        \
+  c = rotl((c), 10)
 
-#define HHH(a, b, c, d, e, x, s)\
-    a += H((b), (c), (d)) + (x) + _K5;\
-    a = rotl((a), (s)) + (e);\
-    c = rotl((c), 10)
+#define HHH(a, b, c, d, e, x, s)     \
+  a += H((b), (c), (d)) + (x) + _K5; \
+  a = rotl((a), (s)) + (e);          \
+  c = rotl((c), 10)
 
-#define III(a, b, c, d, e, x, s)\
-    a += I((b), (c), (d)) + (x) + _K6;\
-    a = rotl((a), (s)) + (e);\
-    c = rotl((c), 10)
+#define III(a, b, c, d, e, x, s)     \
+  a += I((b), (c), (d)) + (x) + _K6; \
+  a = rotl((a), (s)) + (e);          \
+  c = rotl((c), 10)
 
-#define JJJ(a, b, c, d, e, x, s)\
-    a += J((b), (c), (d)) + (x) + _K7;\
-    a = rotl((a), (s)) + (e);\
-    c = rotl((c), 10)
+#define JJJ(a, b, c, d, e, x, s)     \
+  a += J((b), (c), (d)) + (x) + _K7; \
+  a = rotl((a), (s)) + (e);          \
+  c = rotl((c), 10)
 
-
-void ripemd160sha256(const unsigned int x[8], unsigned int digest[5])
-{
+void ripemd160sha256(const unsigned int x[8], unsigned int digest[5]) {
     unsigned int a1 = _RIPEMD160_IV[0];
     unsigned int b1 = _RIPEMD160_IV[1];
     unsigned int c1 = _RIPEMD160_IV[2];
@@ -287,9 +279,7 @@ void ripemd160sha256(const unsigned int x[8], unsigned int digest[5])
     digest[4] = _RIPEMD160_IV[0] + b1 + c2;
 }
 
-
-void ripemd160sha256NoFinal(const unsigned int x[8], unsigned int digest[5])
-{
+void ripemd160sha256NoFinal(const unsigned int x[8], unsigned int digest[5]) {
     unsigned int a1 = _RIPEMD160_IV[0];
     unsigned int b1 = _RIPEMD160_IV[1];
     unsigned int c1 = _RIPEMD160_IV[2];
@@ -491,4 +481,5 @@ void ripemd160sha256NoFinal(const unsigned int x[8], unsigned int digest[5])
     digest[3] = a1 + b2;
     digest[4] = b1 + c2;
 }
+
 #endif

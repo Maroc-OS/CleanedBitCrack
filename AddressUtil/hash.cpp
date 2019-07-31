@@ -1,23 +1,20 @@
 #include "AddressUtil.h"
 #include "CryptoUtil.h"
 
-#include <stdio.h>
-#include <string.h>
 
-static unsigned int endian(unsigned int x)
-{
-	return (x << 24) | ((x << 8) & 0x00ff0000) | ((x >> 8) & 0x0000ff00) | (x >> 24);
+static unsigned int endian(unsigned int x) {
+	return (x << 24) | ((x << 8) & 0x00ff0000) | ((x >> 8) & 0x0000ff00)
+			| (x >> 24);
 }
 
-bool Address::verifyAddress(std::string address)
-{
+bool Address::verifyAddress(std::string address) {
 	// Check length
-	if(address.length() > 34) {
-		false;
+	if (address.length() > 34) {
+		return false;
 	}
 
 	// Check encoding
-	if(!Base58::isBase58(address)) {
+	if (!Base58::isBase58(address)) {
 		return false;
 	}
 
@@ -35,8 +32,8 @@ bool Address::verifyAddress(std::string address)
 	return crypto::checksum(hash) == checksum;
 }
 
-std::string Address::fromPublicKey(const secp256k1::ecpoint &p, bool compressed)
-{
+std::string Address::fromPublicKey(const secp256k1::ecpoint &p,
+		bool compressed) {
 	unsigned int xWords[8] = { 0 };
 	unsigned int yWords[8] = { 0 };
 
@@ -45,7 +42,7 @@ std::string Address::fromPublicKey(const secp256k1::ecpoint &p, bool compressed)
 
 	unsigned int digest[5];
 
-	if(compressed) {
+	if (compressed) {
 		Hash::hashPublicKeyCompressed(xWords, yWords, digest);
 	} else {
 		Hash::hashPublicKey(xWords, yWords, digest);
@@ -54,18 +51,18 @@ std::string Address::fromPublicKey(const secp256k1::ecpoint &p, bool compressed)
 	unsigned int checksum = crypto::checksum(digest);
 
 	unsigned int addressWords[8] = { 0 };
-	for(int i = 0; i < 5; i++) {
+	for (int i = 0; i < 5; i++) {
 		addressWords[2 + i] = digest[i];
 	}
 	addressWords[7] = checksum;
 
-	secp256k1::uint256 addressBigInt(addressWords, secp256k1::uint256::BigEndian);
+	secp256k1::uint256 addressBigInt(addressWords,
+			secp256k1::uint256::BigEndian);
 
 	return "1" + Base58::toBase58(addressBigInt);
 }
 
-void Hash::hashPublicKey(const secp256k1::ecpoint &p, unsigned int *digest)
-{
+void Hash::hashPublicKey(const secp256k1::ecpoint &p, unsigned int *digest) {
 	unsigned int xWords[8];
 	unsigned int yWords[8];
 
@@ -75,9 +72,8 @@ void Hash::hashPublicKey(const secp256k1::ecpoint &p, unsigned int *digest)
 	hashPublicKey(xWords, yWords, digest);
 }
 
-
-void Hash::hashPublicKeyCompressed(const secp256k1::ecpoint &p, unsigned int *digest)
-{
+void Hash::hashPublicKeyCompressed(const secp256k1::ecpoint &p,
+		unsigned int *digest) {
 	unsigned int xWords[8];
 	unsigned int yWords[8];
 
@@ -87,8 +83,8 @@ void Hash::hashPublicKeyCompressed(const secp256k1::ecpoint &p, unsigned int *di
 	hashPublicKeyCompressed(xWords, yWords, digest);
 }
 
-void Hash::hashPublicKey(const unsigned int *x, const unsigned int *y, unsigned int *digest)
-{
+void Hash::hashPublicKey(const unsigned int *x, const unsigned int *y,
+		unsigned int *digest) {
 	unsigned int msg[16];
 	unsigned int sha256Digest[8];
 
@@ -110,12 +106,11 @@ void Hash::hashPublicKey(const unsigned int *x, const unsigned int *y, unsigned 
 	msg[1] = (x[1] >> 8) | (x[0] << 24);
 	msg[0] = (x[0] >> 8) | 0x04000000;
 
-
 	crypto::sha256Init(sha256Digest);
 	crypto::sha256(msg, sha256Digest);
 
 	// Zero out the message
-	for(int i = 0; i < 16; i++) {
+	for (int i = 0; i < 16; i++) {
 		msg[i] = 0;
 	}
 
@@ -125,12 +120,12 @@ void Hash::hashPublicKey(const unsigned int *x, const unsigned int *y, unsigned 
 
 	crypto::sha256(msg, sha256Digest);
 
-	for(int i = 0; i < 16; i++) {
+	for (int i = 0; i < 16; i++) {
 		msg[i] = 0;
 	}
 
 	// Swap to little-endian
-	for(int i = 0; i < 8; i++) {
+	for (int i = 0; i < 8; i++) {
 		msg[i] = endian(sha256Digest[i]);
 	}
 
@@ -142,10 +137,8 @@ void Hash::hashPublicKey(const unsigned int *x, const unsigned int *y, unsigned 
 	crypto::ripemd160(msg, digest);
 }
 
-
-
-void Hash::hashPublicKeyCompressed(const unsigned int *x, const unsigned int *y, unsigned int *digest)
-{
+void Hash::hashPublicKeyCompressed(const unsigned int *x, const unsigned int *y,
+		unsigned int *digest) {
 	unsigned int msg[16] = { 0 };
 	unsigned int sha256Digest[8];
 
@@ -161,7 +154,7 @@ void Hash::hashPublicKeyCompressed(const unsigned int *x, const unsigned int *y,
 	msg[2] = (x[2] >> 8) | (x[1] << 24);
 	msg[1] = (x[1] >> 8) | (x[0] << 24);
 
-	if(y[7] & 0x01) {
+	if (y[7] & 0x01) {
 		msg[0] = (x[0] >> 8) | 0x03000000;
 	} else {
 		msg[0] = (x[0] >> 8) | 0x02000000;
@@ -170,12 +163,12 @@ void Hash::hashPublicKeyCompressed(const unsigned int *x, const unsigned int *y,
 	crypto::sha256Init(sha256Digest);
 	crypto::sha256(msg, sha256Digest);
 
-	for(int i = 0; i < 16; i++) {
+	for (int i = 0; i < 16; i++) {
 		msg[i] = 0;
 	}
 
 	// Swap to little-endian
-	for(int i = 0; i < 8; i++) {
+	for (int i = 0; i < 8; i++) {
 		msg[i] = endian(sha256Digest[i]);
 	}
 

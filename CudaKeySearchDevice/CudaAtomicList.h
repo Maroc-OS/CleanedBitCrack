@@ -2,6 +2,7 @@
 #define _ATOMIC_LIST_HOST_H
 
 #include <cuda_runtime.h>
+#include <sys/_types/_null.h>
 
 /**
  A list that multiple device threads can append items to. Items can be
@@ -24,8 +25,7 @@ private:
 
 public:
 
-	CudaAtomicList()
-	{
+	CudaAtomicList() {
 		_devPtr = NULL;
 		_hostPtr = NULL;
 		_countHostPtr = NULL;
@@ -34,8 +34,7 @@ public:
 		_itemSize = 0;
 	}
 
-	~CudaAtomicList()
-	{
+	~CudaAtomicList() {
 		cleanup();
 	}
 
@@ -47,7 +46,7 @@ public:
 
 	void clear();
 
-    void cleanup();
+	void cleanup();
 
 };
 

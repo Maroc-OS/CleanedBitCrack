@@ -3,35 +3,35 @@
 
 #include <string>
 #include <map>
-#include <vector>
-#include <fstream>
 
 class ConfigFileEntry {
 
 public:
-    std::string key = "";
-    std::string value = "";
+	std::string key = "";
+	std::string value = "";
 
-    ConfigFileEntry() {}
+	ConfigFileEntry() {
+	}
 
-    ConfigFileEntry(std::string k, std::string v) : key(k), value(v)
-    {
-    }
+	ConfigFileEntry(std::string k, std::string v) :
+			key(k), value(v) {
+	}
 
 };
 
 class ConfigFileReader {
 
 private:
-    std::string _path;
+	std::string _path;
 
-    ConfigFileEntry readEntry(const std::string &line);
+	ConfigFileEntry readEntry(const std::string &line);
 
 public:
-    ConfigFileReader(const std::string &path);
+	ConfigFileReader(const std::string &path);
 
-    bool exists();
-    std::map<std::string, ConfigFileEntry> read();
+	bool exists();
+
+	std::map<std::string, ConfigFileEntry> read();
 };
 
 #endif

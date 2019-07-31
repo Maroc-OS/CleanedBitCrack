@@ -1,13 +1,7 @@
-#include"CryptoUtil.h"
-#include<stdio.h>
+#include "CryptoUtil.h"
 
-static const unsigned int _IV[5] = {
-	0x67452301,
-	0xefcdab89,
-	0x98badcfe,
-	0x10325476,
-	0xc3d2e1f0
-};
+static const unsigned int _IV[5] = { 0x67452301, 0xefcdab89, 0x98badcfe,
+		0x10325476, 0xc3d2e1f0 };
 
 static const unsigned int _K0 = 0x5a827999;
 static const unsigned int _K1 = 0x6ed9eba1;
@@ -19,114 +13,106 @@ static const unsigned int _K5 = 0x6d703ef3;
 static const unsigned int _K6 = 0x5c4dd124;
 static const unsigned int _K7 = 0x50a28be6;
 
-
-static unsigned int endian(unsigned int x)
-{
-	return (x << 24) | ((x << 8) & 0x00ff0000) | ((x >> 8) & 0x0000ff00) | (x >> 24);
+static unsigned int endian(unsigned int x) {
+	return (x << 24) | ((x << 8) & 0x00ff0000) | ((x >> 8) & 0x0000ff00)
+			| (x >> 24);
 }
 
-static unsigned int rotl(unsigned int x, int n)
-{
+static unsigned int rotl(unsigned int x, int n) {
 	return (x << n) | (x >> (32 - n));
 }
 
-static unsigned int F(unsigned int x, unsigned int y, unsigned int z)
-{
+static unsigned int F(unsigned int x, unsigned int y, unsigned int z) {
 	return x ^ y ^ z;
 }
 
-static unsigned int G(unsigned int x, unsigned int y, unsigned int z)
-{
+static unsigned int G(unsigned int x, unsigned int y, unsigned int z) {
 	return (((x) & (y)) | (~(x) & (z)));
 }
 
-static unsigned int H(unsigned int x, unsigned int y, unsigned int z)
-{
+static unsigned int H(unsigned int x, unsigned int y, unsigned int z) {
 	return (((x) | ~(y)) ^ (z));
 }
 
-static unsigned int I(unsigned int x, unsigned int y, unsigned int z)
-{
+static unsigned int I(unsigned int x, unsigned int y, unsigned int z) {
 	return (((x) & (z)) | ((y) & ~(z)));
 }
 
-static unsigned int J(unsigned int x, unsigned int y, unsigned int z)
-{
-	return  ((x) ^ ((y) | ~(z)));
+static unsigned int J(unsigned int x, unsigned int y, unsigned int z) {
+	return ((x) ^ ((y) | ~(z)));
 }
 
-static void FF(unsigned int &a, unsigned int &b, unsigned int &c, unsigned int &d, unsigned int &e, unsigned int x, unsigned int s)
-{
+static void FF(unsigned int &a, unsigned int &b, unsigned int &c,
+		unsigned int &d, unsigned int &e, unsigned int x, unsigned int s) {
 	a += F(b, c, d) + x;
 	a = rotl(a, s) + e;
 	c = rotl(c, 10);
 }
 
-static void GG(unsigned int &a, unsigned int &b, unsigned int &c, unsigned int &d, unsigned int &e, unsigned int x, unsigned int s)
-{
+static void GG(unsigned int &a, unsigned int &b, unsigned int &c,
+		unsigned int &d, unsigned int &e, unsigned int x, unsigned int s) {
 	a += G(b, c, d) + x + _K0;
 	a = rotl(a, s) + e;
 	c = rotl(c, 10);
 }
 
-static void HH(unsigned int &a, unsigned int &b, unsigned int &c, unsigned int &d, unsigned int &e, unsigned int x, unsigned int s)
-{
+static void HH(unsigned int &a, unsigned int &b, unsigned int &c,
+		unsigned int &d, unsigned int &e, unsigned int x, unsigned int s) {
 	a += H(b, c, d) + x + _K1;
 	a = rotl(a, s) + e;
 	c = rotl(c, 10);
 }
 
-static void II(unsigned int &a, unsigned int &b, unsigned int &c, unsigned int &d, unsigned int &e, unsigned int x, unsigned int s)
-{
+static void II(unsigned int &a, unsigned int &b, unsigned int &c,
+		unsigned int &d, unsigned int &e, unsigned int x, unsigned int s) {
 	a += I(b, c, d) + x + _K2;
 	a = rotl(a, s) + e;
 	c = rotl(c, 10);
 }
 
-static void JJ(unsigned int &a, unsigned int &b, unsigned int &c, unsigned int &d, unsigned int &e, unsigned int x, unsigned int s)
-{
+static void JJ(unsigned int &a, unsigned int &b, unsigned int &c,
+		unsigned int &d, unsigned int &e, unsigned int x, unsigned int s) {
 	a += J(b, c, d) + x + _K3;
 	a = rotl(a, s) + e;
 	c = rotl(c, 10);
 }
 
-static void FFF(unsigned int &a, unsigned int &b, unsigned int &c, unsigned int &d, unsigned int &e, unsigned int x, unsigned int s)
-{
+static void FFF(unsigned int &a, unsigned int &b, unsigned int &c,
+		unsigned int &d, unsigned int &e, unsigned int x, unsigned int s) {
 	a += F(b, c, d) + x;
 	a = rotl(a, s) + e;
 	c = rotl(c, 10);
 }
 
-static void GGG(unsigned int &a, unsigned int &b, unsigned int &c, unsigned int &d, unsigned int &e, unsigned int x, unsigned int s)
-{
+static void GGG(unsigned int &a, unsigned int &b, unsigned int &c,
+		unsigned int &d, unsigned int &e, unsigned int x, unsigned int s) {
 	a += G(b, c, d) + x + _K4;
 	a = rotl(a, s) + e;
 	c = rotl(c, 10);
 }
 
-static void HHH(unsigned int &a, unsigned int &b, unsigned int &c, unsigned int &d, unsigned int &e, unsigned int x, unsigned int s)
-{
+static void HHH(unsigned int &a, unsigned int &b, unsigned int &c,
+		unsigned int &d, unsigned int &e, unsigned int x, unsigned int s) {
 	a += H(b, c, d) + x + _K5;
 	a = rotl(a, s) + e;
 	c = rotl(c, 10);
 }
 
-static void III(unsigned int &a, unsigned int &b, unsigned int &c, unsigned int &d, unsigned int &e, unsigned int x, unsigned int s)
-{
+static void III(unsigned int &a, unsigned int &b, unsigned int &c,
+		unsigned int &d, unsigned int &e, unsigned int x, unsigned int s) {
 	a += I(b, c, d) + x + _K6;
 	a = rotl(a, s) + e;
 	c = rotl(c, 10);
 }
 
-static void JJJ(unsigned int &a, unsigned int &b, unsigned int &c, unsigned int &d, unsigned int &e, unsigned int x, unsigned int s)
-{
+static void JJJ(unsigned int &a, unsigned int &b, unsigned int &c,
+		unsigned int &d, unsigned int &e, unsigned int x, unsigned int s) {
 	a += J(b, c, d) + x + _K7;
 	a = rotl(a, s) + e;
 	c = rotl(c, 10);
 }
 
-void crypto::ripemd160(unsigned int *x, unsigned int *digest)
-{
+void crypto::ripemd160(unsigned int *x, unsigned int *digest) {
 	unsigned int a1 = _IV[0];
 	unsigned int b1 = _IV[1];
 	unsigned int c1 = _IV[2];
@@ -228,7 +214,6 @@ void crypto::ripemd160(unsigned int *x, unsigned int *digest)
 	JJ(d1, e1, a1, b1, c1, x[6], 8);
 	JJ(c1, d1, e1, a1, b1, x[15], 5);
 	JJ(b1, c1, d1, e1, a1, x[13], 6);
-
 
 	/* parallel round 1 */
 	JJJ(a2, b2, c2, d2, e2, x[5], 8);

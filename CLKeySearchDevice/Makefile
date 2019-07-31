@@ -9,7 +9,11 @@ all:
 		${CXX} -c $$file ${INCLUDE} -I${OPENCL_INCLUDE} ${CXXFLAGS};\
 	done
 
+ifeq ($(PLATFORM),Darwin)
+	${CXX} -dynamiclib -undefined suppress -flat_namespace *.o -o ${LIBDIR}/lib$(NAME).dylib
+else
 	ar rvs ${LIBDIR}/lib$(NAME).a *.o
+endif
 
 clean:
 	rm -rf *.a *.o bitcrack.cl bitcrack_cl.cpp

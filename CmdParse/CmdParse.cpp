@@ -1,17 +1,14 @@
 #include "CmdParse.h"
 
-CmdParse::CmdParse()
-{
-
+CmdParse::CmdParse() {
 }
 
-void CmdParse::add(const std::string shortForm, bool hasArg)
-{
+void CmdParse::add(const std::string shortForm, bool hasArg) {
 	this->add(shortForm, "", hasArg);
 }
 
-void CmdParse::add(const std::string shortForm, const std::string longForm, bool hasArg)
-{
+void CmdParse::add(const std::string shortForm, const std::string longForm,
+		bool hasArg) {
 	ArgType arg;
 	arg.shortForm = shortForm;
 	arg.longForm = longForm;
@@ -20,10 +17,9 @@ void CmdParse::add(const std::string shortForm, const std::string longForm, bool
 	_argType.push_back(arg);
 }
 
-bool CmdParse::get(const std::string opt, ArgType &t)
-{
-	for(unsigned int i = 0; i < _argType.size(); i++) {
-		if(_argType[i].shortForm == opt || _argType[i].longForm == opt) {
+bool CmdParse::get(const std::string opt, ArgType &t) {
+	for (unsigned int i = 0; i < _argType.size(); i++) {
+		if (_argType[i].shortForm == opt || _argType[i].longForm == opt) {
 			t = _argType[i];
 			return true;
 		}
@@ -32,21 +28,20 @@ bool CmdParse::get(const std::string opt, ArgType &t)
 	return false;
 }
 
-void CmdParse::parse(int argc, char **argv)
-{
-	for(int i = 1; i < argc; i++) {
+void CmdParse::parse(int argc, char **argv) {
+	for (int i = 1; i < argc; i++) {
 		std::string arg(argv[i]);
 
 		ArgType t;
-		if(get(arg, t)) {
+		if (get(arg, t)) {
 			// It is an option
 
 			OptArg a;
 
-			if(t.hasArg) {
+			if (t.hasArg) {
 				// It requires an argument
 
-				if(i == argc - 1) {
+				if (i == argc - 1) {
 					throw std::string("'" + arg + "' requires an argument");
 				}
 
@@ -63,7 +58,7 @@ void CmdParse::parse(int argc, char **argv)
 			}
 
 			_optArgs.push_back(a);
-			
+
 		} else {
 			// It is an operand
 
@@ -72,12 +67,10 @@ void CmdParse::parse(int argc, char **argv)
 	}
 }
 
-std::vector<OptArg> CmdParse::getArgs()
-{
+std::vector<OptArg> CmdParse::getArgs() {
 	return _optArgs;
 }
 
-std::vector<std::string> CmdParse::getOperands()
-{
+std::vector<std::string> CmdParse::getOperands() {
 	return _operands;
 }

@@ -2,11 +2,9 @@
 #define _KEY_FINDER_SHARED_H
 
 namespace PointCompressionType {
-	enum Value {
-		COMPRESSED = 0,
-		UNCOMPRESSED = 1,
-		BOTH = 2
-	};
+enum Value {
+	COMPRESSED = 0, UNCOMPRESSED = 1, BOTH = 2
+};
 }
 
 // Structures that exist on both host and device side

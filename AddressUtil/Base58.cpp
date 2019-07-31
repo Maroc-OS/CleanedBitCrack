@@ -1,16 +1,14 @@
 #include <map>
-#include "CryptoUtil.h"
 
 #include "AddressUtil.h"
 
-
-static const std::string BASE58_STRING = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+static const std::string BASE58_STRING =
+		"123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 
 struct Base58Map {
-	static std::map<char, int> createBase58Map()
-	{
+	static std::map<char, int> createBase58Map() {
 		std::map<char, int> m;
-		for(int i = 0; i < 58; i++) {
+		for (int i = 0; i < 58; i++) {
 			m[BASE58_STRING[i]] = i;
 		}
 
@@ -22,16 +20,13 @@ struct Base58Map {
 
 std::map<char, int> Base58Map::myMap = Base58Map::createBase58Map();
 
-
-
 /**
  * Converts a base58 string to uint256
  */
-secp256k1::uint256 Base58::toBigInt(const std::string &s)
-{
+secp256k1::uint256 Base58::toBigInt(const std::string &s) {
 	secp256k1::uint256 value;
 
-	for(unsigned int i = 0; i < s.length(); i++) {
+	for (unsigned int i = 0; i < s.length(); i++) {
 		value = value.mul(58);
 
 		int c = Base58Map::myMap[s[i]];
@@ -41,23 +36,21 @@ secp256k1::uint256 Base58::toBigInt(const std::string &s)
 	return value;
 }
 
-void Base58::toHash160(const std::string &s, unsigned int hash[5])
-{
+void Base58::toHash160(const std::string &s, unsigned int hash[5]) {
 	secp256k1::uint256 value = toBigInt(s);
 	unsigned int words[6];
 
 	value.exportWords(words, 6, secp256k1::uint256::BigEndian);
 
 	// Extract words, ignore checksum
-	for(int i = 0; i < 5; i++) {
+	for (int i = 0; i < 5; i++) {
 		hash[i] = words[i];
 	}
 }
 
-bool Base58::isBase58(std::string s)
-{
-	for(unsigned int i = 0; i < s.length(); i++) {
-		if(BASE58_STRING.find(s[i]) < 0) {
+bool Base58::isBase58(std::string s) {
+	for (unsigned int i = 0; i < s.length(); i++) {
+		if (BASE58_STRING.find(s[i]) < 0) {
 			return false;
 		}
 	}
@@ -65,13 +58,12 @@ bool Base58::isBase58(std::string s)
 	return true;
 }
 
-std::string Base58::toBase58(const secp256k1::uint256 &x)
-{
+std::string Base58::toBase58(const secp256k1::uint256 &x) {
 	std::string s;
 
 	secp256k1::uint256 value = x;
 
-	while(!value.isZero()) {
+	while (!value.isZero()) {
 		secp256k1::uint256 digit = value.mod(58);
 		int digitInt = digit.toInt32();
 
@@ -83,8 +75,8 @@ std::string Base58::toBase58(const secp256k1::uint256 &x)
 	return s;
 }
 
-void Base58::getMinMaxFromPrefix(const std::string &prefix, secp256k1::uint256 &minValueOut, secp256k1::uint256 &maxValueOut)
-{
+void Base58::getMinMaxFromPrefix(const std::string &prefix,
+		secp256k1::uint256 &minValueOut, secp256k1::uint256 &maxValueOut) {
 	secp256k1::uint256 minValue = toBigInt(prefix);
 	secp256k1::uint256 maxValue = minValue;
 	int exponent = 1;
@@ -98,7 +90,7 @@ void Base58::getMinMaxFromPrefix(const std::string &prefix, secp256k1::uint256 &
 	// by some power of 58
 	secp256k1::uint256 nextValue = minValue.mul(58);
 
-	while(nextValue.cmp(exp) < 0) {
+	while (nextValue.cmp(exp) < 0) {
 		exponent++;
 		minValue = nextValue;
 		nextValue = nextValue.mul(58);
@@ -108,7 +100,7 @@ void Base58::getMinMaxFromPrefix(const std::string &prefix, secp256k1::uint256 &
 
 	maxValue = minValue.add(diff);
 
-	if(maxValue.cmp(exp) > 0) {
+	if (maxValue.cmp(exp) > 0) {
 		maxValue = exp.sub(1);
 	}
 

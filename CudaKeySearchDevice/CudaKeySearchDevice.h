@@ -12,80 +12,86 @@
 
 // Structures that exist on both host and device side
 struct CudaDeviceResult {
-    int thread;
-    int block;
-    int idx;
-    bool compressed;
-    unsigned int x[8];
-    unsigned int y[8];
-    unsigned int digest[5];
+	int thread;
+	int block;
+	int idx;
+	bool compressed;
+	unsigned int x[8];
+	unsigned int y[8];
+	unsigned int digest[5];
 };
 
-class CudaKeySearchDevice : public KeySearchDevice {
+class CudaKeySearchDevice: public KeySearchDevice {
 
 private:
 
-    int _device;
+	int _device;
 
-    int _blocks;
+	int _blocks;
 
-    int _threads;
+	int _threads;
 
-    int _pointsPerThread;
+	int _pointsPerThread;
 
-    int _compression;
+	int _compression;
 
-    std::vector<KeySearchResult> _results;
+	std::vector<KeySearchResult> _results;
 
-    std::string _deviceName;
+	std::string _deviceName;
 
-    secp256k1::uint256 _startExponent;
+	secp256k1::uint256 _startExponent;
 
-    uint64_t _iterations;
+	uint64_t _iterations;
 
-    void cudaCall(cudaError_t err);
+	void cudaCall(cudaError_t err);
 
-    void generateStartingPoints();
+	void generateStartingPoints();
 
-    CudaDeviceKeys _deviceKeys;
+	CudaDeviceKeys _deviceKeys;
 
-    CudaAtomicList _resultList;
+	CudaAtomicList _resultList;
 
-    CudaHashLookup _targetLookup;
+	CudaHashLookup _targetLookup;
 
-    void getResultsInternal();
+	void getResultsInternal();
 
-    std::vector<hash160> _targets;
+	std::vector<hash160> _targets;
 
-    bool isTargetInList(const unsigned int hash[5]);
-    
-    void removeTargetFromList(const unsigned int hash[5]);
+	bool isTargetInList(const unsigned int hash[5]);
 
-    uint32_t getPrivateKeyOffset(int thread, int block, int point);
+	void removeTargetFromList(const unsigned int hash[5]);
 
-    secp256k1::uint256 _stride;
+	uint32_t getPrivateKeyOffset(int thread, int block, int point);
 
-    bool verifyKey(const secp256k1::uint256 &privateKey, const secp256k1::ecpoint &publicKey, const unsigned int hash[5], bool compressed);
+	secp256k1::uint256 _stride;
+
+	bool
+	verifyKey(const secp256k1::uint256 &privateKey,
+			const secp256k1::ecpoint &publicKey, const unsigned int hash[5],
+			bool compressed);
 
 public:
 
-    CudaKeySearchDevice(int device, int threads, int pointsPerThread, int blocks = 0);
+	CudaKeySearchDevice(int device, int threads, int pointsPerThread,
+			int blocks = 0, int compression = 0);
+	virtual ~CudaKeySearchDevice();
 
-    virtual void init(const secp256k1::uint256 &start, int compression, const secp256k1::uint256 &stride);
+	virtual void init(const secp256k1::uint256 &start, int compression,
+			const secp256k1::uint256 &stride);
 
-    virtual void doStep();
+	virtual void doStep();
 
-    virtual void setTargets(const std::set<KeySearchTarget> &targets);
+	virtual void setTargets(const std::set<KeySearchTarget> &targets);
 
-    virtual size_t getResults(std::vector<KeySearchResult> &results);
+	virtual size_t getResults(std::vector<KeySearchResult> &results);
 
-    virtual uint64_t keysPerStep();
+	virtual uint64_t keysPerStep();
 
-    virtual std::string getDeviceName();
+	virtual std::string getDeviceName();
 
-    virtual void getMemoryInfo(uint64_t &freeMem, uint64_t &totalMem);
+	virtual void getMemoryInfo(uint64_t &freeMem, uint64_t &totalMem);
 
-    virtual secp256k1::uint256 getNextKey();
+	virtual secp256k1::uint256 getNextKey();
 };
 
 #endif

@@ -3,20 +3,16 @@
 
 #include <string>
 
-
 namespace LogLevel {
-	enum Level {
-		Info = 1,
-		Error = 2,
-		Debug = 4,
-        Warning = 8
-	};
-
-	bool isValid(int level);
-
-	std::string toString(int level);
+enum Level {
+	Info = 1, Error = 2, Debug = 4, Warning = 8
 };
 
+bool isValid(int level);
+
+std::string toString(int level);
+}
+;
 
 class Logger {
 
@@ -29,8 +25,7 @@ private:
 
 public:
 
-	Logger()
-	{
+	Logger() {
 	}
 
 	static void log(int logLevel, std::string msg);

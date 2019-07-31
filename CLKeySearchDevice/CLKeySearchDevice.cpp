@@ -1,640 +1,652 @@
-#include <cmath>
-#include "Logger.h"
-#include "util.h"
 #include "CLKeySearchDevice.h"
+#include "Logger.h"
+#include "CommonUtils.h"
+#include <cmath>
 
 // Defined in bitcrack_cl.cpp which gets build in the pre-build event
 extern char _bitcrack_cl[];
 
 typedef struct {
-    int thread;
-    int block;
-    int idx;
-    bool compressed;
-    unsigned int x[8];
-    unsigned int y[8];
-    unsigned int digest[5];
-}CLDeviceResult;
+	int thread;
+	int block;
+	int idx;
+	bool compressed;
+	unsigned int x[8];
+	unsigned int y[8];
+	unsigned int digest[5];
+} CLDeviceResult;
 
+static void undoRMD160FinalRound(const unsigned int hIn[5],
+		unsigned int hOut[5]) {
+	unsigned int iv[5] = { 0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476,
+			0xc3d2e1f0 };
 
-static void undoRMD160FinalRound(const unsigned int hIn[5], unsigned int hOut[5])
-{
-    unsigned int iv[5] = {
-        0x67452301,
-        0xefcdab89,
-        0x98badcfe,
-        0x10325476,
-        0xc3d2e1f0
-    };
-
-    for(int i = 0; i < 5; i++) {
-        hOut[i] = util::endian(hIn[i]) - iv[(i + 1) % 5];
-    }
+	for (int i = 0; i < 5; i++) {
+		hOut[i] = CommonUtils::endian(hIn[i]) - iv[(i + 1) % 5];
+	}
 }
 
-CLKeySearchDevice::CLKeySearchDevice(uint64_t device, int threads, int pointsPerThread, int blocks)
-{
-    _threads = threads;
-    _blocks = blocks;
-    _pointsPerThread = pointsPerThread;
-    _device = (cl_device_id)device;
+CLKeySearchDevice::CLKeySearchDevice(uint64_t device, int threads,
+		int pointsPerThread, int blocks) {
+	_threads = threads;
+	_blocks = blocks;
+	_pointsPerThread = pointsPerThread;
+	_device = (cl_device_id) device;
 
+	if (threads <= 0 || threads % 32 != 0) {
+		throw KeySearchException(
+				"The number of threads must be a multiple of 32");
+	}
 
-    if(threads <= 0 || threads % 32 != 0) {
-        throw KeySearchException("The number of threads must be a multiple of 32");
-    }
+	if (pointsPerThread <= 0) {
+		throw KeySearchException("At least 1 point per thread required");
+	}
 
-    if(pointsPerThread <= 0) {
-        throw KeySearchException("At least 1 point per thread required");
-    }
+	try {
+		// Create the context
+		_clContext = new cl::CLContext(_device);
+		Logger::log(LogLevel::Info, "Compiling OpenCL kernels...");
+		_clProgram = new cl::CLProgram(*_clContext, _bitcrack_cl);
 
-    try {
-        // Create the context
-        _clContext = new cl::CLContext(_device);
-        Logger::log(LogLevel::Info, "Compiling OpenCL kernels...");
-        _clProgram = new cl::CLProgram(*_clContext, _bitcrack_cl);
+		// Load the kernels
+		_initKeysKernel = new cl::CLKernel(*_clProgram, "multiplyStepKernel");
+		_initKeysKernel->getWorkGroupSize();
 
-        // Load the kernels
-        _initKeysKernel = new cl::CLKernel(*_clProgram, "multiplyStepKernel");
-        _initKeysKernel->getWorkGroupSize();
+		_stepKernel = new cl::CLKernel(*_clProgram, "keyFinderKernel");
+		_stepKernelWithDouble = new cl::CLKernel(*_clProgram,
+				"keyFinderKernelWithDouble");
 
-        _stepKernel = new cl::CLKernel(*_clProgram, "keyFinderKernel");
-        _stepKernelWithDouble = new cl::CLKernel(*_clProgram, "keyFinderKernelWithDouble");
+		_globalMemSize = _clContext->getGlobalMemorySize();
 
-        _globalMemSize = _clContext->getGlobalMemorySize();
+		_deviceName = _clContext->getDeviceName();
+	} catch (cl::CLException &ex) {
+		throw KeySearchException(ex.msg);
+	}
 
-        _deviceName = _clContext->getDeviceName();
-    } catch(cl::CLException ex) {
-        throw KeySearchException(ex.msg);
-    }
-
-    _iterations = 0;
+	_iterations = 0;
 }
 
-CLKeySearchDevice::~CLKeySearchDevice()
-{
-    _clContext->free(_x);
-    _clContext->free(_y);
-    _clContext->free(_xTable);
-    _clContext->free(_yTable);
-    _clContext->free(_xInc);
-    _clContext->free(_yInc);
-    _clContext->free(_deviceResults);
-    _clContext->free(_deviceResultsCount);
+CLKeySearchDevice::~CLKeySearchDevice() {
+	_clContext->free(_x);
+	_clContext->free(_y);
+	_clContext->free(_xTable);
+	_clContext->free(_yTable);
+	_clContext->free(_xInc);
+	_clContext->free(_yInc);
+	_clContext->free(_deviceResults);
+	_clContext->free(_deviceResultsCount);
 
-    delete _stepKernel;
-    delete _stepKernelWithDouble;
-    delete _initKeysKernel;
-    delete _clContext;
+	delete _stepKernel;
+	delete _stepKernelWithDouble;
+	delete _initKeysKernel;
+	delete _clContext;
 }
 
-uint64_t CLKeySearchDevice::getOptimalBloomFilterMask(double p, size_t n)
-{
-    double m = 3.6 * ceil((n * std::log(p)) / std::log(1 / std::pow(2, std::log(2))));
+uint64_t CLKeySearchDevice::getOptimalBloomFilterMask(double p, size_t n) {
+	double m = 3.6
+			* ceil((n * std::log(p)) / std::log(1 / std::pow(2, std::log(2))));
 
-    unsigned int bits = (unsigned int)std::ceil(std::log(m) / std::log(2));
+	unsigned int bits = (unsigned int) std::ceil(std::log(m) / std::log(2));
 
-    return ((uint64_t)1 << bits) - 1;
+	return ((uint64_t) 1 << bits) - 1;
 }
 
-void CLKeySearchDevice::initializeBloomFilter(const std::vector<struct hash160> &targets, uint64_t mask)
-{
-    size_t sizeInWords = (mask + 1) / 32;
+void CLKeySearchDevice::initializeBloomFilter(
+		const std::vector<struct hash160> &targets, uint64_t mask) {
+	size_t sizeInWords = (mask + 1) / 32;
 
-    uint32_t *buf = new uint32_t[sizeInWords];
+	uint32_t *buf = new uint32_t[sizeInWords];
 
-    for(size_t i = 0; i < sizeInWords; i++) {
-        buf[i] = 0;
-    }
+	for (size_t i = 0; i < sizeInWords; i++) {
+		buf[i] = 0;
+	}
 
-    for(unsigned int k = 0; k < targets.size(); k++) {
+	for (unsigned int k = 0; k < targets.size(); k++) {
+		unsigned int hash[5];
+		unsigned int h5 = 0;
 
-        unsigned int hash[5];
-        unsigned int h5 = 0;
+		uint64_t idx[5];
 
-        uint64_t idx[5];
+		undoRMD160FinalRound(targets[k].h, hash);
 
-        undoRMD160FinalRound(targets[k].h, hash);
+		for (int i = 0; i < 5; i++) {
+			h5 += hash[i];
+		}
 
-        for(int i = 0; i < 5; i++) {
-            h5 += hash[i];
-        }
+		idx[0] = ((hash[0] << 6) | (h5 & 0x3f)) & mask;
+		idx[1] = ((hash[1] << 6) | ((h5 >> 6) & 0x3f)) & mask;
+		idx[2] = ((hash[2] << 6) | ((h5 >> 12) & 0x3f)) & mask;
+		idx[3] = ((hash[3] << 6) | ((h5 >> 18) & 0x3f)) & mask;
+		idx[4] = ((hash[4] << 6) | ((h5 >> 24) & 0x3f)) & mask;
 
-        idx[0] = ((hash[0] << 6) | (h5 & 0x3f)) & mask;
-        idx[1] = ((hash[1] << 6) | ((h5 >> 6) & 0x3f)) & mask;
-        idx[2] = ((hash[2] << 6) | ((h5 >> 12) & 0x3f)) & mask;
-        idx[3] = ((hash[3] << 6) | ((h5 >> 18) & 0x3f)) & mask;
-        idx[4] = ((hash[4] << 6) | ((h5 >> 24) & 0x3f)) & mask;
+		for (int i = 0; i < 5; i++) {
+			uint64_t j = idx[i];
+			buf[j / 32] |= 1 << (j % 32);
+		}
+	}
 
-        for(int i = 0; i < 5; i++) {
-            uint64_t j = idx[i];
-            buf[j / 32] |= 1 << (j % 32);
-        }
-    }
+	_targetMemSize = sizeInWords * sizeof(uint32_t);
 
+	_deviceTargetList.mask = mask;
+	_deviceTargetList.ptr = _clContext->malloc(sizeInWords * sizeof(uint32_t));
+	_deviceTargetList.size = targets.size();
+	_clContext->copyHostToDevice(buf, _deviceTargetList.ptr,
+			sizeInWords * sizeof(uint32_t));
 
-    _targetMemSize = sizeInWords * sizeof(uint32_t);
-
-    _deviceTargetList.mask = mask;
-    _deviceTargetList.ptr = _clContext->malloc(sizeInWords * sizeof(uint32_t));
-    _deviceTargetList.size = targets.size();
-    _clContext->copyHostToDevice(buf, _deviceTargetList.ptr, sizeInWords * sizeof(uint32_t));
-
-    delete[] buf;
+	delete[] buf;
 }
 
-void CLKeySearchDevice::allocateBuffers()
-{
-    size_t numKeys = (size_t)_threads * _blocks * _pointsPerThread;
-    size_t size = numKeys * 8 * sizeof(unsigned int);
+void CLKeySearchDevice::allocateBuffers() {
+	size_t numKeys = (size_t) _threads * _blocks * _pointsPerThread;
+	size_t size = numKeys * 8 * sizeof(unsigned int);
 
-    // X values
-    _x = _clContext->malloc(size);
-    _clContext->memset(_x, -1, size);
+	// X values
+	_x = _clContext->malloc(size);
+	_clContext->memset(_x, -1, size);
 
-    // Y values
-    _y = _clContext->malloc(size);
-    _clContext->memset(_y, -1, size);
+	// Y values
+	_y = _clContext->malloc(size);
+	_clContext->memset(_y, -1, size);
 
-    // Multiplicaiton chain for batch inverse
-    _chain = _clContext->malloc(size);
+	// Multiplication chain for batch inverse
+	_chain = _clContext->malloc(size);
 
-    // Private keys for initialization
-    _privateKeys = _clContext->malloc(size, CL_MEM_READ_ONLY);
+	// Private keys for initialisation
+	_privateKeys = _clContext->malloc(size, CL_MEM_READ_ONLY);
 
-    // Lookup table for initialization
-    _xTable = _clContext->malloc(256 * 8 * sizeof(unsigned int), CL_MEM_READ_ONLY);
-    _yTable = _clContext->malloc(256 * 8 * sizeof(unsigned int), CL_MEM_READ_ONLY);
+	// Lookup table for initialisation
+	_xTable = _clContext->malloc(256 * 8 * sizeof(unsigned int),
+	CL_MEM_READ_ONLY);
+	_yTable = _clContext->malloc(256 * 8 * sizeof(unsigned int),
+	CL_MEM_READ_ONLY);
 
-    // Value to increment by
-    _xInc = _clContext->malloc(8 * sizeof(unsigned int), CL_MEM_READ_ONLY);
-    _yInc = _clContext->malloc(8 * sizeof(unsigned int), CL_MEM_READ_ONLY);
+	// Value to increment by
+	_xInc = _clContext->malloc(8 * sizeof(unsigned int), CL_MEM_READ_ONLY);
+	_yInc = _clContext->malloc(8 * sizeof(unsigned int), CL_MEM_READ_ONLY);
 
-    // Buffer for storing results
-    _deviceResults = _clContext->malloc(128 * sizeof(CLDeviceResult));
-    _deviceResultsCount = _clContext->malloc(sizeof(unsigned int));
+	// Buffer for storing results
+	_deviceResults = _clContext->malloc(128 * sizeof(CLDeviceResult));
+	_deviceResultsCount = _clContext->malloc(sizeof(unsigned int));
 }
 
-void CLKeySearchDevice::setIncrementor(secp256k1::ecpoint &p)
-{
-    unsigned int buf[8];
+void CLKeySearchDevice::setIncrementor(secp256k1::ecpoint &p) {
+	unsigned int buf[8];
 
-    p.x.exportWords(buf, 8, secp256k1::uint256::BigEndian);
-    _clContext->copyHostToDevice(buf, _xInc, 8 * sizeof(unsigned int));
+	p.x.exportWords(buf, 8, secp256k1::uint256::BigEndian);
+	_clContext->copyHostToDevice(buf, _xInc, 8 * sizeof(unsigned int));
 
-    p.y.exportWords(buf, 8, secp256k1::uint256::BigEndian);
-    _clContext->copyHostToDevice(buf, _yInc, 8 * sizeof(unsigned int));
+	p.y.exportWords(buf, 8, secp256k1::uint256::BigEndian);
+	_clContext->copyHostToDevice(buf, _yInc, 8 * sizeof(unsigned int));
 }
 
-void CLKeySearchDevice::init(const secp256k1::uint256 &start, int compression, const secp256k1::uint256 &stride)
-{
-    if(start.cmp(secp256k1::N) >= 0) {
-        throw KeySearchException("Starting key is out of range");
-    }
+void CLKeySearchDevice::init(const secp256k1::uint256 &start,
+		const secp256k1::uint256 &end, int compression,
+		const secp256k1::uint256 &stride, bool randomMode) {
+	if (start.cmp(secp256k1::N) >= 0) {
+		throw KeySearchException("Starting key is out of range");
+	}
 
-    _start = start;
+	_start = start;
 
-    _stride = stride;
+	_end = end;
 
-    _compression = compression;
+	_stride = stride;
 
-    try {
-        allocateBuffers();
+	_compression = compression;
 
-        generateStartingPoints();
+	_randomMode = randomMode;
 
-        // Set the incrementor
-        secp256k1::ecpoint g = secp256k1::G();
-        secp256k1::ecpoint p = secp256k1::multiplyPoint(secp256k1::uint256((uint64_t)_threads * _blocks * _pointsPerThread) * _stride, g);
+	try {
+		allocateBuffers();
 
-        setIncrementor(p);
-    } catch(cl::CLException ex) {
-        throw KeySearchException(ex.msg);
-    }
+		generateStartingPoints();
+
+		// Set the incrementor
+		secp256k1::ecpoint g = secp256k1::G();
+		secp256k1::ecpoint p;
+
+		if (_randomMode) {
+			p = secp256k1::multiplyPoint(_stride, g);
+		} else {
+			p = secp256k1::multiplyPoint(
+					secp256k1::uint256(
+							(uint64_t) _threads * _blocks * _pointsPerThread)
+							* _stride, g);
+		}
+
+		setIncrementor(p);
+	} catch (cl::CLException &ex) {
+		throw KeySearchException(ex.msg);
+	}
 }
 
-void CLKeySearchDevice::doStep()
-{
-    try {
-        uint64_t numKeys = (uint64_t)_blocks * _threads * _pointsPerThread;
+void CLKeySearchDevice::doStep() {
+	try {
+		uint64_t numKeys = (uint64_t) _blocks * _threads * _pointsPerThread;
 
-        if(_iterations < 2 && _start.cmp(numKeys) <= 0) {
+		if (!_randomMode && _iterations < 2 && _start.cmp(numKeys) <= 0) {
+			_stepKernelWithDouble->call(_blocks, _threads, _pointsPerThread,
+					_compression, _chain, _x, _y, _xInc, _yInc,
+					_deviceTargetList.ptr, _deviceTargetList.size,
+					_deviceTargetList.mask, _deviceResults,
+					_deviceResultsCount);
 
-            _stepKernelWithDouble->call(
-                _blocks,
-                _threads,
-                _pointsPerThread,
-                _compression,
-                _chain,
-                _x,
-                _y,
-                _xInc,
-                _yInc,
-                _deviceTargetList.ptr,
-                _deviceTargetList.size,
-                _deviceTargetList.mask,
-                _deviceResults,
-                _deviceResultsCount);
+		} else {
+			_stepKernel->call(_blocks, _threads, _pointsPerThread, _compression,
+					_chain, _x, _y, _xInc, _yInc, _deviceTargetList.ptr,
+					_deviceTargetList.size, _deviceTargetList.mask,
+					_deviceResults, _deviceResultsCount);
+		}
+		fflush(stdout);
 
-        } else {
-            _stepKernel->call(
-                _blocks,
-                _threads,
-                _pointsPerThread,
-                _compression,
-                _chain,
-                _x,
-                _y,
-                _xInc,
-                _yInc,
-                _deviceTargetList.ptr,
-                _deviceTargetList.size,
-                _deviceTargetList.mask,
-                _deviceResults,
-                _deviceResultsCount);
-        }
-        fflush(stdout);
+		getResultsInternal();
 
-        getResultsInternal();
-
-        _iterations++;
-    } catch(cl::CLException ex) {
-        throw KeySearchException(ex.msg);
-    }
+		_iterations++;
+	} catch (cl::CLException &ex) {
+		throw KeySearchException(ex.msg);
+	}
 }
 
-void CLKeySearchDevice::setTargetsList()
-{
-    size_t count = _targetList.size();
+void CLKeySearchDevice::setTargetsList() {
+	size_t count = _targetList.size();
 
-    _targets = _clContext->malloc(5 * sizeof(unsigned int) * count);
+	_targets = _clContext->malloc(5 * sizeof(unsigned int) * count);
 
-    for(size_t i = 0; i < count; i++) {
-        unsigned int h[5];
+	for (size_t i = 0; i < count; i++) {
+		unsigned int h[5];
 
-        undoRMD160FinalRound(_targetList[i].h, h);
+		undoRMD160FinalRound(_targetList[i].h, h);
 
-        _clContext->copyHostToDevice(h, _targets, i * 5 * sizeof(unsigned int), 5 * sizeof(unsigned int));
-    }
+		_clContext->copyHostToDevice(h, _targets, i * 5 * sizeof(unsigned int),
+				5 * sizeof(unsigned int));
+	}
 
-    _targetMemSize = count * 5 * sizeof(unsigned int);
-    _deviceTargetList.ptr = _targets;
-    _deviceTargetList.size = count;
+	_targetMemSize = count * 5 * sizeof(unsigned int);
+	_deviceTargetList.ptr = _targets;
+	_deviceTargetList.size = count;
 }
 
-void CLKeySearchDevice::setBloomFilter()
-{
-    uint64_t bloomFilterMask = getOptimalBloomFilterMask(1.0e-9, _targetList.size());
+void CLKeySearchDevice::setBloomFilter() {
+	uint64_t bloomFilterMask = getOptimalBloomFilterMask(1.0e-9,
+			_targetList.size());
 
-    initializeBloomFilter(_targetList, bloomFilterMask);
+	initializeBloomFilter(_targetList, bloomFilterMask);
 }
 
-void CLKeySearchDevice::setTargetsInternal()
-{
-    // Clean up existing list
-    if(_deviceTargetList.ptr != NULL) {
-        _clContext->free(_deviceTargetList.ptr);
-    }
+void CLKeySearchDevice::setTargetsInternal() {
+	// Clean up existing list
+	if (_deviceTargetList.ptr != NULL) {
+		_clContext->free(_deviceTargetList.ptr);
+	}
 
-    if(_targetList.size() < 16) {
-        setTargetsList();
-    } else {
-        setBloomFilter();
-    }
+	if (_targetList.size() < 16) {
+		setTargetsList();
+	} else {
+		setBloomFilter();
+	}
 }
 
-void CLKeySearchDevice::setTargets(const std::set<KeySearchTarget> &targets)
-{
-    try {
-        _targetList.clear();
+void CLKeySearchDevice::setTargets(const std::set<KeySearchTarget> &targets) {
+	try {
+		_targetList.clear();
 
-        for(std::set<KeySearchTarget>::iterator i = targets.begin(); i != targets.end(); ++i) {
-            hash160 h(i->value);
-            _targetList.push_back(h);
-        }
+		for (std::set<KeySearchTarget>::iterator i = targets.begin();
+				i != targets.end(); ++i) {
+			hash160 h(i->value);
+			_targetList.push_back(h);
+		}
 
-        setTargetsInternal();
-    } catch(cl::CLException ex) {
-        throw KeySearchException(ex.msg);
-    }
+		setTargetsInternal();
+	} catch (cl::CLException &ex) {
+		throw KeySearchException(ex.msg);
+	}
 }
 
-size_t CLKeySearchDevice::getResults(std::vector<KeySearchResult> &results)
-{
-    size_t count = _results.size();
-    for(size_t i = 0; i < count; i++) {
-        results.push_back(_results[i]);
-    }
-    _results.clear();
+size_t CLKeySearchDevice::getResults(std::vector<KeySearchResult> &results) {
+	size_t count = _results.size();
+	for (size_t i = 0; i < count; i++) {
+		results.push_back(_results[i]);
+	}
+	_results.clear();
 
-    return count;
+	return count;
 }
 
-uint64_t CLKeySearchDevice::keysPerStep()
-{
-    return (uint64_t)_threads * _blocks * _pointsPerThread;
+uint64_t CLKeySearchDevice::keysPerStep() {
+	return (uint64_t) _threads * _blocks * _pointsPerThread;
 }
 
-std::string CLKeySearchDevice::getDeviceName()
-{
-    return _deviceName;
+std::string CLKeySearchDevice::getDeviceName() {
+	return _deviceName;
 }
 
-void CLKeySearchDevice::getMemoryInfo(uint64_t &freeMem, uint64_t &totalMem)
-{
-    freeMem = _globalMemSize - _targetMemSize - _pointsMemSize;
-    totalMem = _globalMemSize;
+void CLKeySearchDevice::getMemoryInfo(uint64_t &freeMem, uint64_t &totalMem) {
+	freeMem = _globalMemSize - _targetMemSize - _pointsMemSize;
+	totalMem = _globalMemSize;
 }
 
-void CLKeySearchDevice::splatBigInt(secp256k1::uint256 &k, unsigned int *ptr)
-{
-    unsigned int buf[8];
+void CLKeySearchDevice::splatBigInt(secp256k1::uint256 &k, unsigned int *ptr) {
+	unsigned int buf[8];
 
-    k.exportWords(buf, 8, secp256k1::uint256::BigEndian);
+	k.exportWords(buf, 8, secp256k1::uint256::BigEndian);
 
-    memcpy(ptr, buf, sizeof(unsigned int) * 8);
-
+	memcpy(ptr, buf, sizeof(unsigned int) * 8);
 }
 
-bool CLKeySearchDevice::isTargetInList(const unsigned int hash[5])
-{
-    size_t count = _targetList.size();
+bool CLKeySearchDevice::isTargetInList(const unsigned int hash[5]) {
+	size_t count = _targetList.size();
 
-    while(count) {
-        if(memcmp(hash, _targetList[count - 1].h, 20) == 0) {
-            return true;
-        }
-        count--;
-    }
+	while (count) {
+		if (memcmp(hash, _targetList[count - 1].h, 20) == 0) {
+			return true;
+		}
+		count--;
+	}
 
-    return false;
+	return false;
 }
 
-void CLKeySearchDevice::removeTargetFromList(const unsigned int hash[5])
-{
-    size_t count = _targetList.size();
+void CLKeySearchDevice::removeTargetFromList(const unsigned int hash[5]) {
+	size_t count = _targetList.size();
 
-    while(count) {
-        if(memcmp(hash, _targetList[count - 1].h, 20) == 0) {
-            _targetList.erase(_targetList.begin() + count - 1);
-            return;
-        }
-        count--;
-    }
+	while (count) {
+		if (memcmp(hash, _targetList[count - 1].h, 20) == 0) {
+			_targetList.erase(_targetList.begin() + count - 1);
+			return;
+		}
+		count--;
+	}
 }
 
-uint32_t CLKeySearchDevice::getPrivateKeyOffset(int thread, int block, int idx)
-{
-    // Total number of threads
-    int totalThreads = _blocks * _threads;
+uint32_t CLKeySearchDevice::getPrivateKeyOffset(int thread, int block,
+		int idx) {
+	// Total number of threads
+	int totalThreads = _blocks * _threads;
 
-    int base = idx * totalThreads;
+	int base = idx * totalThreads;
 
-    // Global ID of the current thread
-    int threadId = block * _threads + thread;
+	// Global ID of the current thread
+	int threadId = block * _threads + thread;
 
-    return base + threadId;
+	return base + threadId;
 }
 
-void CLKeySearchDevice::getResultsInternal()
-{
-    unsigned int numResults = 0;
+void CLKeySearchDevice::getResultsInternal() {
+	unsigned int numResults = 0;
 
-    _clContext->copyDeviceToHost(_deviceResultsCount, &numResults, sizeof(unsigned int));
+	_clContext->copyDeviceToHost(_deviceResultsCount, &numResults,
+			sizeof(unsigned int));
 
-    if(numResults > 0) {
-        CLDeviceResult *ptr = new CLDeviceResult[numResults];
+	if (numResults > 0) {
+		CLDeviceResult *ptr = new CLDeviceResult[numResults];
 
-        _clContext->copyDeviceToHost(_deviceResults, ptr, sizeof(CLDeviceResult) * numResults);
+		_clContext->copyDeviceToHost(_deviceResults, ptr,
+				sizeof(CLDeviceResult) * numResults);
 
-        unsigned int actualCount = 0;
+		unsigned int actualCount = 0;
 
-        for(unsigned int i = 0; i < numResults; i++) {
+		for (unsigned int i = 0; i < numResults; i++) {
+			// might be false-positive
+			if (!isTargetInList(ptr[i].digest)) {
+				continue;
+			}
+			actualCount++;
 
-            // might be false-positive
-            if(!isTargetInList(ptr[i].digest)) {
-                continue;
-            }
-            actualCount++;
+			KeySearchResult minerResult;
 
-            KeySearchResult minerResult;
+			// Calculate the private key based on the number of iterations and the current thread
+			secp256k1::uint256 offset;
+			secp256k1::uint256 privateKey;
 
-            // Calculate the private key based on the number of iterations and the current thread
-            secp256k1::uint256 offset = (secp256k1::uint256((uint64_t)_blocks * _threads * _pointsPerThread * _iterations) + secp256k1::uint256(getPrivateKeyOffset(ptr[i].thread, ptr[i].block, ptr[i].idx))) * _stride;
-            secp256k1::uint256 privateKey = secp256k1::addModN(_start, offset);
+			uint32_t privateKeyOffset = getPrivateKeyOffset(ptr[i].thread,
+					ptr[i].block, ptr[i].idx);
 
-            minerResult.privateKey = privateKey;
-            minerResult.compressed = ptr[i].compressed;
+			if (!_randomMode) {
+				offset = (secp256k1::uint256(
+						(uint64_t) _blocks * _threads * _pointsPerThread
+								* _iterations) + privateKeyOffset) * _stride;
+				privateKey = secp256k1::addModN(_start, offset);
+			} else {
+				offset = secp256k1::uint256(_iterations) * _stride;
+				privateKey = exponents[privateKeyOffset];
+				privateKey = secp256k1::addModN(privateKey, offset);
+			}
 
-            memcpy(minerResult.hash, ptr[i].digest, 20);
+			minerResult.privateKey = privateKey;
+			minerResult.compressed = ptr[i].compressed;
 
-            minerResult.publicKey = secp256k1::ecpoint(secp256k1::uint256(ptr[i].x, secp256k1::uint256::BigEndian), secp256k1::uint256(ptr[i].y, secp256k1::uint256::BigEndian));
+			memcpy(minerResult.hash, ptr[i].digest, 20);
 
-            removeTargetFromList(ptr[i].digest);
+			minerResult.publicKey = secp256k1::ecpoint(
+					secp256k1::uint256(ptr[i].x, secp256k1::uint256::BigEndian),
+					secp256k1::uint256(ptr[i].y,
+							secp256k1::uint256::BigEndian));
 
-            _results.push_back(minerResult);
-        }
+			removeTargetFromList(ptr[i].digest);
 
-        // Reset device counter
-        numResults = 0;
-        _clContext->copyHostToDevice(&numResults, _deviceResultsCount, sizeof(unsigned int));
-    }
+			_results.push_back(minerResult);
+		}
+
+		// Reset device counter
+		numResults = 0;
+		_clContext->copyHostToDevice(&numResults, _deviceResultsCount,
+				sizeof(unsigned int));
+	}
 }
 
-void CLKeySearchDevice::selfTest()
-{
-    uint64_t numPoints = (uint64_t)_threads * _blocks * _pointsPerThread;
-    std::vector<secp256k1::uint256> privateKeys;
+void CLKeySearchDevice::selfTest() {
+	uint64_t numPoints = (uint64_t) _threads * _blocks * _pointsPerThread;
+	std::vector<secp256k1::uint256> privateKeys;
 
-    // Generate key pairs for k, k+1, k+2 ... k + <total points in parallel - 1>
-    secp256k1::uint256 privKey = _start;
+	// Generate key pairs for k, k+1, k+2 ... k + <total points in parallel - 1>
+	secp256k1::uint256 privKey = _start;
 
-    privateKeys.push_back(_start);
+	privateKeys.push_back(_start);
 
-    for(uint64_t i = 1; i < numPoints; i++) {
-        privKey = privKey.add(_stride);
-        privateKeys.push_back(privKey);
-    }
+	for (uint64_t i = 1; i < numPoints; i++) {
+		privKey = privKey.add(_stride);
+		privateKeys.push_back(privKey);
+	}
 
-    unsigned int *xBuf = new unsigned int[numPoints * 8];
-    unsigned int *yBuf = new unsigned int[numPoints * 8];
+	unsigned int *xBuf = new unsigned int[numPoints * 8];
+	unsigned int *yBuf = new unsigned int[numPoints * 8];
 
-    _clContext->copyDeviceToHost(_x, xBuf, sizeof(unsigned int) * 8 * numPoints);
-    _clContext->copyDeviceToHost(_y, yBuf, sizeof(unsigned int) * 8 * numPoints);
+	_clContext->copyDeviceToHost(_x, xBuf,
+			sizeof(unsigned int) * 8 * numPoints);
+	_clContext->copyDeviceToHost(_y, yBuf,
+			sizeof(unsigned int) * 8 * numPoints);
 
-    for(int block = 0; block < _blocks; block++) {
-        for(int thread = 0; thread < _threads; thread++) {
-            for(int idx = 0; idx < _pointsPerThread; idx++) {
+	for (int block = 0; block < _blocks; block++) {
+		for (int thread = 0; thread < _threads; thread++) {
+			for (int idx = 0; idx < _pointsPerThread; idx++) {
+				int index = getIndex(block, thread, idx);
 
-                int index = getIndex(block, thread, idx);
+				secp256k1::uint256 privateKey = privateKeys[index];
 
-                secp256k1::uint256 privateKey = privateKeys[index];
+				secp256k1::uint256 x = readBigInt(xBuf, block, thread, idx);
+				secp256k1::uint256 y = readBigInt(yBuf, block, thread, idx);
 
-                secp256k1::uint256 x = readBigInt(xBuf, block, thread, idx);
-                secp256k1::uint256 y = readBigInt(yBuf, block, thread, idx);
+				secp256k1::ecpoint p1(x, y);
+				secp256k1::ecpoint p2 = secp256k1::multiplyPoint(privateKey,
+						secp256k1::G());
 
-                secp256k1::ecpoint p1(x, y);
-                secp256k1::ecpoint p2 = secp256k1::multiplyPoint(privateKey, secp256k1::G());
+				if (!secp256k1::pointExists(p1)) {
+					throw std::string("Validation failed: invalid point");
+				}
 
-                if(!secp256k1::pointExists(p1)) {
-                    throw std::string("Validation failed: invalid point");
-                }
+				if (!secp256k1::pointExists(p2)) {
+					throw std::string("Validation failed: invalid point");
+				}
 
-                if(!secp256k1::pointExists(p2)) {
-                    throw std::string("Validation failed: invalid point");
-                }
-
-                if(!(p1 == p2)) {
-                    throw std::string("Validation failed: points do not match");
-                }
-            }
-        }
-    }
+				if (!(p1 == p2)) {
+					throw std::string("Validation failed: points do not match");
+				}
+			}
+		}
+	}
 }
 
-void CLKeySearchDevice::splatBigInt(unsigned int *dest, int block, int thread, int idx, const secp256k1::uint256 &i)
-{
-    unsigned int value[8] = {0};
+void CLKeySearchDevice::splatBigInt(unsigned int *dest, int block, int thread,
+		int idx, const secp256k1::uint256 &i) {
+	unsigned int value[8] = { 0 };
 
-    i.exportWords(value, 8, secp256k1::uint256::BigEndian);
+	i.exportWords(value, 8, secp256k1::uint256::BigEndian);
 
-    int totalThreads = _blocks * _threads;
-    int threadId = block * _threads + thread;
+	int totalThreads = _blocks * _threads;
+	int threadId = block * _threads + thread;
 
-    int base = idx * totalThreads * 8;
+	int base = idx * totalThreads * 8;
 
-    for(int k = 0; k < 8; k++) {
-        dest[base + threadId * 8 + k] = value[k];
-    }
+	for (int k = 0; k < 8; k++) {
+		dest[base + threadId * 8 + k] = value[k];
+	}
 }
 
-secp256k1::uint256 CLKeySearchDevice::readBigInt(unsigned int *src, int block, int thread, int idx)
-{
-    unsigned int value[8] = {0};
+secp256k1::uint256 CLKeySearchDevice::readBigInt(unsigned int *src, int block,
+		int thread, int idx) {
+	unsigned int value[8] = { 0 };
 
-    int totalThreads = _blocks * _threads;
-    int threadId = block * _threads + thread;
+	int totalThreads = _blocks * _threads;
+	int threadId = block * _threads + thread;
 
-    int base = idx * totalThreads * 8;
+	int base = idx * totalThreads * 8;
 
-    for(int k = 0; k < 8; k++) {
-        value[k] = src[base + threadId * 8 + k];
-    }
+	for (int k = 0; k < 8; k++) {
+		value[k] = src[base + threadId * 8 + k];
+	}
 
-    secp256k1::uint256 v(value, secp256k1::uint256::BigEndian);
+	secp256k1::uint256 v(value, secp256k1::uint256::BigEndian);
 
-    return v;
+	return v;
 }
 
-void CLKeySearchDevice::initializeBasePoints()
-{
-    // generate a table of points G, 2G, 4G, 8G...(2^255)G
-    std::vector<secp256k1::ecpoint> table;
+void CLKeySearchDevice::initializeBasePoints() {
+	// generate a table of points G, 2G, 4G, 8G...(2^255)G
+	std::vector<secp256k1::ecpoint> table;
 
-    table.push_back(secp256k1::G());
-    for(uint64_t i = 1; i < 256; i++) {
+	table.push_back(secp256k1::G());
+	for (uint64_t i = 1; i < 256; i++) {
+		secp256k1::ecpoint p = doublePoint(table[i - 1]);
+		if (!pointExists(p)) {
+			throw std::string("Point does not exist!");
+		}
+		table.push_back(p);
+	}
 
-        secp256k1::ecpoint p = doublePoint(table[i - 1]);
-        if(!pointExists(p)) {
-            throw std::string("Point does not exist!");
-        }
-        table.push_back(p);
-    }
+	size_t count = 256;
 
-    size_t count = 256;
+	unsigned int *tmpX = new unsigned int[count * 8];
+	unsigned int *tmpY = new unsigned int[count * 8];
 
-    unsigned int *tmpX = new unsigned int[count * 8];
-    unsigned int *tmpY = new unsigned int[count * 8];
+	for (int i = 0; i < 256; i++) {
+		unsigned int bufX[8];
+		unsigned int bufY[8];
+		table[i].x.exportWords(bufX, 8, secp256k1::uint256::BigEndian);
+		table[i].y.exportWords(bufY, 8, secp256k1::uint256::BigEndian);
 
-    for(int i = 0; i < 256; i++) {
-        unsigned int bufX[8];
-        unsigned int bufY[8];
-        table[i].x.exportWords(bufX, 8, secp256k1::uint256::BigEndian);
-        table[i].y.exportWords(bufY, 8, secp256k1::uint256::BigEndian);
+		for (int j = 0; j < 8; j++) {
+			tmpX[i * 8 + j] = bufX[j];
+			tmpY[i * 8 + j] = bufY[j];
+		}
+	}
 
-        for(int j = 0; j < 8; j++) {
-            tmpX[i * 8 + j] = bufX[j];
-            tmpY[i * 8 + j] = bufY[j];
-        }
-    }
+	_clContext->copyHostToDevice(tmpX, _xTable,
+			count * 8 * sizeof(unsigned int));
 
-    _clContext->copyHostToDevice(tmpX, _xTable, count * 8 * sizeof(unsigned int));
-
-    _clContext->copyHostToDevice(tmpY, _yTable, count * 8 * sizeof(unsigned int));
+	_clContext->copyHostToDevice(tmpY, _yTable,
+			count * 8 * sizeof(unsigned int));
 }
 
-int CLKeySearchDevice::getIndex(int block, int thread, int idx)
-{
-    // Total number of threads
-    int totalThreads = _blocks * _threads;
+int CLKeySearchDevice::getIndex(int block, int thread, int idx) {
+	// Total number of threads
+	int totalThreads = _blocks * _threads;
 
-    int base = idx * totalThreads;
+	int base = idx * totalThreads;
 
-    // Global ID of the current thread
-    int threadId = block * _threads + thread;
+	// Global ID of the current thread
+	int threadId = block * _threads + thread;
 
-    return base + threadId;
+	return base + threadId;
 }
 
-void CLKeySearchDevice::generateStartingPoints()
-{
-    uint64_t totalPoints = (uint64_t)_pointsPerThread * _threads * _blocks;
-    uint64_t totalMemory = totalPoints * 40;
+void CLKeySearchDevice::generateStartingPoints() {
+	uint64_t totalPoints = (uint64_t) _pointsPerThread * _threads * _blocks;
+	uint64_t totalMemory = totalPoints * 40;
 
-    std::vector<secp256k1::uint256> exponents;
+	initializeBasePoints();
 
-    initializeBasePoints();
+	_pointsMemSize = totalPoints * sizeof(unsigned int) * 16
+			+ _pointsPerThread * sizeof(unsigned int) * 8;
 
-    _pointsMemSize = totalPoints * sizeof(unsigned int) * 16 + _pointsPerThread * sizeof(unsigned int) * 8;
+	Logger::log(LogLevel::Info,
+			"Generating " + CommonUtils::formatThousands(totalPoints)
+					+ " starting points ("
+					+ CommonUtils::format("%.1f",
+							(double) totalMemory / (double) (1024 * 1024))
+					+ "MB)");
 
-    Logger::log(LogLevel::Info, "Generating " + util::formatThousands(totalPoints) + " starting points (" + util::format("%.1f", (double)totalMemory / (double)(1024 * 1024)) + "MB)");
+	// Generate key pairs for k, k+1, k+2 ... k + <total points in parallel - 1>
+	secp256k1::uint256 privKey = _start;
 
-    // Generate key pairs for k, k+1, k+2 ... k + <total points in parallel - 1>
-    secp256k1::uint256 privKey = _start;
+	if (!_randomMode) {
+		exponents.push_back(privKey);
+	}
 
-    exponents.push_back(privKey);
+	for (uint64_t i = !_randomMode ? 1 : 0; i < totalPoints; i++) {
+		if (_randomMode) {
+			privKey = secp256k1::getRandomRange(_start, _end);
+		} else {
+			privKey = privKey.add(_stride);
+		}
 
-    for(uint64_t i = 1; i < totalPoints; i++) {
-        privKey = privKey.add(_stride);
-        exponents.push_back(privKey);
-    }
+		if (_randomMode && i < 3) {
+			Logger::log(LogLevel::Info,
+					"Starting point sample: " + privKey.toString() + " ("
+							+ std::to_string(privKey.getBitRange())
+							+ " bit range)");
+		}
+		exponents.push_back(privKey);
+	}
 
-    unsigned int *privateKeys = new unsigned int[8 * totalPoints];
+	unsigned int *privateKeys = new unsigned int[8 * totalPoints];
 
-    for(int block = 0; block < _blocks; block++) {
-        for(int thread = 0; thread < _threads; thread++) {
-            for(int idx = 0; idx < _pointsPerThread; idx++) {
+	for (int block = 0; block < _blocks; block++) {
+		for (int thread = 0; thread < _threads; thread++) {
+			for (int idx = 0; idx < _pointsPerThread; idx++) {
+				int index = getIndex(block, thread, idx);
 
-                int index = getIndex(block, thread, idx);
+				splatBigInt(privateKeys, block, thread, idx, exponents[index]);
+			}
+		}
+	}
 
-                splatBigInt(privateKeys, block, thread, idx, exponents[index]);
-            }
-        }
-    }
+	// Copy to device
+	_clContext->copyHostToDevice(privateKeys, _privateKeys,
+			totalPoints * 8 * sizeof(unsigned int));
 
-    // Copy to device
-    _clContext->copyHostToDevice(privateKeys, _privateKeys, totalPoints * 8 * sizeof(unsigned int));
+	delete[] privateKeys;
 
-    delete[] privateKeys;
+	// Show progress in 10% increments
+	double pct = 10.0;
+	for (int i = 0; i < 256; i++) {
+		_initKeysKernel->call(_blocks, _threads, _pointsPerThread, i,
+				_privateKeys, _chain, _xTable, _yTable, _x, _y);
 
-    // Show progress in 10% increments
-    double pct = 10.0;
-    for(int i = 0; i < 256; i++) {
-        _initKeysKernel->call(_blocks, _threads, _pointsPerThread, i, _privateKeys, _chain, _xTable, _yTable, _x, _y);
+		if (((double) (i + 1) / 256.0) * 100.0 >= pct) {
+			Logger::log(LogLevel::Info, CommonUtils::format("%.1f%%", pct));
+			pct += 10.0;
+		}
+	}
 
-        if(((double)(i+1) / 256.0) * 100.0 >= pct) {
-            Logger::log(LogLevel::Info, util::format("%.1f%%", pct));
-            pct += 10.0;
-        }
-    }
+	Logger::log(LogLevel::Info, "Done");
 
-    Logger::log(LogLevel::Info, "Done");
+	if (!_randomMode) {
+		exponents.clear();
+	}
 }
 
+secp256k1::uint256 CLKeySearchDevice::getNextKey() {
+	uint64_t totalPoints = (uint64_t) _pointsPerThread * _threads * _blocks;
 
-secp256k1::uint256 CLKeySearchDevice::getNextKey()
-{
-    uint64_t totalPoints = (uint64_t)_pointsPerThread * _threads * _blocks;
-
-    return _start + secp256k1::uint256(totalPoints) * _iterations * _stride;
+	return _start + secp256k1::uint256(totalPoints) * _iterations * _stride;
 }

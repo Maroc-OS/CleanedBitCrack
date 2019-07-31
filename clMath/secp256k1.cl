@@ -6,47 +6,43 @@ typedef ulong uint64_t;
 /**
  Prime modulus 2^256 - 2^32 - 977
  */
-__constant unsigned int _P[8] = {
-    0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFE, 0xFFFFFC2F
-};
+__constant unsigned int _P[8] = {0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF,
+                                 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF,
+                                 0xFFFFFFFE, 0xFFFFFC2F};
 
-__constant unsigned int _P_MINUS1[8] = {
-    0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFE, 0xFFFFFC2F
-};
+__constant unsigned int _P_MINUS1[8] = {0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF,
+                                        0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF,
+                                        0xFFFFFFFE, 0xFFFFFC2F};
 
 /**
  Base point X
  */
-__constant unsigned int _GX[8] = {
-    0x79BE667E, 0xF9DCBBAC, 0x55A06295, 0xCE870B07, 0x029BFCDB, 0x2DCE28D9, 0x59F2815B, 0x16F81798
-};
+__constant unsigned int _GX[8] = {0x79BE667E, 0xF9DCBBAC, 0x55A06295,
+                                  0xCE870B07, 0x029BFCDB, 0x2DCE28D9,
+                                  0x59F2815B, 0x16F81798};
 
 /**
  Base point Y
  */
-__constant unsigned int _GY[8] = {
-    0x483ADA77, 0x26A3C465, 0x5DA4FBFC, 0x0E1108A8, 0xFD17B448, 0xA6855419, 0x9C47D08F, 0xFB10D4B8
-};
-
+__constant unsigned int _GY[8] = {0x483ADA77, 0x26A3C465, 0x5DA4FBFC,
+                                  0x0E1108A8, 0xFD17B448, 0xA6855419,
+                                  0x9C47D08F, 0xFB10D4B8};
 
 /**
  * Group order
  */
-__constant unsigned int _N[8] = {
-    0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFE, 0xBAAEDCE6, 0xAF48A03B, 0xBFD25E8C, 0xD0364141
-};
-
-
+__constant unsigned int _N[8] = {0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF,
+                                 0xFFFFFFFE, 0xBAAEDCE6, 0xAF48A03B,
+                                 0xBFD25E8C, 0xD0364141};
 
 // Add with carry
-unsigned int addc(unsigned int a, unsigned int b, unsigned int *carry)
-{
+unsigned int addc(unsigned int a, unsigned int b, unsigned int *carry) {
     unsigned int sum = a + *carry;
 
     unsigned int c1 = (sum < a) ? 1 : 0;
 
     sum = sum + b;
-    
+
     unsigned int c2 = (sum < b) ? 1 : 0;
 
     *carry = c1 | c2;
@@ -55,8 +51,7 @@ unsigned int addc(unsigned int a, unsigned int b, unsigned int *carry)
 }
 
 // Subtract with borrow
-unsigned int subc(unsigned int a, unsigned int b, unsigned int *borrow)
-{
+unsigned int subc(unsigned int a, unsigned int b, unsigned int *borrow) {
     unsigned int diff = a - *borrow;
 
     *borrow = (diff > a) ? 1 : 0;
@@ -69,39 +64,40 @@ unsigned int subc(unsigned int a, unsigned int b, unsigned int *borrow)
 }
 
 #ifdef DEVICE_VENDOR_INTEL
-unsigned int mul_hi977(unsigned int x)
-{
-    unsigned int high = x >> 16;
-    unsigned int low = x & 0xffff;
+unsigned int mul_hi977(unsigned int x) {
+  unsigned int high = x >> 16;
+  unsigned int low = x & 0xffff;
 
-    return (((low * 977) >> 16) + (high * 977)) >> 16;
+  return (((low * 977) >> 16) + (high * 977)) >> 16;
 }
 
 // 32 x 32 multiply-add
-void madd977(unsigned int *high, unsigned int *low, unsigned int a, unsigned int c)
-{
-    *low = a * 977;
-    unsigned int tmp = *low + c;
-    unsigned int carry = tmp < *low ? 1 : 0;
-    *low = tmp;
-    *high = mul_hi977(a) + carry;
+void madd977(unsigned int *high, unsigned int *low, unsigned int a,
+             unsigned int c) {
+  *low = a * 977;
+  unsigned int tmp = *low + c;
+  unsigned int carry = tmp < *low ? 1 : 0;
+  *low = tmp;
+  *high = mul_hi977(a) + carry;
 }
 
 #else
+
 // 32 x 32 multiply-add
-void madd977(unsigned int *high, unsigned int *low, unsigned int a, unsigned int c)
-{
+void madd977(unsigned int *high, unsigned int *low, unsigned int a,
+             unsigned int c) {
     *low = a * 977;
     unsigned int tmp = *low + c;
     unsigned int carry = tmp < *low ? 1 : 0;
     *low = tmp;
-    *high = mad_hi(a, (unsigned int)977, carry);
+    *high = mad_hi(a, (unsigned int) 977, carry);
 }
+
 #endif
 
 // 32 x 32 multiply-add
-void madd(unsigned int *high, unsigned int *low, unsigned int a, unsigned int b, unsigned int c)
-{
+void madd(unsigned int *high, unsigned int *low, unsigned int a, unsigned int b,
+          unsigned int c) {
     *low = a * b;
     unsigned int tmp = *low + c;
     unsigned int carry = tmp < *low ? 1 : 0;
@@ -109,28 +105,27 @@ void madd(unsigned int *high, unsigned int *low, unsigned int a, unsigned int b,
     *high = mad_hi(a, b, carry);
 }
 
-void mull(unsigned int *high, unsigned int *low, unsigned int a, unsigned int b)
-{
+void mull(unsigned int *high, unsigned int *low, unsigned int a,
+          unsigned int b) {
     *low = a * b;
     *high = mul_hi(a, b);
 }
 
-unsigned int sub256(const unsigned int a[8], const unsigned int b[8], unsigned int c[8])
-{
+unsigned int sub256(const unsigned int a[8], const unsigned int b[8],
+                    unsigned int c[8]) {
     unsigned int borrow = 0;
-    for(int i = 7; i >= 0; i--) {
+    for (int i = 7; i >= 0; i--) {
         c[i] = subc(a[i], b[i], &borrow);
     }
 
     return borrow;
 }
 
-bool greaterThanEqualToP(const unsigned int a[8])
-{
-    for(int i = 0; i < 8; i++) {
-        if(a[i] > _P_MINUS1[i]) {
+bool greaterThanEqualToP(const unsigned int a[8]) {
+    for (int i = 0; i < 8; i++) {
+        if (a[i] > _P_MINUS1[i]) {
             return true;
-        } else if(a[i] < _P_MINUS1[i]) {
+        } else if (a[i] < _P_MINUS1[i]) {
             return false;
         }
     }
@@ -138,60 +133,54 @@ bool greaterThanEqualToP(const unsigned int a[8])
     return false;
 }
 
-void multiply256(const unsigned int x[8], const unsigned int y[8], unsigned int z[16])
-{
+void multiply256(const unsigned int x[8], const unsigned int y[8],
+                 unsigned int z[16]) {
     unsigned int high = 0;
 
     // First round, overwrite z
-    for(int j = 7; j >= 0; j--) {
-
-        uint64_t product = (uint64_t)x[7] * y[j];
+    for (int j = 7; j >= 0; j--) {
+        uint64_t product = (uint64_t) x[7] * y[j];
 
         product = product + high;
 
-        z[7 + j + 1] = (unsigned int)product;
-        high = (unsigned int)(product >> 32);
+        z[7 + j + 1] = (unsigned int) product;
+        high = (unsigned int) (product >> 32);
     }
     z[7] = high;
 
-    for(int i = 6; i >= 0; i--) {
-
+    for (int i = 6; i >= 0; i--) {
         high = 0;
 
-        for(int j = 7; j >= 0; j--) {
-
-            uint64_t product = (uint64_t)x[i] * y[j];
+        for (int j = 7; j >= 0; j--) {
+            uint64_t product = (uint64_t) x[i] * y[j];
 
             product = product + z[i + j + 1] + high;
 
-            z[i + j + 1] = (unsigned int)product;
+            z[i + j + 1] = (unsigned int) product;
 
             high = product >> 32;
         }
 
         z[i] = high;
-    }    
+    }
 }
 
-unsigned int add256(const unsigned int a[8], const unsigned int b[8], unsigned int c[8])
-{
+unsigned int add256(const unsigned int a[8], const unsigned int b[8],
+                    unsigned int c[8]) {
     unsigned int carry = 0;
 
-    for(int i = 7; i >= 0; i--) {
+    for (int i = 7; i >= 0; i--) {
         c[i] = addc(a[i], b[i], &carry);
     }
 
     return carry;
 }
 
-
-
-bool isInfinity(const unsigned int x[8])
-{
+bool isInfinity(const unsigned int x[8]) {
     bool isf = true;
 
-    for(int i = 0; i < 8; i++) {
-        if(x[i] != 0xffffffff) {
+    for (int i = 0; i < 8; i++) {
+        if (x[i] != 0xffffffff) {
             isf = false;
         }
     }
@@ -199,17 +188,15 @@ bool isInfinity(const unsigned int x[8])
     return isf;
 }
 
-void copyBigInt(const unsigned int src[8], unsigned int dest[8])
-{
-    for(int i = 0; i < 8; i++) {
+void copyBigInt(const unsigned int src[8], unsigned int dest[8]) {
+    for (int i = 0; i < 8; i++) {
         dest[i] = src[i];
     }
 }
 
-bool equal(const unsigned int a[8], const unsigned int b[8])
-{
-    for(int i = 0; i < 8; i++) {
-        if(a[i] != b[i]) {
+bool equal(const unsigned int a[8], const unsigned int b[8]) {
+    for (int i = 0; i < 8; i++) {
+        if (a[i] != b[i]) {
             return false;
         }
     }
@@ -220,15 +207,14 @@ bool equal(const unsigned int a[8], const unsigned int b[8])
 /**
  * Reads an 8-word big integer from device memory
  */
-void readInt(__global const unsigned int *ara, int idx, unsigned int x[8])
-{
+void readInt(__global const unsigned int *ara, int idx, unsigned int x[8]) {
     size_t totalThreads = get_global_size(0);
 
     size_t base = idx * totalThreads * 8;
 
     size_t threadId = get_local_size(0) * get_group_id(0) + get_local_id(0);
 
-    for(int i = 0; i < 8; i++) {
+    for (int i = 0; i < 8; i++) {
         x[i] = ara[base + threadId * 8 + i];
     }
 }
@@ -236,8 +222,7 @@ void readInt(__global const unsigned int *ara, int idx, unsigned int x[8])
 /*
  * Read least-significant word
  */
-unsigned int readLSW(__global const unsigned int *ara, int idx)
-{
+unsigned int readLSW(__global const unsigned int *ara, int idx) {
     size_t totalThreads = get_global_size(0);
 
     size_t base = idx * totalThreads * 8;
@@ -250,34 +235,31 @@ unsigned int readLSW(__global const unsigned int *ara, int idx)
 /**
  * Writes an 8-word big integer to device memory
  */
-void writeInt(__global unsigned int *ara, int idx, const unsigned int x[8])
-{
+void writeInt(__global unsigned int *ara, int idx, const unsigned int x[8]) {
     size_t totalThreads = get_global_size(0);
 
     size_t base = idx * totalThreads * 8;
 
     size_t threadId = get_local_size(0) * get_group_id(0) + get_local_id(0);
 
-    for(int i = 0; i < 8; i++) {
+    for (int i = 0; i < 8; i++) {
         ara[base + threadId * 8 + i] = x[i];
     }
 }
 
-unsigned int addP(const unsigned int a[8], unsigned int c[8])
-{
+unsigned int addP(const unsigned int a[8], unsigned int c[8]) {
     unsigned int carry = 0;
 
-    for(int i = 7; i >= 0; i--) {
+    for (int i = 7; i >= 0; i--) {
         c[i] = addc(a[i], _P[i], &carry);
     }
 
     return carry;
 }
 
-unsigned int subP(const unsigned int a[8], unsigned int c[8])
-{
+unsigned int subP(const unsigned int a[8], unsigned int c[8]) {
     unsigned int borrow = 0;
-    for(int i = 7; i >= 0; i--) {
+    for (int i = 7; i >= 0; i--) {
         c[i] = subc(a[i], _P[i], &borrow);
     }
 
@@ -287,39 +269,36 @@ unsigned int subP(const unsigned int a[8], unsigned int c[8])
 /**
  * Subtraction mod p
  */
-void subModP(const unsigned int a[8], const unsigned int b[8], unsigned int c[8])
-{
-    if(sub256(a, b, c)) {
+void subModP(const unsigned int a[8], const unsigned int b[8],
+             unsigned int c[8]) {
+    if (sub256(a, b, c)) {
         addP(c, c);
     }
 }
 
-
-void addModP(const unsigned int a[8], const unsigned int b[8], unsigned int c[8])
-{
+void addModP(const unsigned int a[8], const unsigned int b[8],
+             unsigned int c[8]) {
     unsigned int carry = 0;
 
     carry = add256(a, b, c);
 
     bool gt = false;
-    for(int i = 0; i < 8; i++) {
-        if(c[i] > _P[i]) {
+    for (int i = 0; i < 8; i++) {
+        if (c[i] > _P[i]) {
             gt = true;
             break;
-        } else if(c[i] < _P[i]) {
+        } else if (c[i] < _P[i]) {
             break;
         }
     }
 
-    if(carry || gt) {
+    if (carry || gt) {
         subP(c, c);
     }
 }
 
-
-
-void mulModP(const unsigned int a[8], const unsigned int b[8], unsigned int c[8])
-{
+void mulModP(const unsigned int a[8], const unsigned int b[8],
+             unsigned int c[8]) {
     unsigned int product[16];
     unsigned int hWord = 0;
     unsigned int carry = 0;
@@ -330,17 +309,17 @@ void mulModP(const unsigned int a[8], const unsigned int b[8], unsigned int c[8]
     // Copy the high 256 bits
     unsigned int high[8];
 
-    for(int i = 0; i < 8; i++) {
+    for (int i = 0; i < 8; i++) {
         high[i] = product[i];
     }
 
-    for(int i = 0; i < 8; i++) {
+    for (int i = 0; i < 8; i++) {
         product[i] = 0;
     }
 
     // Add 2^32 * high to the low 256 bits (shift left 1 word and add)
     // Affects product[14] to product[6]
-    for(int i = 7; i >= 0; i--) {
+    for (int i = 7; i >= 0; i--) {
         product[i + 7] = addc(product[i + 7], high[i], &carry);
     }
     product[6] = addc(product[6], 0, &carry);
@@ -349,7 +328,7 @@ void mulModP(const unsigned int a[8], const unsigned int b[8], unsigned int c[8]
 
     // Multiply high by 977 and add to low
     // Affects product[15] to product[5]
-    for(int i = 7; i >= 0; i--) {
+    for (int i = 7; i >= 0; i--) {
         unsigned int t = 0;
         madd977(&hWord, &t, high[i], hWord);
         product[8 + i] = addc(product[8 + i], t, &carry);
@@ -370,7 +349,7 @@ void mulModP(const unsigned int a[8], const unsigned int b[8], unsigned int c[8]
     product[13] = addc(product[13], high[6], &carry);
 
     // Propagate the carry
-    for(int i = 12; i >= 7; i--) {
+    for (int i = 12; i >= 7; i--) {
         product[i] = addc(product[i], 0, &carry);
     }
 
@@ -386,16 +365,16 @@ void mulModP(const unsigned int a[8], const unsigned int b[8], unsigned int c[8]
     product[13] = addc(product[13], hWord, &carry);
 
     // Propagate carry
-    for(int i = 12; i >= 7; i--) {
+    for (int i = 12; i >= 7; i--) {
         product[i] = addc(product[i], 0, &carry);
     }
 
     // Reduce if >= P
-    if(product[7] || greaterThanEqualToP(&product[8])) {
+    if (product[7] || greaterThanEqualToP(&product[8])) {
         subP(&product[8], &product[8]);
     }
 
-    for(int i = 0; i < 8; i++) {
+    for (int i = 0; i < 8; i++) {
         c[i] = product[8 + i];
     }
 }
@@ -404,8 +383,7 @@ void mulModP(const unsigned int a[8], const unsigned int b[8], unsigned int c[8]
  * Multiply mod P
  * c = a * c
  */
-void mulModP_d(const unsigned int a[8], unsigned int c[8])
-{
+void mulModP_d(const unsigned int a[8], unsigned int c[8]) {
     unsigned int tmp[8];
     mulModP(a, c, tmp);
 
@@ -416,8 +394,7 @@ void mulModP_d(const unsigned int a[8], unsigned int c[8])
  * Square mod P
  * b = a * a
  */
-void squareModP(const unsigned int a[8], unsigned int b[8])
-{
+void squareModP(const unsigned int a[8], unsigned int b[8]) {
     mulModP(a, a, b);
 }
 
@@ -425,20 +402,17 @@ void squareModP(const unsigned int a[8], unsigned int b[8])
  * Square mod P
  * x = x * x
  */
-void squareModP_d(unsigned int x[8])
-{
+void squareModP_d(unsigned int x[8]) {
     unsigned int tmp[8];
     squareModP(x, tmp);
     copyBigInt(tmp, x);
 }
 
-
-
 /**
- * Multiplicative inverse mod P using Fermat's method of x^(p-2) mod p and addition chains
+ * Multiplicative inverse mod P using Fermat's method of x^(p-2) mod p and
+ * addition chains
  */
-void invModP(unsigned int value[8])
-{
+void invModP(unsigned int value[8]) {
     unsigned int x[8];
 
     copyBigInt(value, x);
@@ -448,7 +422,7 @@ void invModP(unsigned int value[8])
     // 0xd - 1101
     mulModP_d(x, y);
     squareModP_d(x);
-    //mulModP_d(x, y);
+    // mulModP_d(x, y);
     squareModP_d(x);
     mulModP_d(x, y);
     squareModP_d(x);
@@ -456,40 +430,38 @@ void invModP(unsigned int value[8])
     squareModP_d(x);
 
     // 0x2 - 0010
-    //mulModP_d(x, y);
+    // mulModP_d(x, y);
     squareModP_d(x);
     mulModP_d(x, y);
     squareModP_d(x);
-    //mulModP_d(x, y);
+    // mulModP_d(x, y);
     squareModP_d(x);
-    //mulModP_d(x, y);
+    // mulModP_d(x, y);
     squareModP_d(x);
 
     // 0xc = 0x1100
-    //mulModP_d(x, y);
+    // mulModP_d(x, y);
     squareModP_d(x);
-    //mulModP_d(x, y);
-    squareModP_d(x);
-    mulModP_d(x, y);
+    // mulModP_d(x, y);
     squareModP_d(x);
     mulModP_d(x, y);
     squareModP_d(x);
-
+    mulModP_d(x, y);
+    squareModP_d(x);
 
     // 0xfffff
     // Strange behavior here: Incorrect results if in a single loop
-    for(int i = 0; i < 19; i++) {
+    for (int i = 0; i < 19; i++) {
         mulModP_d(x, y);
         squareModP_d(x);
     }
-    for(int i = 0; i < 1; i++) {
+    for (int i = 0; i < 1; i++) {
         mulModP_d(x, y);
         squareModP_d(x);
     }
-
 
     // 0xe - 1110
-    //mulModP_d(x, y);
+    // mulModP_d(x, y);
     squareModP_d(x);
     mulModP_d(x, y);
     squareModP_d(x);
@@ -499,63 +471,57 @@ void invModP(unsigned int value[8])
     squareModP_d(x);
 
     // 0xfffffffffffffffffffffffffffffffffffffffffffffffffffffff
-    for(int i = 0; i < 219; i++) {
+    for (int i = 0; i < 219; i++) {
         mulModP_d(x, y);
         squareModP_d(x);
     }
-
 
     mulModP_d(x, y);
 
     copyBigInt(y, value);
 }
 
-
-void beginBatchAdd(const unsigned int *px, const unsigned int *x, __global unsigned int *chain, int i, int batchIdx, unsigned int inverse[8])
-{
+void beginBatchAdd(const unsigned int *px, const unsigned int *x,
+                   __global unsigned int *chain, int i, int batchIdx,
+                   unsigned int inverse[8]) {
     // x = Gx - x
     unsigned int t[8];
     subModP(px, x, t);
 
-    // Keep a chain of multiples of the diff, i.e. c[0] = diff0, c[1] = diff0 * diff1,
-    // c[2] = diff2 * diff1 * diff0, etc
+    // Keep a chain of multiples of the diff, i.e. c[0] = diff0, c[1] = diff0 *
+    // diff1, c[2] = diff2 * diff1 * diff0, etc
     mulModP_d(t, inverse);
 
     writeInt(chain, batchIdx, inverse);
 }
 
-
-void beginBatchAddWithDouble(const unsigned int *px, const unsigned int *py, __global unsigned int *xPtr, __global unsigned int *chain, int i, int batchIdx, unsigned int inverse[8])
-{
+void beginBatchAddWithDouble(const unsigned int *px, const unsigned int *py,
+                             __global unsigned int *xPtr,
+                             __global unsigned int *chain, int i, int batchIdx,
+                             unsigned int inverse[8]) {
     unsigned int x[8];
     readInt(xPtr, i, x);
 
-    if(equal(px, x)) {
+    if (equal(px, x)) {
         addModP(py, py, x);
     } else {
         // x = Gx - x
         subModP(px, x, x);
     }
 
-    // Keep a chain of multiples of the diff, i.e. c[0] = diff0, c[1] = diff0 * diff1,
-    // c[2] = diff2 * diff1 * diff0, etc
+    // Keep a chain of multiples of the diff, i.e. c[0] = diff0, c[1] = diff0 *
+    // diff1, c[2] = diff2 * diff1 * diff0, etc
     mulModP_d(x, inverse);
 
     writeInt(chain, batchIdx, inverse);
 }
 
-void completeBatchAddWithDouble(
-    const unsigned int *px,
-    const unsigned int *py,
-    __global const unsigned int *xPtr,
-    __global const unsigned int *yPtr,
-    int i,
-    int batchIdx,
-    __global unsigned int *chain,
-    unsigned int *inverse,
-    unsigned int newX[8],
-    unsigned int newY[8])
-{
+void completeBatchAddWithDouble(const unsigned int *px, const unsigned int *py,
+                                __global const unsigned int *xPtr,
+                                __global const unsigned int *yPtr, int i,
+                                int batchIdx, __global unsigned int *chain,
+                                unsigned int *inverse, unsigned int newX[8],
+                                unsigned int newY[8]) {
     unsigned int s[8];
     unsigned int x[8];
     unsigned int y[8];
@@ -563,7 +529,7 @@ void completeBatchAddWithDouble(
     readInt(xPtr, i, x);
     readInt(yPtr, i, y);
 
-    if(batchIdx >= 1) {
+    if (batchIdx >= 1) {
         unsigned int c[8];
 
         readInt(chain, batchIdx - 1, c);
@@ -571,7 +537,7 @@ void completeBatchAddWithDouble(
         mulModP(inverse, c, s);
 
         unsigned int diff[8];
-        if(equal(px, x)) {
+        if (equal(px, x)) {
             addModP(py, py, diff);
         } else {
             subModP(px, x, diff);
@@ -582,8 +548,7 @@ void completeBatchAddWithDouble(
         copyBigInt(inverse, s);
     }
 
-
-    if(equal(px, x)) {
+    if (equal(px, x)) {
         // currently s = 1 / 2y
 
         unsigned int x2[8];
@@ -593,7 +558,6 @@ void completeBatchAddWithDouble(
         mulModP(x, x, x2);
         addModP(x2, x2, tx2);
         addModP(x2, tx2, tx2);
-
 
         // s = 3x^2 * 1/2y
         mulModP_d(tx2, s);
@@ -613,7 +577,6 @@ void completeBatchAddWithDouble(
         subModP(newY, py, newY);
 
     } else {
-
         unsigned int rise[8];
         subModP(py, y, rise);
 
@@ -634,24 +597,17 @@ void completeBatchAddWithDouble(
     }
 }
 
-void completeBatchAdd(
-    const unsigned int *px,
-    const unsigned int *py,
-    __global unsigned int *xPtr,
-    __global unsigned int *yPtr,
-    int i,
-    int batchIdx,
-    __global unsigned int *chain,
-    unsigned int *inverse,
-    unsigned int newX[8],
-    unsigned int newY[8])
-{
+void completeBatchAdd(const unsigned int *px, const unsigned int *py,
+                      __global unsigned int *xPtr, __global unsigned int *yPtr,
+                      int i, int batchIdx, __global unsigned int *chain,
+                      unsigned int *inverse, unsigned int newX[8],
+                      unsigned int newY[8]) {
     unsigned int s[8];
     unsigned int x[8];
 
     readInt(xPtr, i, x);
 
-    if(batchIdx >= 1) {
+    if (batchIdx >= 1) {
         unsigned int c[8];
 
         readInt(chain, batchIdx - 1, c);
@@ -685,10 +641,6 @@ void completeBatchAdd(
     subModP(newY, py, newY);
 }
 
-
-void doBatchInverse(unsigned int inverse[8])
-{
-    invModP(inverse);
-}
+void doBatchInverse(unsigned int inverse[8]) { invModP(inverse); }
 
 #endif
