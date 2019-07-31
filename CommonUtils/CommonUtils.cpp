@@ -1,4 +1,5 @@
 #include <fstream>
+#include <cinttypes>
 
 #include "CommonUtils.h"
 
@@ -47,7 +48,7 @@ void commonUtilsSleep(int seconds) {
 std::string formatThousands(uint64_t x) {
 	char buf[32] = "";
 
-	snprintf(buf, 32, "%lld", x);
+	snprintf(buf, 32, "%" PRIu64 "", x);
 
 	std::string s(buf);
 
@@ -98,11 +99,11 @@ uint64_t parseUInt64(std::string s) {
 	}
 
 	if (StringIsHex) {
-		if (sscanf(s.c_str(), "%llx", &val) != 1) {
+		if (sscanf(s.c_str(), "%" PRIx64 "", &val) != 1) {
 			throw std::string("Expected an integer");
 		}
 	} else {
-		if (sscanf(s.c_str(), "%lld", &val) != 1) {
+		if (sscanf(s.c_str(), "%" PRIu64 "", &val) != 1) {
 			throw std::string("Expected an integer");
 		}
 	}
@@ -223,7 +224,7 @@ std::string format(uint32_t value) {
 std::string format(uint64_t value) {
 	char buf[100] = { 0 };
 
-	snprintf(buf, 100, "%lld", (uint64_t) value);
+	snprintf(buf, 100, "%" PRIu64 "", (uint64_t) value);
 
 	return std::string(buf);
 }

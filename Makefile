@@ -69,7 +69,7 @@ endif
 
 ifeq ($(BUILD_OPENCL),1)
 	TARGETS:=${TARGETS} dir_embedcl dir_clKeySearchDevice dir_clutil dir_clunittest
-	CXXFLAGS:=${CXXFLAGS} -DCL_TARGET_OPENCL_VERSION=${OPENCL_VERSION} -D_REETRANT -Wall -Wextra -pedantic
+	CXXFLAGS:=${CXXFLAGS} -DCL_TARGET_OPENCL_VERSION=${OPENCL_VERSION} -D_REETRANT -Wall -Wextra -pedantic -Wconversion
 endif
 
 all:	${TARGETS}
