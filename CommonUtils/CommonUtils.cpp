@@ -80,8 +80,14 @@ std::string formatThousands(std::string s) {
 	return result;
 }
 
-uint32_t parseUInt32(std::string s) {
-	return (uint32_t) parseUInt64(s);
+
+uint32_t parseUInt32(const std::string &s) {
+	  uint64_t num = parseUInt64(s);
+	  if ((num >> 32LL) == 0) {
+	    return static_cast<uint32_t>(num);
+	  } else {
+	    throw std::out_of_range(s);
+	  }
 }
 
 uint64_t parseUInt64(std::string s) {
