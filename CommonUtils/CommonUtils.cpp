@@ -39,7 +39,7 @@ uint64_t Timer::getTime() {
 
 void commonUtilsSleep(int seconds) {
 #ifdef _WIN32
-        Sleep(seconds * 1000);
+	Sleep(seconds * 1000);
 #else
 	sleep(seconds);
 #endif
@@ -141,9 +141,9 @@ std::string formatSeconds(unsigned int seconds) {
 	unsigned int sec = seconds % 60;
 
 	if (days > 0) {
-		snprintf(s, 128, "%d:%02d:%02d:%02d", days, hours, minutes, sec);
+		snprintf(s, 128, "%" PRIu32 ":%02" PRIu32 ":%02" PRIu32 ":%02" PRIu32 "", days, hours, minutes, sec);
 	} else {
-		snprintf(s, 128, "%02d:%02d:%02d", hours, minutes, sec);
+		snprintf(s, 128, "%02" PRIu32 ":%02" PRIu32 ":%02" PRIu32 "", hours, minutes, sec);
 	}
 
 	return std::string(s);
