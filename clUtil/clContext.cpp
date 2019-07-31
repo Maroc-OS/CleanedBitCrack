@@ -144,7 +144,7 @@ cl::CLProgram::CLProgram(cl::CLContext &ctx, const char *src,
 	clCall(err);
 }
 
-std::string cl::CLProgram::loadSource(std::string srcFile) {
+std::string cl::CLProgram::loadSource(const std::string &srcFile) {
 	std::ifstream f(srcFile);
 	if (!f.good()) {
 		throw CLException(CL_BUILD_PROGRAM_FAILURE,

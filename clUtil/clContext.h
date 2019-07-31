@@ -50,7 +50,7 @@ private:
 	CLContext &_ctx;
 	std::string _buildLog;
 
-	std::string loadSource(std::string src);
+	std::string loadSource(const std::string &src);
 
 public:
 	CLProgram(CLContext &ctx, std::string src, std::string options = "");
