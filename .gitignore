@@ -288,3 +288,11 @@ __pycache__/
 # tools/
 
 TestData/
+
+.DS_Store
+.settings
+.vscode
+.cproject
+.project
+
+addresses.txt

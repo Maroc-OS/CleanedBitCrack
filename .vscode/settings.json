@@ -1,7 +1,0 @@
-{
-    "files.associations": {
-        "*.xm": "objective-c",
-        "h": "cpp",
-        "*.tcc": "cpp"
-    }
-}
