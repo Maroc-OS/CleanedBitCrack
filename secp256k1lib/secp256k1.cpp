@@ -14,7 +14,7 @@ static inline void addc(unsigned int a, unsigned int b, unsigned int carryIn,
 	uint64_t sum64 = (uint64_t) a + b + carryIn;
 
 	sum = (unsigned int) sum64;
-	carryOut = (int) (sum64 >> 32) & 1;
+	carryOut = (int) (sum64 >> 32u) & 1;
 }
 
 static inline void subc(unsigned int a, unsigned int b, unsigned int borrowIn,
@@ -22,7 +22,7 @@ static inline void subc(unsigned int a, unsigned int b, unsigned int borrowIn,
 	uint64_t diff64 = (uint64_t) a - b - borrowIn;
 
 	diff = (unsigned int) diff64;
-	borrowOut = (int) ((diff64 >> 32) & 1);
+	borrowOut = (int) ((diff64 >> 32u) & 1);
 }
 
 static bool lessThanEqualTo(const unsigned int *a, const unsigned int *b,
@@ -61,7 +61,7 @@ static int add(const unsigned int *a, const unsigned int *b, unsigned int *c,
 		int len) {
 	int carry = 0;
 
-	for (int i = 0; i < len; i++) {
+	for (unsigned int i = 0; i < static_cast<unsigned int>(len); i++) {
 		addc(a[i], b[i], carry, c[i], carry);
 	}
 
@@ -72,7 +72,7 @@ static int sub(const unsigned int *a, const unsigned int *b, unsigned int *c,
 		int len) {
 	int borrow = 0;
 
-	for (int i = 0; i < len; i++) {
+	for (unsigned int i = 0; i < static_cast<unsigned int>(len); i++) {
 		subc(a[i], b[i], borrow, c[i], borrow);
 	}
 
@@ -101,10 +101,10 @@ static void multiply(const unsigned int *x, int xLen, const unsigned int *y,
 			// will take care of performing any carries resulting from the addition
 			product = product + z[i + j] + high;
 			// update the sum
-			z[i + j] = (unsigned int) product;
+			z[i + j] = static_cast<unsigned int>(product);
 
 			// Keep the high word for the next iteration
-			high = product >> 32;
+			high = product >> 32u;
 		}
 
 		z[i + yLen] = high;
@@ -137,7 +137,7 @@ uint256 uint256::mul(uint64_t i) const {
 	unsigned int x[2];
 
 	x[0] = (unsigned int) i;
-	x[1] = (unsigned int) (i >> 32);
+	x[1] = (unsigned int) (i >> 32u);
 
 	multiply(x, 2, this->v, 8, product);
 
@@ -271,9 +271,9 @@ static uint256 divBy2(const uint256 &x) {
 	uint256 r;
 
 	for (int i = 0; i < 7; i++) {
-		r.v[i] = (x.v[i] >> 1) | (x.v[i + 1] << 31);
+		r.v[i] = (x.v[i] >> 1u) | (x.v[i + 1] << 31u);
 	}
-	r.v[7] = x.v[7] >> 1;
+	r.v[7] = x.v[7] >> 1u;
 
 	return r;
 }
@@ -313,7 +313,7 @@ uint256 secp256k1::invModP(const uint256 &x) {
 				x1 = divBy2(x1);
 
 				// Shift right (signed bit is preserved)
-				x1.v[7] |= ((unsigned int) x1Signed & 0x01) << 31;
+				x1.v[7] |= ((unsigned int) x1Signed & 0x01) << 31u;
 
 				x1Signed >>= 1;
 			} else {
@@ -323,7 +323,7 @@ uint256 secp256k1::invModP(const uint256 &x) {
 
 				x1Signed += carry;
 
-				x1.v[7] |= ((unsigned int) x1Signed & 0x01) << 31;
+				x1.v[7] |= ((unsigned int) x1Signed & 0x01) << 31u;
 
 				x1Signed >>= 1;
 			}
@@ -335,7 +335,7 @@ uint256 secp256k1::invModP(const uint256 &x) {
 			if (isEven(x2)) {
 				x2 = divBy2(x2);
 
-				x2.v[7] |= ((unsigned int) x2Signed & 0x01) << 31;
+				x2.v[7] |= ((unsigned int) x2Signed & 0x01) << 31u;
 
 				x2Signed >>= 1;
 			} else {
@@ -345,7 +345,7 @@ uint256 secp256k1::invModP(const uint256 &x) {
 
 				x2Signed += carry;
 
-				x2.v[7] |= ((unsigned int) x2Signed & 0x01) << 31;
+				x2.v[7] |= ((unsigned int) x2Signed & 0x01) << 31u;
 
 				x2Signed >>= 1;
 			}
@@ -664,8 +664,8 @@ ecpoint secp256k1::multiplyPoint(const uint256 &k, const ecpoint &p) {
 	ecpoint sum = pointAtInfinity();
 	ecpoint d = p;
 
-	for (int i = 0; i < 256; i++) {
-		unsigned int mask = 1 << (i % 32);
+	for (unsigned int i = 0; i < (unsigned int)256; i++) {
+		unsigned int mask = 1u << (i % 32u);
 
 		if (k.v[i / 32] & mask) {
 			sum = addPoints(sum, d);
@@ -680,8 +680,8 @@ ecpoint secp256k1::multiplyPoint(const uint256 &k, const ecpoint &p) {
 uint256 generatePrivateKey() {
 	uint256 k;
 
-	for (int i = 0; i < 8; i++) {
-		k.v[i] = ((unsigned int) rand() | ((unsigned int) rand()) << 17);
+	for (unsigned int i = 0; i < 8; i++) {
+		k.v[i] = (static_cast<unsigned int>(rand()) | (static_cast<unsigned int>(rand())) << 17u);
 	}
 
 	return k;
@@ -709,7 +709,7 @@ static void bulkInversionModP(std::vector<uint256> &in) {
 
 	uint256 inverse = secp256k1::invModP(total);
 
-	for (int i = (int) in.size() - 1; i >= 0; i--) {
+	for (size_t i = in.size() - 1; i >= 0; i--) {
 		if (i > 0) {
 			uint256 newValue = secp256k1::multiplyModP(products[i - 1],
 					inverse);
@@ -746,9 +746,14 @@ void secp256k1::generateKeyPairsBulk(const ecpoint &basePoint,
 	table.push_back(basePoint);
 	for (int i = 1; i < 256; i++) {
 		ecpoint p = doublePoint(table[i - 1]);
-		if (!pointExists(p)) {
+
+		try {
+			pointExists(p);
+		}
+		catch (...) {
 			throw std::string("Point does not exist!");
 		}
+
 		table.push_back(p);
 	}
 
@@ -805,9 +810,14 @@ void secp256k1::generateKeyPairsBulk(const ecpoint &basePoint,
 							pubKeysOut[j].y);
 
 					ecpoint r(rx, ry);
-					if (!pointExists(r)) {
+
+					try {
+						pointExists(r);
+					}
+					catch (...) {
 						throw std::string("Point does not exist");
 					}
+
 					pubKeysOut[j] = r;
 				}
 			}
@@ -835,7 +845,10 @@ secp256k1::ecpoint secp256k1::parsePublicKey(const std::string &pubKeyString) {
 
 	ecpoint p(x, y);
 
-	if (!pointExists(p)) {
+	try {
+		pointExists(p);
+	}
+	catch (...) {
 		throw std::string("Invalid public key");
 	}
 

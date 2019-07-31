@@ -26,7 +26,7 @@ std::map<char, int> Base58Map::myMap = Base58Map::createBase58Map();
 secp256k1::uint256 Base58::toBigInt(const std::string &s) {
 	secp256k1::uint256 value;
 
-	for (unsigned int i = 0; i < s.length(); i++) {
+	for (size_t i = 0; i < s.length(); i++) {
 		value = value.mul(58);
 
 		int c = Base58Map::myMap[s[i]];
@@ -49,7 +49,7 @@ void Base58::toHash160(const std::string &s, unsigned int hash[5]) {
 }
 
 bool Base58::isBase58(std::string s) {
-	for (unsigned int i = 0; i < s.length(); i++) {
+	for (size_t i = 0; i < s.length(); i++) {
 		if (BASE58_STRING.find(s[i]) < 0) {
 			return false;
 		}

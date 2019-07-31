@@ -27,7 +27,7 @@ std::string LogLevel::toString(int level) {
 }
 
 std::string Logger::getDateTimeString() {
-	time_t now = time(0);
+	time_t now = time(nullptr);
 	struct tm tm;
 	char buf[80];
 	localtime_r(&now, &tm);
@@ -37,7 +37,7 @@ std::string Logger::getDateTimeString() {
 	return std::string(buf);
 }
 
-std::string Logger::formatLog(int logLevel, std::string msg) {
+std::string Logger::formatLog(int logLevel, const std::string &msg) {
 	std::string dateTime = getDateTimeString();
 
 	std::string prefix = "[" + dateTime + "] [" + LogLevel::toString(logLevel)
@@ -64,12 +64,12 @@ std::string Logger::formatLog(int logLevel, std::string msg) {
 	return prefix;
 }
 
-void Logger::log(int logLevel, std::string msg) {
+void Logger::log(int logLevel, const std::string &msg) {
 	std::string str = formatLog(logLevel, msg);
 
 	fprintf(stderr, "%s\n", str.c_str());
 }
 
-void Logger::setLogFile(std::string path) {
+void Logger::setLogFile(const std::string &path) {
 	fprintf(stdin, "%s\n", path.c_str());
 }

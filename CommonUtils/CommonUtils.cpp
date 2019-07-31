@@ -297,10 +297,12 @@ int HexToDecString::add(struct number *a, struct number *b, struct number *c) {
 	}
 
 	for (i = 0, carry = 0; i < (int) a->num_digits; i++) {
-		if (i >= (int) b->num_digits)
+		if (i >= (int) b->num_digits) {
 			j = a->digits[i] + carry;
-		else
+		}
+		else {
 			j = a->digits[i] + b->digits[i] + carry;
+		}
 
 		if (j > 9) {
 			j -= 10;
@@ -313,8 +315,9 @@ int HexToDecString::add(struct number *a, struct number *b, struct number *c) {
 	}
 
 	/* Did we overflow? */
-	if (carry > 0 && i == H2D_MAXLEN)
+	if (carry > 0 && i == H2D_MAXLEN) {
 		return -1;
+	}
 
 	/* Carry over from last addition? */
 	if (carry > 0) {
@@ -330,8 +333,9 @@ int HexToDecString::add(struct number *a, struct number *b, struct number *c) {
 void HexToDecString::copy_number(struct number *dst, struct number *src) {
 	int i;
 
-	for (i = 0; i < (int) src->num_digits; i++)
+	for (i = 0; i < (int) src->num_digits; i++) {
 		dst->digits[i] = src->digits[i];
+	}
 
 	dst->num_digits = src->num_digits;
 }

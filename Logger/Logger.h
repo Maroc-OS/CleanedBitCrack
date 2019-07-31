@@ -19,7 +19,7 @@ class Logger {
 private:
 	static std::string _logFile;
 
-	static std::string formatLog(int logLevel, std::string msg);
+	static std::string formatLog(int logLevel, const std::string &msg);
 
 	static std::string getDateTimeString();
 
@@ -28,9 +28,9 @@ public:
 	Logger() {
 	}
 
-	static void log(int logLevel, std::string msg);
+	static void log(int logLevel, const std::string &msg);
 
-	static void setLogFile(std::string path);
+	static void setLogFile(const std::string &path);
 };
 
 #endif

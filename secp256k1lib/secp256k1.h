@@ -67,7 +67,7 @@ public:
 		}
 
 		// Verify only valid hex characters
-		for (int i = 0; i < (int) t.length(); i++) {
+		for (size_t i = 0; i < t.length(); i++) {
 			if (!((t[i] >= 'a' && t[i] <= 'f') || (t[i] >= 'A' && t[i] <= 'F')
 					|| (t[i] >= '0' && t[i] <= '9'))) {
 				throw std::string("Incorrect hex formatting");
@@ -106,7 +106,7 @@ public:
 	uint256(uint64_t x) {
 		memset(this->v, 0, sizeof(this->v));
 		this->v[0] = (unsigned int) x;
-		this->v[1] = (unsigned int) (x >> 32);
+		this->v[1] = (unsigned int) (x >> 32u);
 	}
 
 	uint256(int x) {
@@ -284,7 +284,7 @@ public:
 	std::string toString(int base = 16, bool leadingZeros = true);
 
 	uint64_t toUint64() {
-		return ((uint64_t) this->v[1] << 32) | v[0];
+		return ((uint64_t) this->v[1] << 32u) | v[0];
 	}
 };
 
