@@ -716,7 +716,6 @@ int main(int argc, char **argv) {
 			} else if (optArg.equals("-f", "--follow")) {
 				_config.follow = true;
 			}
-
 		} catch (std::string &err) {
 			Logger::log(LogLevel::Error, "Error " + opt + ": " + err);
 			return 1;

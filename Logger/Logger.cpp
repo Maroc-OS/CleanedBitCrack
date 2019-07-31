@@ -28,11 +28,11 @@ std::string LogLevel::toString(int level) {
 
 std::string Logger::getDateTimeString() {
 	time_t now = time(0);
-	struct tm tstruct;
+	struct tm tm;
 	char buf[80];
-	tstruct = *localtime(&now);
+	localtime_r(&now, &tm);
 
-	strftime(buf, sizeof(buf), "%Y-%m-%d.%X", &tstruct);
+	strftime(buf, sizeof(buf), "%Y-%m-%d.%X", &tm);
 
 	return std::string(buf);
 }
