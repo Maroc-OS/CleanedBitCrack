@@ -7,12 +7,14 @@
 
 #include "Logger.h"
 
-void KeyFinder::defaultResultCallback(KeySearchResult result) {
+void KeyFinder::defaultResultCallback(KeySearchResult /* unused */) {
 	// Do nothing
+	Logger::log(LogLevel::Info, "(Default result callback) result");
 }
 
-void KeyFinder::defaultStatusCallback(KeySearchStatus status) {
+void KeyFinder::defaultStatusCallback(KeySearchStatus /* unused */) {
 	// Do nothing
+	Logger::log(LogLevel::Info, "(Default status callback) status");
 }
 
 KeyFinder::KeyFinder(const secp256k1::uint256 &startKey,

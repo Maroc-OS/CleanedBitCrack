@@ -1,5 +1,5 @@
-CPPSRC:=$(wildcard *.cpp)
 NAME=embedcl
+CPPSRC:=$(wildcard *.cpp)
 
 all:
 	${CXX} -o ${NAME} ${CPPSRC} ${INCLUDE} ${CXXFLAGS}
@@ -8,3 +8,8 @@ all:
 
 clean:
 	rm -rf ${NAME}
+ifeq ($(PLATFORM),Darwin)
+ifeq ($(BUILD_DEBUG),1)
+	rm -rf ${NAME}.dSYM
+endif
+endif

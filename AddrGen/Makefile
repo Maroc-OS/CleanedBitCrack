@@ -8,3 +8,8 @@ all:
 
 clean:
 	rm -rf addrgen.bin
+ifeq ($(PLATFORM),Darwin)
+ifeq ($(BUILD_DEBUG),1)
+	rm -rf addrgen.bin.dSYM
+endif
+endif

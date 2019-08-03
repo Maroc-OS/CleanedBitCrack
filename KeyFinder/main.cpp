@@ -113,6 +113,8 @@ typedef struct {
 	int forcedValue;
 } time_conversion_t;
 
+typedef std::vector<time_conversion_t> t_time_conversion_t;
+
 secp256k1::uint256 FACTOR_MINUTE(60);
 secp256k1::uint256 FACTOR_HOUR(FACTOR_MINUTE.mul(60));
 secp256k1::uint256 FACTOR_DAY(FACTOR_HOUR.mul(24));
@@ -126,7 +128,7 @@ secp256k1::uint256 FACTOR_MILLENIUM_AND_MORE(FACTOR_MILLENIUM.mul(100000000));
 secp256k1::uint256 FACTOR_END(
 		"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
 
-std::vector<time_conversion_t> timeConversions = {
+t_time_conversion_t timeConversions = {
 		{ "second", "seconds", 1, -1 },
 		{ "minute", "minutes", FACTOR_MINUTE, -1 }, { "hour", "hours",
 				FACTOR_HOUR, -1 }, { "day", "days", FACTOR_DAY, -1 }, { "week",
@@ -203,7 +205,7 @@ void statusCallback(KeySearchStatus info) {
 		secp256k1::uint256 timeRemainingSeconds = remainingKeys.div(
 				info.speed * 1000000);
 
-		double timeRemaining;
+		double timeRemaining = 0;
 		std::string timeUnit("second");
 
 		getTimeRemaining(timeRemainingSeconds, timeRemaining, timeUnit);
@@ -349,6 +351,10 @@ getDeviceContext(DeviceManager::DeviceInfo &device, int blocks, int threads,
 #endif
 
 	return NULL;
+}
+
+KeySearchDevice::~KeySearchDevice(){
+
 }
 
 static void printDeviceList(

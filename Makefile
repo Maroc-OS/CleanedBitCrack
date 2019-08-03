@@ -13,12 +13,14 @@ LIBS+=-L$(LIBDIR)
 # C++ options
 ifeq ($(PLATFORM),Darwin)
     CXX=clang++
-    CXXFLAGS=-DNDEBUG -O3 -std=c++17 -arch x86_64
-    #CXXFLAGS=-DDEBUG -g -O2 -std=c++17 -arch x86_64
 else
     CXX=g++
-    CXXFLAGS=-DNDEBUG -O3 -std=c++17 -arch x86_64
-    #CXXFLAGS=-DDEBUG -g -O2 -std=c++17 -arch x86_64
+endif
+
+ifeq ($(BUILD_DEBUG),1)
+	CXXFLAGS=-DDEBUG -g -O2 -std=c++17 -arch x86_64
+else
+	CXXFLAGS=-DNDEBUG -O3 -std=c++17 -arch x86_64
 endif
 
 # CUDA variables
@@ -60,6 +62,7 @@ export OPENCL_LIB
 export OPENCL_INCLUDE
 export BUILD_OPENCL
 export BUILD_CUDA
+export BUILD_DEBUG
 
 TARGETS=dir_addressutil dir_cmdparse dir_cryptoutil dir_keyfinderlib dir_keyfinder dir_secp256k1lib dir_commonutils dir_logger dir_addrgen
 
@@ -69,7 +72,11 @@ endif
 
 ifeq ($(BUILD_OPENCL),1)
 	TARGETS:=${TARGETS} dir_embedcl dir_clKeySearchDevice dir_clutil dir_clunittest
-	CXXFLAGS:=${CXXFLAGS} -DCL_TARGET_OPENCL_VERSION=${OPENCL_VERSION} -D_REETRANT -Wall -Wextra -pedantic -Wconversion
+	CXXFLAGS:=${CXXFLAGS} -DCL_TARGET_OPENCL_VERSION=${OPENCL_VERSION} -D_REETRANT -Wall -Wextra -pedantic
+endif
+
+ifeq ($(BUILD_DEBUG),1)
+	CXXFLAGS:=${CXXFLAGS} -Wconversion
 endif
 
 all:	${TARGETS}
@@ -133,6 +140,7 @@ dir_clunittest:	dir_clutil
 
 clean:
 	make --directory AddressUtil clean
+	make --directory AddrGen clean
 	make --directory CmdParse clean
 	make --directory CryptoUtil clean
 	make --directory KeyFinderLib clean

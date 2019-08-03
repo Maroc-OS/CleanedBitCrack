@@ -7,7 +7,7 @@ class KeyFinder {
 private:
 	KeySearchDevice *_device;
 
-	unsigned int _compression;
+	int _compression;
 
 	std::set<KeySearchTarget> _targets;
 

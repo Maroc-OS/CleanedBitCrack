@@ -15,3 +15,10 @@ endif
 clean:
 	rm -rf cuKeyFinder.bin
 	rm -rf clKeyFinder.bin
+ifeq ($(PLATFORM),Darwin)
+ifeq ($(BUILD_DEBUG),1)
+	rm -rf cuKeyFinder.bin.dSYM
+	rm -rf clKeyFinder.bin.dSYM
+endif
+endif
+	
