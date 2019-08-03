@@ -1,5 +1,7 @@
 # BitCrack
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/16ed20d53cda41689068bb08c7773db6)](https://app.codacy.com/app/merruk-company/CleanedBitCrack?utm_source=github.com&utm_medium=referral&utm_content=Maroc-OS/CleanedBitCrack&utm_campaign=Badge_Grade_Settings)
+
 A tool for brute-forcing Bitcoin private keys. The main purpose of this project is to contribute to the effort of solving the [Bitcoin puzzle transaction](https://blockchain.info/tx/08389f34c98c606322740c0be6a7125d9860bb8d5cb182c02f98461e5fa6cd15): A transaction with 32 addresses that become increasingly difficult to crack.
 
 
