@@ -362,7 +362,7 @@ static void printDeviceList(
 	for (size_t i = 0; i < devices.size(); i++) {
 		printf("ID:     %d\n", devices[i].id);
 		printf("Name:   %s\n", devices[i].name.c_str());
-		printf("Memory: %lldMB\n",
+		printf("Memory: %lluMB\n",
 				devices[i].memory / ((uint64_t) 1024 * 1024));
 		printf("Compute units: %d\n", devices[i].computeUnits);
 		printf("\n");
