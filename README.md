@@ -1,5 +1,7 @@
 # BitCrack
+
 ### Build Status
+
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/7d7d6b6a74b04571bd855c7786e947b7)](https://www.codacy.com/app/merruk-company/CleanedBitCrack?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Maroc-OS/CleanedBitCrack&amp;utm_campaign=Badge_Grade)
 
 ### Description 

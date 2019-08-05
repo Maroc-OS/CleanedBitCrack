@@ -6,7 +6,6 @@
 namespace cl {
 
 class CLContext {
-
 private:
 	cl_device_id _device;
 	cl_context _ctx;
@@ -44,7 +43,6 @@ public:
 };
 
 class CLProgram {
-
 private:
 	cl_program _prog;
 	CLContext &_ctx;
@@ -64,11 +62,9 @@ public:
 	CLContext &getContext();
 
 	std::string getBuildLog();
-
 };
 
 class CLKernel {
-
 private:
 	CLProgram &_prog;
 	std::string _entry;

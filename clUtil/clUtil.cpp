@@ -60,7 +60,7 @@ std::vector<cl::CLDeviceInfo> cl::getDevices() {
 					clGetDeviceInfo(devices[j], CL_DEVICE_GLOBAL_MEM_SIZE,
 							sizeof(mem), &mem, NULL));
 
-			info.mem = (uint64_t) mem;
+			info.mem = static_cast<uint64_t>(mem);
 			info.id = devices[j];
 			deviceList.push_back(info);
 		}

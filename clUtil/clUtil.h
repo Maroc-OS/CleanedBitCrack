@@ -34,7 +34,7 @@ public:
 		this->msg = getErrorString(err);
 	}
 
-	CLException(cl_int err, std::string msg) {
+	CLException(cl_int err, const std::string &msg) {
 		this->error = err;
 		this->msg = msg;
 	}

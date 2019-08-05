@@ -1,6 +1,9 @@
 #ifndef _CRYPTO_UTIL_H
 #define _CRYPTO_UTIL_H
 
+#include <cinttypes>
+#include <fstream>
+
 namespace crypto {
 
 class Rng {
@@ -12,7 +15,7 @@ class Rng {
 public:
 	Rng();
 
-	void get(unsigned char *buf, int len);
+	void get(unsigned char *buf, size_t len);
 };
 
 void ripemd160(unsigned int *msg, unsigned int *digest);

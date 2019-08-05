@@ -149,7 +149,13 @@ std::string formatSeconds(unsigned int seconds) {
 	return std::string(s);
 }
 
-long getFileSize(const std::string &fileName) {
+std::ifstream::pos_type getFileSize(const std::string& fileName)
+{
+    std::ifstream in(fileName, std::ifstream::ate | std::ifstream::binary);
+    return in.tellg();
+}
+
+/* long getFileSize(const std::string &fileName) {
 	FILE *fp = fopen(fileName.c_str(), "rb");
 	if (fp == NULL) {
 		return -1;
@@ -162,7 +168,7 @@ long getFileSize(const std::string &fileName) {
 	fclose(fp);
 
 	return pos;
-}
+}*/
 
 bool readLinesFromStream(const std::string &fileName,
 		std::vector<std::string> &lines) {
@@ -176,12 +182,10 @@ bool readLinesFromStream(const std::string &fileName,
 }
 
 bool readLinesFromStream(std::istream &in, std::vector<std::string> &lines) {
-	std::string line;
-
-	while (std::getline(in, line)) {
-		if (line.length() > 0) {
-			lines.push_back(line);
-		}
+	const int MAX_LENGTH = 256;
+	char* line = new char[MAX_LENGTH];
+	while (in.getline(line, MAX_LENGTH) && strlen(line) > 0) {
+		lines.push_back(line);
 	}
 
 	return true;
@@ -420,7 +424,6 @@ int HexToDecString::mult(struct number *a, struct number *b, struct number *c) {
 
 std::string HexToDecString::convert(std::string in) {
 	int n;
-	char s;
 	struct number decrep;
 	struct number twopow;
 	struct number digit;
@@ -438,7 +441,7 @@ std::string HexToDecString::convert(std::string in) {
 
 		power(&twopow, n, &twopow);
 
-		s = in.at(currentChar++);
+		char s = in.at(currentChar++);
 
 		/* Extract digit */
 		if (s == '0') {
