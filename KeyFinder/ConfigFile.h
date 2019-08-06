@@ -1,37 +1,37 @@
 #ifndef _CONFIG_FILE_H
 #define _CONFIG_FILE_H
 
-#include <string>
 #include <map>
+#include <string>
 
-class ConfigFileEntry {
-
+class ConfigFileEntry
+{
 public:
-	std::string key = "";
-	std::string value = "";
+    std::string key;
+    std::string value;
 
-	ConfigFileEntry() {
-	}
+    ConfigFileEntry()
+    {
+    }
 
-	ConfigFileEntry(std::string k, std::string v) :
-			key(k), value(v) {
-	}
-
+    ConfigFileEntry(const std::string& k, const std::string& v) : key(k), value(v)
+    {
+    }
 };
 
-class ConfigFileReader {
-
+class ConfigFileReader
+{
 private:
-	std::string _path;
+    std::string _path;
 
-	ConfigFileEntry readEntry(const std::string &line);
+    ConfigFileEntry readEntry(const std::string& line);
 
 public:
-	ConfigFileReader(const std::string &path);
+    ConfigFileReader(const std::string& path);
 
-	bool exists();
+    bool exists();
 
-	std::map<std::string, ConfigFileEntry> read();
+    std::map<std::string, ConfigFileEntry> read();
 };
 
 #endif

@@ -233,7 +233,7 @@ void statusCallback(KeySearchStatus info) {
 	if (_config.follow) {
 		formatStr = "%s %s/%sMB | %s %s %s %s\n";
 	} else {
-		formatStr = "\r%s %s / %sMB | %s %s %s %s";
+		formatStr = "\r%s %s/%sMB | %s %s %s %s";
 	}
 
 	printf(formatStr, timeStr.c_str(), usedMemStr.c_str(), totalMemStr.c_str(),
