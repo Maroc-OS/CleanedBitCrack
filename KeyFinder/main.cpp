@@ -330,7 +330,7 @@ typedef struct {
 DeviceParameters getDefaultParameters(const DeviceManager::DeviceInfo &device) {
 	DeviceParameters p = {0,0,0};
 	p.threads = 256;
-	p.blocks = device.computeUnits;//32;
+	p.blocks = 32;
 	p.pointsPerThread = 32;
 
 	return p;
