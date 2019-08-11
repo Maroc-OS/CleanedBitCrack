@@ -10,10 +10,11 @@ namespace DeviceManager {
 class DeviceManagerException {
 
 public:
-	std::string msg;
+    std::string msg;
 
-	DeviceManagerException(const std::string &msg) {
-		this->msg = msg;
+    explicit DeviceManagerException(const std::string& msg)
+    {
+        this->msg = msg;
 	}
 };
 

@@ -51,7 +51,7 @@ private:
 	std::string loadSource(const std::string &src);
 
 public:
-	CLProgram(CLContext &ctx, std::string src, std::string options = "");
+	CLProgram(CLContext &ctx, std::string &src, std::string options = "");
 
 	CLProgram(CLContext &ctx, const char *src, std::string options = "");
 

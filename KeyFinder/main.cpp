@@ -328,9 +328,9 @@ typedef struct {
 } DeviceParameters;
 
 DeviceParameters getDefaultParameters(const DeviceManager::DeviceInfo &device) {
-	DeviceParameters p;
+	DeviceParameters p = {0,0,0};
 	p.threads = 256;
-	p.blocks = 32;
+	p.blocks = device.computeUnits;//32;
 	p.pointsPerThread = 32;
 
 	return p;
@@ -341,7 +341,7 @@ getDeviceContext(DeviceManager::DeviceInfo &device, int blocks, int threads,
 		int pointsPerThread) {
 #ifdef BUILD_CUDA
     if (device.type == DeviceManager::DeviceType::CUDA) {
-        return new CudaKeySearchDevice((int)device.physicalId, threads, pointsPerThread, blocks);
+        return new CudaKeySearchDevice(static_cast<int>(device.physicalId), threads, pointsPerThread, blocks);
     }
 #endif
 
@@ -579,9 +579,6 @@ int main(int argc, char **argv) {
 	bool optUncompressed = false;
 	bool listDevices = false;
 	bool optShares = false;
-	bool optThreads = false;
-	bool optBlocks = false;
-	bool optPoints = false;
 	bool optContinue = false;
 
 	uint32_t shareIdx = 0;
@@ -649,13 +646,10 @@ int main(int argc, char **argv) {
 		try {
 			if (optArg.equals("-t", "--threads")) {
 				_config.threads = CommonUtils::parseUInt32(optArg.arg);
-				optThreads = true;
 			} else if (optArg.equals("-b", "--blocks")) {
 				_config.blocks = CommonUtils::parseUInt32(optArg.arg);
-				optBlocks = true;
 			} else if (optArg.equals("-p", "--points")) {
 				_config.pointsPerThread = CommonUtils::parseUInt32(optArg.arg);
-				optPoints = true;
 			} else if (optArg.equals("-d", "--device")) {
 				_config.device = CommonUtils::parseUInt32(optArg.arg);
 			} else if (optArg.equals("-c", "--compressed")) {

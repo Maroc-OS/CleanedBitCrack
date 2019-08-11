@@ -7,12 +7,12 @@ unsigned int crypto::checksum(const unsigned int *hash) {
 
 	// Insert network byte, shift everything right 1 byte
 	msg[0] = 0x00; // main network
-	msg[0] |= hash[0] >> 8;
-	msg[1] = (hash[0] << 24) | (hash[1] >> 8);
-	msg[2] = (hash[1] << 24) | (hash[2] >> 8);
-	msg[3] = (hash[2] << 24) | (hash[3] >> 8);
-	msg[4] = (hash[3] << 24) | (hash[4] >> 8);
-	msg[5] = (hash[4] << 24) | 0x00800000;
+	msg[0] |= hash[0] >> 8u;
+	msg[1] = (hash[0] << 24u) | (hash[1] >> 8u);
+	msg[2] = (hash[1] << 24u) | (hash[2] >> 8u);
+	msg[3] = (hash[2] << 24u) | (hash[3] >> 8u);
+	msg[4] = (hash[3] << 24u) | (hash[4] >> 8u);
+	msg[5] = (hash[4] << 24u) | 0x00800000;
 
 	// Padding and length
 	msg[15] = 168;

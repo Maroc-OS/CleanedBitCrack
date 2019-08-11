@@ -1,6 +1,7 @@
 #ifndef _CRYPTO_UTIL_H
 #define _CRYPTO_UTIL_H
 
+#include "portable_endian.h"
 #include <cinttypes>
 #include <fstream>
 
@@ -25,7 +26,6 @@ void sha256Init(unsigned int *digest);
 void sha256(unsigned int *msg, unsigned int *digest);
 
 unsigned int checksum(const unsigned int *hash);
-}
-;
+};
 
 #endif

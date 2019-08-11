@@ -22,7 +22,7 @@ static void undoRMD160FinalRound(const unsigned int hIn[5],
 			0xc3d2e1f0 };
 
 	for (int i = 0; i < 5; i++) {
-		hOut[i] = CommonUtils::endian(hIn[i]) - iv[(i + 1) % 5];
+		hOut[i] = be32toh(hIn[i]) - iv[(i + 1) % 5];
 	}
 }
 
@@ -113,11 +113,11 @@ void CLKeySearchDevice::initializeBloomFilter(
 			h5 += hash[i];
 		}
 
-		idx[0] = ((hash[0] << 6) | (h5 & 0x3f)) & mask;
-		idx[1] = ((hash[1] << 6) | ((h5 >> 6) & 0x3f)) & mask;
-		idx[2] = ((hash[2] << 6) | ((h5 >> 12) & 0x3f)) & mask;
-		idx[3] = ((hash[3] << 6) | ((h5 >> 18) & 0x3f)) & mask;
-		idx[4] = ((hash[4] << 6) | ((h5 >> 24) & 0x3f)) & mask;
+		idx[0] = ((hash[0] << 6u) | (h5 & 0x3f)) & mask;
+		idx[1] = ((hash[1] << 6u) | ((h5 >> 6u) & 0x3f)) & mask;
+		idx[2] = ((hash[2] << 6u) | ((h5 >> 12u) & 0x3f)) & mask;
+		idx[3] = ((hash[3] << 6u) | ((h5 >> 18u) & 0x3f)) & mask;
+		idx[4] = ((hash[4] << 6u) | ((h5 >> 24u) & 0x3f)) & mask;
 
 		for (int i = 0; i < 5; i++) {
 			uint64_t j = idx[i];

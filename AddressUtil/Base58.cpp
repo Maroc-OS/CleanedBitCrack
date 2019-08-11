@@ -1,5 +1,4 @@
 #include <map>
-
 #include "AddressUtil.h"
 
 /*static const char* pszBase58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";

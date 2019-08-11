@@ -1,12 +1,6 @@
 #include "AddressUtil.h"
 #include "CryptoUtil.h"
 
-
-static unsigned int endian(unsigned int x) {
-	return (x << 24u) | ((x << 8u) & 0x00ff0000) | ((x >> 8u) & 0x0000ff00)
-			| (x >> 24u);
-}
-
 bool Address::verifyAddress(std::string address) {
 	// Check length
 	if (address.length() > 34) {
@@ -126,7 +120,7 @@ void Hash::hashPublicKey(const unsigned int *x, const unsigned int *y,
 
 	// Swap to little endian
 	for (int i = 0; i < 8; i++) {
-		msg[i] = endian(sha256Digest[i]);
+		msg[i] = be32toh(sha256Digest[i]);
 	}
 
 	// Message length, little endian
@@ -169,7 +163,7 @@ void Hash::hashPublicKeyCompressed(const unsigned int *x, const unsigned int *y,
 
 	// Swap to little endian
 	for (int i = 0; i < 8; i++) {
-		msg[i] = endian(sha256Digest[i]);
+		msg[i] = be32toh(sha256Digest[i]);
 	}
 
 	// Message length, little endian

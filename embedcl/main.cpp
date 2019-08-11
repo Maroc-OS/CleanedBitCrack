@@ -27,7 +27,7 @@ bool create(char* inputFile, char* outputFile, char* symbol)
 
     size_t bytesRead = 0;
     while ((bytesRead = fread(buf, 1, sizeof(buf), fpIn))) {
-        for (int i = 0; i < (int)bytesRead; i++) {
+        for (int i = 0; i < static_cast<int>(bytesRead); i++) {
             fprintf(fpOut, "0x%x,", buf[i]);
         }
     }

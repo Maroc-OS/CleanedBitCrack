@@ -2,6 +2,7 @@
 #define _COMMON_UTIL_H
 
 #include <string>
+#include <portable_endian.h>
 
 namespace CommonUtils {
 class Timer {
@@ -48,8 +49,6 @@ std::string format(uint64_t value);
 std::string format(int value);
 
 void removeNewline(std::string &s);
-
-unsigned int endian(unsigned int x);
 
 std::string toLower(const std::string &s);
 

@@ -65,10 +65,10 @@ unsigned int subc(unsigned int a, unsigned int b, unsigned int *borrow) {
 
 #ifdef DEVICE_VENDOR_INTEL
 unsigned int mul_hi977(unsigned int x) {
-  unsigned int high = x >> 16;
+  unsigned int high = x >> 16u;
   unsigned int low = x & 0xffff;
 
-  return (((low * 977) >> 16) + (high * 977)) >> 16;
+  return (((low * 977) >> 16u) + (high * 977)) >> 16u;
 }
 
 // 32 x 32 multiply-add
@@ -144,7 +144,7 @@ void multiply256(const unsigned int x[8], const unsigned int y[8],
         product = product + high;
 
         z[7 + j + 1] = (unsigned int) product;
-        high = (unsigned int) (product >> 32);
+        high = (unsigned int) (product >> 32u);
     }
     z[7] = high;
 
@@ -158,7 +158,7 @@ void multiply256(const unsigned int x[8], const unsigned int y[8],
 
             z[i + j + 1] = (unsigned int) product;
 
-            high = product >> 32;
+            high = product >> 32u;
         }
 
         z[i] = high;

@@ -1,8 +1,13 @@
-# BitCrack
+# BitCrack  (macOS Compatible)
 
 ### Build Status
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/7d7d6b6a74b04571bd855c7786e947b7)](https://www.codacy.com/app/merruk-company/CleanedBitCrack?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Maroc-OS/CleanedBitCrack&amp;utm_campaign=Badge_Grade)
+
+
+### NOTE
+This version has been modified and partially fixed by me (Maroc-OS @MerrukTechnolog) except for most of CUDA files it's not tested, only OpenCL has been tested. the main goal is to fix maximum possible issues, style, security and performance. then make it a pool style compatible tool.
+
 
 ### Description 
 A tool for brute-forcing Bitcoin private keys. The main purpose of this project is to contribute to the effort of solving the [Bitcoin puzzle transaction](https://blockchain.info/tx/08389f34c98c606322740c0be6a7125d9860bb8d5cb182c02f98461e5fa6cd15): A transaction with 32 addresses that become increasingly difficult to crack.
@@ -46,6 +51,9 @@ Options:
 
 -p, --points NUMBER
     Each thread will process NUMBER keys at a time
+
+-r, --random
+    Use random values from keyspace.
 
 --keyspace KEYSPACE
     Specify the range of keys to search, where KEYSPACE is in the format,
@@ -99,6 +107,18 @@ The `--keyspace` option can also be used to search a specific range:
 
 ```
 xxBitCrack.exe --keyspace 80000000:ffffffff 1FshYsUh3mqgsG29XpZ23eLjWV8Ur3VwH
+```
+
+To start the search randomly, use the `--random` option:
+
+```
+xxBitCrack.exe --random 1FshYsUh3mqgsG29XpZ23eLjWV8Ur3VwH
+```
+
+The `--keyspace` & `--random` option can also be used to search randomly in a specific range:
+
+```
+xxBitCrack.exe --keyspace 80000000:ffffffff --random 1FshYsUh3mqgsG29XpZ23eLjWV8Ur3VwH
 ```
 
 To periodically save progress, the `--continue` option can be used. This is useful for recovering
@@ -174,7 +194,7 @@ to
 #if _MSC_VER < 1600 || _MSC_VER > 1916
 ```
 
-### Building in Linux
+### Building in macOS & Linux
 
 Using `make`:
 
@@ -187,10 +207,19 @@ Build OpenCL:
 ```
 make BUILD_OPENCL=1
 ```
+Or just use:
+```
+make
+```
 
 Or build both:
 ```
 make BUILD_CUDA=1 BUILD_OPENCL=1
+```
+
+Debug Version:
+```
+make BUILD_DEBUG=1
 ```
 
 ### Supporting this project

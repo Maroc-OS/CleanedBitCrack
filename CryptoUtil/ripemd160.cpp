@@ -13,11 +13,6 @@ static const unsigned int _K5 = 0x6d703ef3;
 static const unsigned int _K6 = 0x5c4dd124;
 static const unsigned int _K7 = 0x50a28be6;
 
-static unsigned int endian(unsigned int x) {
-	return (x << 24) | ((x << 8) & 0x00ff0000) | ((x >> 8) & 0x0000ff00)
-			| (x >> 24);
-}
-
 static unsigned int rotl(unsigned int x, int n) {
 	return (x << n) | (x >> (32 - n));
 }
@@ -305,9 +300,9 @@ void crypto::ripemd160(unsigned int *x, unsigned int *digest) {
 	FFF(c2, d2, e2, a2, b2, x[9], 11);
 	FFF(b2, c2, d2, e2, a2, x[11], 11);
 
-	digest[0] = endian(_IV[1] + c1 + d2);
-	digest[1] = endian(_IV[2] + d1 + e2);
-	digest[2] = endian(_IV[3] + e1 + a2);
-	digest[3] = endian(_IV[4] + a1 + b2);
-	digest[4] = endian(_IV[0] + b1 + c2);
+	digest[0] = be32toh(_IV[1] + c1 + d2);
+	digest[1] = be32toh(_IV[2] + d1 + e2);
+	digest[2] = be32toh(_IV[3] + e1 + a2);
+	digest[3] = be32toh(_IV[4] + a1 + b2);
+	digest[4] = be32toh(_IV[0] + b1 + c2);
 }

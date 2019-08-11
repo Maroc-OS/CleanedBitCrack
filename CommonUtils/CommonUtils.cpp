@@ -268,11 +268,6 @@ void removeNewline(std::string &s) {
 	}
 }
 
-unsigned int endian(unsigned int x) {
-	return (x << 24) | ((x << 8) & 0x00ff0000) | ((x >> 8) & 0x0000ff00)
-			| (x >> 24);
-}
-
 std::string toLower(const std::string &s) {
 	std::string lowerCase = s;
 	std::transform(lowerCase.begin(), lowerCase.end(), lowerCase.begin(),
