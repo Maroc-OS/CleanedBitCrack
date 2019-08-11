@@ -298,3 +298,5 @@ TestData/
 addresses.txt
 random.txt
 continue.txt
+
+*.gcda
