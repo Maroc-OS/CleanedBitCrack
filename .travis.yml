@@ -29,3 +29,4 @@ script:
     - make all
 after_success:
     - ./bin/clunittest
+    - ./bin/clBitCrack 173M3yw1P1SfiPiDHABLGi5LLBAMohVQ7h
