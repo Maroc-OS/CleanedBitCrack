@@ -1,7 +1,8 @@
 language: cpp
 sudo: required
 dist: bionic
-compiler: clang
+compiler:
+- clang
 matrix:
   include:
     # works on Precise and Trusty
@@ -10,11 +11,11 @@ matrix:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-precise-7
+            - llvm-toolchain-bionic-7
           packages:
-            - clang-7
+            - clang
       env:
-        - MATRIX_EVAL="CC=clang-7 && CXX=clang++-7"
+        - MATRIX_EVAL="CC=clang && CXX=clang++"
 
     - os: osx
       osx_image: xcode10.1
