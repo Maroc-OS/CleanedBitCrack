@@ -1,6 +1,8 @@
 #include "secp256k1.h"
-#include "CryptoUtil.h"
 #include "CommonUtils.h"
+#include "CryptoUtil.h"
+
+#include <stdexcept>
 
 
 using namespace secp256k1;
@@ -751,7 +753,7 @@ void secp256k1::generateKeyPairsBulk(const ecpoint &basePoint,
 			pointExists(p);
 		}
 		catch (...) {
-			throw std::string("Point does not exist!");
+			throw std::runtime_error("Point does not exist!");
 		}
 
 		table.push_back(p);
@@ -815,7 +817,7 @@ void secp256k1::generateKeyPairsBulk(const ecpoint &basePoint,
 						pointExists(r);
 					}
 					catch (...) {
-						throw std::string("Point does not exist");
+						throw std::runtime_error("Point does not exist");
 					}
 
 					pubKeysOut[j] = r;
@@ -830,11 +832,11 @@ void secp256k1::generateKeyPairsBulk(const ecpoint &basePoint,
  */
 secp256k1::ecpoint secp256k1::parsePublicKey(const std::string &pubKeyString) {
 	if (pubKeyString.length() != 130) {
-		throw std::string("Invalid public key");
+		throw std::runtime_error("Invalid public key");
 	}
 
 	if (pubKeyString[0] != '0' || pubKeyString[1] != '4') {
-		throw std::string("Invalid public key");
+		throw std::runtime_error("Invalid public key");
 	}
 
 	std::string xString = pubKeyString.substr(2, 64);
@@ -849,13 +851,13 @@ secp256k1::ecpoint secp256k1::parsePublicKey(const std::string &pubKeyString) {
 		pointExists(p);
 	}
 	catch (...) {
-		throw std::string("Invalid public key");
+		throw std::runtime_error("Invalid public key");
 	}
 
 	return p;
 }
 
-uint256 secp256k1::getRandomRange(uint256 min, uint256 max) {
+uint256 secp256k1::getRandomRange(const uint256 &min, const uint256 &max) {
 	uint256 result;
 	uint256 range = max.sub(min);
 

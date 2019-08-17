@@ -2,7 +2,7 @@
 #define _HOST_SECP256K1_H
 
 #include <random>
-
+#include <stdexcept>
 
 namespace secp256k1 {
 class Random {
@@ -49,7 +49,7 @@ public:
 		memset(this->v, 0, sizeof(this->v));
 	}
 
-	uint256(const std::string &s) {
+	explicit uint256(const std::string &s) {
 		std::string t = s;
 
 		// 0x prefix
@@ -63,14 +63,14 @@ public:
 		}
 
 		if (t.length() == 0) {
-			throw std::string("Incorrect hex formatting");
+			throw std::runtime_error("Incorrect hex formatting");
 		}
 
 		// Verify only valid hex characters
 		for (size_t i = 0; i < t.length(); i++) {
 			if (!((t[i] >= 'a' && t[i] <= 'f') || (t[i] >= 'A' && t[i] <= 'F')
 					|| (t[i] >= '0' && t[i] <= '9'))) {
-				throw std::string("Incorrect hex formatting");
+				throw std::runtime_error("Incorrect hex formatting");
 			}
 		}
 
@@ -88,33 +88,33 @@ public:
 
 		int j = 0;
 		for (int i = len - 8; i >= 0; i -= 8) {
-			std::string sub = t.substr(i, 8);
+			std::string subs = t.substr(i, 8);
 			uint32_t val;
-			if (sscanf(sub.c_str(), "%x", &val) != 1) {
-				throw std::string("Incorrect hex formatting");
+			if (sscanf(subs.c_str(), "%x", &val) != 1) {
+				throw std::runtime_error("Incorrect hex formatting");
 			}
 			this->v[j] = val;
 			j++;
 		}
 	}
 
-	uint256(unsigned int x) {
+	explicit uint256(unsigned int x) {
 		memset(this->v, 0, sizeof(this->v));
 		this->v[0] = x;
 	}
 
-	uint256(uint64_t x) {
+	explicit uint256(uint64_t x) {
 		memset(this->v, 0, sizeof(this->v));
 		this->v[0] = (unsigned int) x;
 		this->v[1] = (unsigned int) (x >> 32u);
 	}
 
-	uint256(int x) {
+	explicit uint256(int x) {
 		memset(this->v, 0, sizeof(this->v));
 		this->v[0] = (unsigned int) x;
 	}
 
-	uint256(const unsigned int x[8], int endian = LittleEndian) {
+	explicit uint256(const unsigned int x[8], int endian = LittleEndian) {
 		if (endian == LittleEndian) {
 			for (int i = 0; i < 8; i++) {
 				this->v[i] = x[i];
@@ -290,7 +290,7 @@ public:
 
 static Random rnd;
 
-uint256 getRandomRange(uint256 min, uint256 max);
+uint256 getRandomRange(const uint256 &min, const uint256 &max);
 
 const unsigned int _POINT_AT_INFINITY_WORDS[8] = { 0xFFFFFFFF, 0xFFFFFFFF,
 		0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF };
@@ -312,19 +312,13 @@ public:
 	uint256 x;
 	uint256 y;
 
-	ecpoint() {
-		this->x = uint256(_POINT_AT_INFINITY_WORDS);
-		this->y = uint256(_POINT_AT_INFINITY_WORDS);
+	ecpoint() : x(uint256(_POINT_AT_INFINITY_WORDS)), y(uint256(_POINT_AT_INFINITY_WORDS)) {
 	}
 
-	ecpoint(const uint256 &x, const uint256 &y) {
-		this->x = x;
-		this->y = y;
+	ecpoint(const uint256 &e_x, const uint256 &e_y) : x(e_x), y(e_y) {
 	}
 
-	ecpoint(const ecpoint &p) {
-		this->x = p.x;
-		this->y = p.y;
+	ecpoint(const ecpoint &p) : x(p.x), y(p.y) {
 	}
 
 	ecpoint operator=(const ecpoint &p) {
