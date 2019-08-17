@@ -13,9 +13,9 @@ matrix:
             - ubuntu-toolchain-r-test
             - llvm-toolchain-bionic-7
           packages:
-            - clang
+            - gcc
       env:
-        - MATRIX_EVAL="CC=clang && CXX=clang++"
+        - MATRIX_EVAL="CC=gcc && CXX=g++"
 
     - os: osx
       osx_image: xcode10.1

@@ -14,7 +14,7 @@ LIBS+=-L$(LIBDIR)
 ifeq ($(PLATFORM),Darwin)
     CXX=clang++
 else
-    CXX=clang++
+    CXX=g++
 endif
 
 ifeq ($(BUILD_DEBUG),1)
