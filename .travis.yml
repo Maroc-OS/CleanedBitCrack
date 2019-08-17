@@ -24,10 +24,11 @@ matrix:
         - COMPILER=clang++
 
 before_install:
+    - sudo apt-get update
     - eval "${MATRIX_EVAL}"
     - make clean
 script:
     - make all
 after_success:
     - ./bin/clunittest
-    - ./bin/clBitCrack 173M3yw1P1SfiPiDHABLGi5LLBAMohVQ7h
+    - ./bin/clBitCrack 173M3yw1P1SfiPiDHABLGi5LLBAMohVQ7h -b 40 -t 128 -p 128
