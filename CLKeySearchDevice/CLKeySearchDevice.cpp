@@ -27,11 +27,10 @@ static void undoRMD160FinalRound(const unsigned int hIn[5],
 }
 
 CLKeySearchDevice::CLKeySearchDevice(uint64_t device, int threads,
-		int pointsPerThread, int blocks) {
+		int pointsPerThread, int blocks) : _device((cl_device_id) device) {
 	_threads = threads;
 	_blocks = blocks;
 	_pointsPerThread = pointsPerThread;
-	_device = (cl_device_id) device;
 
 	if (threads <= 0 || threads % 32 != 0) {
 		throw KeySearchException(
