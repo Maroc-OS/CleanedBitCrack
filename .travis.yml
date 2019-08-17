@@ -6,25 +6,24 @@ compiler:
 matrix:
   include:
     # works on Precise and Trusty
-    - os: linux
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-            - llvm-toolchain-bionic-7
-          packages:
-            - clang-7
-            - ocl-icd-opencl-dev
-            - opencl-headers
-      env:
-        - COMPILER=clang++-7
+    #- os: linux
+    #  addons:
+    #    apt:
+    #      sources:
+    #        - ubuntu-toolchain-r-test
+    #        - llvm-toolchain-bionic-7
+    #      packages:
+    #        - clang-7
+    #        - ocl-icd-opencl-dev
+    #        - opencl-headers
+    #  env:
+    #    - COMPILER=clang++-7
     - os: osx
       osx_image: xcode10.1
       env:
         - COMPILER=clang++
 
 before_install:
-    - sudo apt-get update
     - eval "${MATRIX_EVAL}"
     - make clean
 script:
