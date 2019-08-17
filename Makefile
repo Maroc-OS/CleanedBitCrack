@@ -11,16 +11,17 @@ BINDIR=$(CUR_DIR)/bin
 LIBS+=-L$(LIBDIR)
 
 # C++ options
-ifeq ($(PLATFORM),Darwin)
-    CXX=clang++
+ifeq ($(BUILD_DEBUG),1)
+        CXXFLAGS=-DDEBUG -g -O2 -std=c++17             
 else
-    CXX=g++
+        CXXFLAGS=-DNDEBUG -O3 -std=c++17             
 endif
 
-ifeq ($(BUILD_DEBUG),1)
-	CXXFLAGS=-DDEBUG -g -O2 -std=c++17 -arch x86_64
+ifeq ($(PLATFORM),Darwin)
+    CXX=clang++
+    CXXFLAGS+=-arch x86_64
 else
-	CXXFLAGS=-DNDEBUG -O3 -std=c++17 -arch x86_64
+    CXX=g++
 endif
 
 # CUDA variables
