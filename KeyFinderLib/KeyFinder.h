@@ -7,20 +7,19 @@ class KeyFinder {
 private:
 	KeySearchDevice *_device;
 
+	bool _randomMode = false;
 	int _compression;
 
 	std::set<KeySearchTarget> _targets;
 
 	uint64_t _statusInterval;
-
-	secp256k1::uint256 _stride = 1;
-	bool _randomMode = false;
 	uint64_t _iterCount;
 	uint64_t _total;
 	uint64_t _totalTime;
 
 	secp256k1::uint256 _startKey;
 	secp256k1::uint256 _endKey;
+	secp256k1::uint256 _stride = secp256k1::uint256(1);
 
 	// Each index of each thread gets a flag to indicate if it found a valid hash
 	bool _running;
@@ -29,9 +28,9 @@ private:
 
 	void (*_statusCallback)(KeySearchStatus);
 
-	static void defaultResultCallback(KeySearchResult result);
+	static void defaultResultCallback(const KeySearchResult &result);
 
-	static void defaultStatusCallback(KeySearchStatus status);
+	static void defaultStatusCallback(const KeySearchStatus &status);
 
 	void removeTargetFromList(const unsigned int value[5]);
 

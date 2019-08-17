@@ -7,12 +7,12 @@
 
 #include "Logger.h"
 
-void KeyFinder::defaultResultCallback(KeySearchResult /* unused */) {
+void KeyFinder::defaultResultCallback(const KeySearchResult /* unused */ &) {
 	// Do nothing
 	Logger::log(LogLevel::Info, "(Default result callback) result");
 }
 
-void KeyFinder::defaultStatusCallback(KeySearchStatus /* unused */) {
+void KeyFinder::defaultStatusCallback(const KeySearchStatus /* unused */ &) {
 	// Do nothing
 	Logger::log(LogLevel::Info, "(Default status callback) status");
 }
@@ -20,7 +20,7 @@ void KeyFinder::defaultStatusCallback(KeySearchStatus /* unused */) {
 KeyFinder::KeyFinder(const secp256k1::uint256 &startKey,
 		const secp256k1::uint256 &endKey, int compression,
 		KeySearchDevice *device, const secp256k1::uint256 &stride,
-		bool randomMode) {
+		bool randomMode) : _startKey(startKey), _endKey(endKey), _stride(stride) {
 	_total = 0;
 	_running = false;
 	_totalTime = 0;
@@ -29,23 +29,16 @@ KeyFinder::KeyFinder(const secp256k1::uint256 &startKey,
 
 	_compression = compression;
 
-	_startKey = startKey;
+	_statusCallback = nullptr;
 
-	_endKey = endKey;
-
-	_statusCallback = NULL;
-
-	_resultCallback = NULL;
+	_resultCallback = nullptr;
 
 	_iterCount = 0;
-
-	_stride = stride;
 
 	_randomMode = randomMode;
 }
 
-KeyFinder::~KeyFinder() {
-}
+KeyFinder::~KeyFinder() = default;
 
 void KeyFinder::setTargets(std::vector<std::string> &targets) {
 	if (targets.size() == 0) {

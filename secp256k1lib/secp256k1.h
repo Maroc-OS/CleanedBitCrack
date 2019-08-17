@@ -109,7 +109,7 @@ public:
 		this->v[1] = (unsigned int) (x >> 32u);
 	}
 
-	explicit uint256(int x) {
+	uint256(int x) {
 		memset(this->v, 0, sizeof(this->v));
 		this->v[0] = (unsigned int) x;
 	}
