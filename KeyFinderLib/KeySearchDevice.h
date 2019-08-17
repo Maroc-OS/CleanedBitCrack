@@ -27,7 +27,6 @@ typedef struct {
 // Pure virtual class representing a device that performs a key search
 class KeySearchDevice {
 public:
-
 	// Destructor
 	virtual ~KeySearchDevice() = 0;
 

@@ -3,6 +3,6 @@
 
 #include <cuda_runtime.h>
 
-__device__ void atomicListAdd(void *info, unsigned int size);
+__device__ void atomicListAdd(void* info, unsigned int size);
 
 #endif

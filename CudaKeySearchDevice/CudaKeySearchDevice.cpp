@@ -12,8 +12,8 @@ void CudaKeySearchDevice::cudaCall(cudaError_t err) {
 	}
 }
 
-CudaKeySearchDevice::CudaKeySearchDevice(int device, int threads, // @suppress("Class members should be properly initialized")
-		int pointsPerThread, int blocks, int compression) {
+CudaKeySearchDevice::CudaKeySearchDevice(int device, int threads, 
+		int pointsPerThread, int blocks, int compression) : _compression(compression) {
 	cuda::CudaDeviceInfo info;
 	try {
 		info = cuda::getDeviceInfo(device);

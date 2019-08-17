@@ -8,7 +8,6 @@
 #include "secp256k1.h"
 
 class CudaDeviceKeys {
-
 private:
 	int _blocks;
 
@@ -47,17 +46,16 @@ private:
 	cudaError_t initializeBasePoints();
 
 public:
-
 	CudaDeviceKeys() {
 		_blocks = 0;
 		_threads = 0;
 		_numKeys = 0;
-		_devX = NULL;
-		_devY = NULL;
-		_devPrivate = NULL;
-		_devChain = NULL;
-		_devBasePointX = NULL;
-		_devBasePointY = NULL;
+		_devX = nullptr;
+		_devY = nullptr;
+		_devPrivate = nullptr;
+		_devChain = nullptr;
+		_devBasePointX = nullptr;
+		_devBasePointY = nullptr;
 		_pointsPerThread = 0;
 		_step = 0;
 	}
@@ -77,7 +75,6 @@ public:
 	void clearPrivateKeys();
 
 	void clearPublicKeys();
-
 };
 
 #endif

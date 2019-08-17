@@ -8,7 +8,6 @@
 namespace DeviceManager {
 
 class DeviceManagerException {
-
 public:
     std::string msg;
 

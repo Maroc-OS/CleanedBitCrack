@@ -9,7 +9,6 @@
 
 namespace cuda {
 typedef struct {
-
 	int id;
 	int major;
 	int minor;
@@ -17,7 +16,6 @@ typedef struct {
 	int cores;
 	uint64_t mem;
 	std::string name;
-
 } CudaDeviceInfo;
 
 class CudaException {

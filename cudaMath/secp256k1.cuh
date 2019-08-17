@@ -729,9 +729,7 @@ __device__ static void completeBatchAddWithDouble(const unsigned int *px, const 
 		subModP(px, newX, k);
 		mulModP(s, k, newY);
 		subModP(newY, py, newY);
-
 	} else {
-
 		unsigned int rise[8];
 		subModP(py, y, rise);
 

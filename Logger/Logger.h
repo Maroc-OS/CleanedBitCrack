@@ -11,11 +11,9 @@ enum Level {
 bool isValid(int level);
 
 std::string toString(int level);
-}
-;
+};
 
 class Logger {
-
 private:
 	static std::string _logFile;
 
@@ -24,7 +22,6 @@ private:
 	static std::string getDateTimeString();
 
 public:
-
 	Logger() {
 	}
 

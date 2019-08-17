@@ -22,9 +22,7 @@ struct CudaDeviceResult {
 };
 
 class CudaKeySearchDevice: public KeySearchDevice {
-
 private:
-
 	int _device;
 
 	int _blocks;
@@ -71,7 +69,6 @@ private:
 			bool compressed);
 
 public:
-
 	CudaKeySearchDevice(int device, int threads, int pointsPerThread,
 			int blocks = 0, int compression = 0);
 	virtual ~CudaKeySearchDevice();
