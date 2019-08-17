@@ -119,7 +119,7 @@ private:
 public:
 	CLKeySearchDevice(uint64_t device, int threads, int pointsPerThread,
 			int blocks = 0);
-	virtual ~CLKeySearchDevice();
+	virtual ~CLKeySearchDevice() = default;
 
 	// Initialize the device
 	virtual void init(const secp256k1::uint256 &start,
