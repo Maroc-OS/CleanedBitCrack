@@ -12,9 +12,7 @@ class DeviceManagerException {
 public:
     std::string msg;
 
-    explicit DeviceManagerException(const std::string& msg)
-    {
-        this->msg = msg;
+    explicit DeviceManagerException(const std::string& dm_msg) : msg(dm_msg) {
 	}
 };
 

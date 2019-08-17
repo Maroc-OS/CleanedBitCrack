@@ -351,7 +351,7 @@ getDeviceContext(DeviceManager::DeviceInfo &device, int blocks, int threads,
     }
 #endif
 
-	return NULL;
+	return 0;
 }
 
 KeySearchDevice::~KeySearchDevice(){

@@ -49,6 +49,7 @@ std::vector<DeviceManager::DeviceInfo> DeviceManager::getDevices() {
             device.memory = clDevices[i].mem;
             device.computeUnits = clDevices[i].cores;
             devices.push_back(device);
+
             deviceId++;
         }
     } catch (cl::CLException &ex) {

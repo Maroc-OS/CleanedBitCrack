@@ -1,7 +1,7 @@
-#include <fstream>
-#include <cinttypes>
-
 #include "CommonUtils.h"
+#include <cinttypes>
+#include <fstream>
+#include <stdexcept>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -20,7 +20,7 @@ uint64_t getSystemTime() {
         return GetTickCount64();
 #else
 	struct timeval t;
-	gettimeofday(&t, NULL);
+	gettimeofday(&t, nullptr);
 	return (uint64_t) t.tv_sec * 1000 + t.tv_usec / 1000;
 #endif
 }
@@ -83,7 +83,7 @@ std::string formatThousands(std::string s) {
 
 uint32_t parseUInt32(const std::string &s) {
 	  uint64_t num = parseUInt64(s);
-	  if ((num >> 32LL) == 0) {
+	  if ((num >> 32ULL) == 0) {
 	    return static_cast<uint32_t>(num);
 	  } else {
 	    throw std::out_of_range(s);
@@ -106,11 +106,11 @@ uint64_t parseUInt64(std::string s) {
 
 	if (StringIsHex) {
 		if (sscanf(s.c_str(), "%" PRIx64 "", &val) != 1) {
-			throw std::string("Expected an integer");
+			throw std::runtime_error("Expected an integer");
 		}
 	} else {
 		if (sscanf(s.c_str(), "%" PRIu64 "", &val) != 1) {
-			throw std::string("Expected an integer");
+			throw std::runtime_error("Expected an integer");
 		}
 	}
 

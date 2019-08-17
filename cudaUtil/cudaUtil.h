@@ -25,9 +25,7 @@ public:
 	cudaError_t error;
 	std::string msg;
 
-	CudaException(cudaError_t err) {
-		this->error = err;
-		this->msg = std::string(cudaGetErrorString(err));
+	explicit CudaException(cudaError_t err) : error(err), msg(std::string(cudaGetErrorString(err))) {
 	}
 };
 

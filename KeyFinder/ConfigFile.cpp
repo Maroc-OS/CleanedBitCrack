@@ -4,8 +4,7 @@
 #include <vector>
 #include <fstream>
 
-ConfigFileReader::ConfigFileReader(const std::string &path) {
-	_path = path;
+ConfigFileReader::ConfigFileReader(const std::string &path) :_path(path) {
 }
 
 bool ConfigFileReader::exists() {
