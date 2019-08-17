@@ -1,13 +1,13 @@
 #include "CmdParse.h"
+#include <stdexcept>
 
-CmdParse::CmdParse() {
-}
+CmdParse::CmdParse() = default;
 
-void CmdParse::add(const std::string shortForm, bool hasArg) {
+void CmdParse::add(const std::string &shortForm, bool hasArg) {
 	this->add(shortForm, "", hasArg);
 }
 
-void CmdParse::add(const std::string shortForm, const std::string longForm,
+void CmdParse::add(const std::string &shortForm, const std::string &longForm,
 		bool hasArg) {
 	ArgType arg;
 	arg.shortForm = shortForm;
@@ -17,7 +17,7 @@ void CmdParse::add(const std::string shortForm, const std::string longForm,
 	_argType.push_back(arg);
 }
 
-bool CmdParse::get(const std::string opt, ArgType &t) {
+bool CmdParse::get(const std::string &opt, ArgType &t) {
 	for (unsigned int i = 0; i < _argType.size(); i++) {
 		if (_argType[i].shortForm == opt || _argType[i].longForm == opt) {
 			t = _argType[i];
@@ -42,7 +42,7 @@ void CmdParse::parse(int argc, char **argv) {
 				// It requires an argument
 
 				if (i == argc - 1) {
-					throw std::string("'" + arg + "' requires an argument");
+					throw std::runtime_error("'" + arg + "' requires an argument");
 				}
 
 				std::string optArg(argv[i + 1]);

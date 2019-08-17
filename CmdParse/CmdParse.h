@@ -9,7 +9,7 @@ public:
 	std::string option;
 	std::string arg;
 
-	bool equals(std::string shortForm, std::string longForm = "") {
+	bool equals(const std::string& shortForm, const std::string& longForm = "") {
 		return (shortForm.length() > 0 && option == shortForm)
 				|| option == longForm;
 	}
@@ -30,17 +30,17 @@ private:
 
 	std::vector<std::string> _operands;
 
-	bool get(const std::string opt, ArgType &t);
+	bool get(const std::string& opt, ArgType &t);
 
 public:
 	CmdParse();
 
 	void parse(int argc, char **argv);
 
-	void add(const std::string shortForm, const std::string longForm,
+	void add(const std::string& shortForm, const std::string& longForm,
 			bool hasArg);
 
-	void add(const std::string shortForm, bool hasArg);
+	void add(const std::string& shortForm, bool hasArg);
 
 	std::vector<OptArg> getArgs();
 
