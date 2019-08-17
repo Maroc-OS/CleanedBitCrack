@@ -1,4 +1,5 @@
 #include "CryptoUtil.h"
+#include <stdexcept>
 #include <string>
 
 #ifdef _WIN32
@@ -19,13 +20,14 @@ static void secureRandom(unsigned char *buf, size_t count) {
     size_t bytes_read = 0;
 
     if (!urandom) {
-        throw std::string("Fatal error: Cannot open urandom device for reading");
+        throw std::runtime_error("Fatal error: Cannot open urandom device for reading");
     }
 
     bytes_read = fread(buf, 1, count, urandom);
 
     if (bytes_read != count) {
-        throw std::string("Fatal error: Not enough entropy available in urandom device");
+        fclose(urandom);
+        throw std::runtime_error("Fatal error: Not enough entropy available in urandom device");
     }
 
     fclose(urandom);

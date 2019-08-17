@@ -47,7 +47,6 @@ void crypto::sha256Init(unsigned int *digest) {
 
 void crypto::sha256(unsigned int *msg, unsigned int *digest) {
 	unsigned int a, b, c, d, e, f, g, h;
-	unsigned int s0, s1;
 
 	a = digest[0];
 	b = digest[1];
@@ -68,8 +67,8 @@ void crypto::sha256(unsigned int *msg, unsigned int *digest) {
 		unsigned int x = w[i - 15];
 		unsigned int y = w[i - 2];
 
-		s0 = rotr(x, 7) ^ rotr(x, 18) ^ (x >> 3);
-		s1 = rotr(y, 17) ^ rotr(y, 19) ^ (y >> 10);
+		unsigned int s0 = rotr(x, 7) ^ rotr(x, 18) ^ (x >> 3u);
+		unsigned int s1 = rotr(y, 17) ^ rotr(y, 19) ^ (y >> 10u);
 		w[i] = w[i - 16] + s0 + w[i - 7] + s1;
 	}
 

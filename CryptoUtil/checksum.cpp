@@ -12,7 +12,7 @@ unsigned int crypto::checksum(const unsigned int *hash) {
 	msg[2] = (hash[1] << 24u) | (hash[2] >> 8u);
 	msg[3] = (hash[2] << 24u) | (hash[3] >> 8u);
 	msg[4] = (hash[3] << 24u) | (hash[4] >> 8u);
-	msg[5] = (hash[4] << 24u) | 0x00800000;
+	msg[5] = (hash[4] << 24u) | 0x00800000u;
 
 	// Padding and length
 	msg[15] = 168;
