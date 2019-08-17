@@ -13,20 +13,22 @@ static void secureRandom(unsigned char* buf, unsigned int count)
 }
 #else
 
-static void secureRandom(unsigned char *buf, unsigned int count) {
-	// Read from /dev/urandom
-	FILE *fp = fopen("/dev/urandom", "rb");
+static void secureRandom(unsigned char *buf, size_t count) {
+    // Read from /dev/urandom
+    FILE* urandom = fopen("/dev/urandom", "rb");
+    size_t bytes_read = 0;
 
-	if (fp == NULL) {
-		throw std::string("Fatal error: Cannot open /dev/urandom for reading");
-	}
+    if (!urandom) {
+        throw std::string("Fatal error: Cannot open urandom device for reading");
+    }
 
-	if (fread(buf, 1, count, fp) != count) {
-		throw std::string(
-				"Fatal error: Not enough entropy available in /dev/urandom");
-	}
+    bytes_read = fread(buf, 1, count, urandom);
 
-	fclose(fp);
+    if (bytes_read != count) {
+        throw std::string("Fatal error: Not enough entropy available in urandom device");
+    }
+
+    fclose(urandom);
 }
 
 #endif
