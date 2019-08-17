@@ -29,14 +29,10 @@ public:
 	int error;
 	std::string msg;
 
-	CLException(cl_int err) {
-		this->error = err;
-		this->msg = getErrorString(err);
+	explicit CLException(cl_int err) : error(err), msg(getErrorString(err)) {
 	}
 
-	CLException(cl_int err, const std::string &msg) {
-		this->error = err;
-		this->msg = msg;
+	CLException(cl_int err, const std::string &cl_msg) : error(err), msg(cl_msg) {
 	}
 };
 

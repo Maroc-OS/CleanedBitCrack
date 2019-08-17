@@ -11,7 +11,7 @@ std::vector<cl::CLDeviceInfo> cl::getDevices() {
 
 	cl_uint platformCount = 0;
 
-	clCall(clGetPlatformIDs(0, NULL, &platformCount));
+	clCall(clGetPlatformIDs(0, nullptr, &platformCount));
 
 	if (platformCount == 0) {
 		return deviceList;
@@ -19,12 +19,12 @@ std::vector<cl::CLDeviceInfo> cl::getDevices() {
 
 	cl_platform_id *platforms = new cl_platform_id[platformCount];
 
-	clCall(clGetPlatformIDs(platformCount, platforms, NULL));
+	clCall(clGetPlatformIDs(platformCount, platforms, nullptr));
 
 	for (cl_uint i = 0; i < platformCount; i++) {
 		cl_uint deviceCount = 0;
 		clCall(
-				clGetDeviceIDs(platforms[i], CL_DEVICE_TYPE_ALL, 0, NULL,
+				clGetDeviceIDs(platforms[i], CL_DEVICE_TYPE_ALL, 0, nullptr,
 						&deviceCount));
 
 		if (deviceCount == 0) {
@@ -34,7 +34,7 @@ std::vector<cl::CLDeviceInfo> cl::getDevices() {
 		cl_device_id *devices = new cl_device_id[deviceCount];
 		clCall(
 				clGetDeviceIDs(platforms[i], CL_DEVICE_TYPE_ALL, deviceCount,
-						devices, NULL));
+						devices, nullptr));
 
 		for (cl_uint j = 0; j < deviceCount; j++) {
 			char buf[256] = { 0 };
@@ -51,14 +51,14 @@ std::vector<cl::CLDeviceInfo> cl::getDevices() {
 			int cores = 0;
 			clCall(
 					clGetDeviceInfo(devices[j], CL_DEVICE_MAX_COMPUTE_UNITS,
-							sizeof(cores), &cores, NULL));
+							sizeof(cores), &cores, nullptr));
 
 			info.cores = cores;
 
 			cl_ulong mem;
 			clCall(
 					clGetDeviceInfo(devices[j], CL_DEVICE_GLOBAL_MEM_SIZE,
-							sizeof(mem), &mem, NULL));
+							sizeof(mem), &mem, nullptr));
 
 			info.mem = static_cast<uint64_t>(mem);
 			info.id = devices[j];

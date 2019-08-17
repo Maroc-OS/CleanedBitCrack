@@ -12,9 +12,9 @@ private:
 	cl_command_queue _queue;
 
 public:
-	CLContext(cl_device_id device);
+	explicit CLContext(cl_device_id device);
 
-	~CLContext();
+	~CLContext() = default;
 
 	cl_device_id getDevice();
 
@@ -55,7 +55,7 @@ public:
 
 	CLProgram(CLContext &ctx, const char *src, std::string options = "");
 
-	~CLProgram();
+	~CLProgram() = default;
 
 	cl_program getProgram();
 
@@ -75,7 +75,7 @@ public:
 
 	size_t getWorkGroupSize();
 
-	~CLKernel();
+	~CLKernel() = default;
 
 	template<typename T1>
 	void call(size_t blocks, size_t threads, T1 arg1) {

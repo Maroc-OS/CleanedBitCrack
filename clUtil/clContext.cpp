@@ -4,9 +4,7 @@
 #include "clContext.h"
 #include "CommonUtils.h"
 
-cl::CLContext::CLContext(cl_device_id device) {
-	_device = device;
-
+cl::CLContext::CLContext(cl_device_id device) : _device(device) {
 	cl_int err = 0;
 	_ctx = clCreateContext(0, 1, &_device, nullptr, nullptr, &err);
 	clCall(err);
@@ -197,8 +195,7 @@ cl::CLProgram::~CLProgram() {
 }
 
 cl::CLKernel::CLKernel(cl::CLProgram &prog, std::string entry) :
-		_prog(prog) {
-	_entry = entry;
+		_prog(prog), _entry(entry) {
 	const char *ptr = entry.c_str();
 	cl_int err = 0;
 	_kernel = clCreateKernel(_prog.getProgram(), ptr, &err);
