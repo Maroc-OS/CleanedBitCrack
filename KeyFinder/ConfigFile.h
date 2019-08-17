@@ -27,7 +27,7 @@ private:
     ConfigFileEntry readEntry(const std::string& line);
 
 public:
-    ConfigFileReader(const std::string& path);
+    explicit ConfigFileReader(const std::string& path);
 
     bool exists();
 
