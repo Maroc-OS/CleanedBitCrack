@@ -14,7 +14,7 @@ matrix:
             - llvm-toolchain-bionic-7
           packages:
             - clang-7
-            - fglrx
+            - ocl-icd-opencl-dev
             - opencl-headers
       env:
         - COMPILER=clang++-7
