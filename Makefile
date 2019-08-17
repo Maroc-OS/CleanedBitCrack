@@ -12,16 +12,20 @@ LIBS+=-L$(LIBDIR)
 
 # C++ options
 ifeq ($(BUILD_DEBUG),1)
-        CXXFLAGS=-DDEBUG -g -O2 -std=c++17             
+        CXXFLAGS=-DDEBUG -g -O2 -std=c++17
 else
-        CXXFLAGS=-DNDEBUG -O3 -std=c++17             
+        CXXFLAGS=-DNDEBUG -O3 -std=c++17
 endif
 
 ifeq ($(PLATFORM),Darwin)
     CXX=clang++
     CXXFLAGS+=-arch x86_64
 else
+ifeq ($(CXX),clang++)
+    CXXFLAGS+=-arch x86_64
+else
     CXX=g++
+endif
 endif
 
 # CUDA variables
