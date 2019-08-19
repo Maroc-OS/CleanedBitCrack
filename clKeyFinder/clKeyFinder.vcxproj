@@ -22,32 +22,32 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{36400E8D-3D04-430C-90A4-FC989E460B3C}</ProjectGuid>
     <RootNamespace>clKeyFinder</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -89,7 +89,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)\KeyFinderLib;$(SolutionDir)\AddressUtil;$(SolutionDir)\Logger;$(SolutionDir)\CmdParse;$(SolutionDir)\CLKeySearchDevice;$(SolutionDir)\secp256k1lib;$(SolutionDir)\util;$(SolutionDir)\clUtil;$(OPENCL_INCLUDE);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\KeyFinderLib;$(SolutionDir)\AddressUtil;$(SolutionDir)\Logger;$(SolutionDir)\CmdParse;$(SolutionDir)\CLKeySearchDevice;$(SolutionDir)\secp256k1lib;$(SolutionDir)\CommonUtils;$(SolutionDir)\clUtil;$(OPENCL_INCLUDE);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;BUILD_OPENCL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -146,7 +146,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)\KeyFinderLib;$(SolutionDir)\AddressUtil;$(SolutionDir)\Logger;$(SolutionDir)\CmdParse;$(SolutionDir)\CLKeySearchDevice;$(SolutionDir)\secp256k1lib;$(SolutionDir)\util;$(SolutionDir)\clUtil;$(OPENCL_INCLUDE);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\KeyFinderLib;$(SolutionDir)\AddressUtil;$(SolutionDir)\Logger;$(SolutionDir)\CmdParse;$(SolutionDir)\CLKeySearchDevice;$(SolutionDir)\secp256k1lib;$(SolutionDir)\CommonUtils;$(SolutionDir)\clUtil;$(OPENCL_INCLUDE);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;BUILD_OPENCL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -202,7 +202,7 @@
     <ProjectReference Include="..\secp256k1lib\secp256k1lib.vcxproj">
       <Project>{bff4b5fe-c2c5-4384-8941-cd6cb29e78c6}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\util\util.vcxproj">
+    <ProjectReference Include="..\CommonUtils\CommonUtils.vcxproj">
       <Project>{93b89bf6-32b9-4eba-aa44-bcfec4836b76}</Project>
     </ProjectReference>
   </ItemGroup>
