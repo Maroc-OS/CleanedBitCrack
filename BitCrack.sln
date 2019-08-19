@@ -7,7 +7,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "secp256k1lib", "secp256k1li
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CmdParse", "CmdParse\CmdParse.vcxproj", "{F7037134-28C5-4EB9-BE5D-587E79A40628}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "util", "util\util.vcxproj", "{93B89BF6-32B9-4EBA-AA44-BCFEC4836B76}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CommonUtils", "CommonUtils\CommonUtils.vcxproj", "{93B89BF6-32B9-4EBA-AA44-BCFEC4836B76}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AddressUtil", "AddressUtil\AddressUtil.vcxproj", "{34042455-D274-432D-9134-C9EA41FD1B54}"
 EndProject

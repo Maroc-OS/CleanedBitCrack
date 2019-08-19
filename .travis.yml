@@ -30,4 +30,4 @@ script:
     - make all
 after_success:
     - ./bin/clunittest
-    - ./bin/clBitCrack 173M3yw1P1SfiPiDHABLGi5LLBAMohVQ7h -b 40 -t 128 -p 128
+    - ./bin/clBitCrack 173M3yw1P1SfiPiDHABLGi5LLBAMohVQ7h -b 32 -t 128 -p 128

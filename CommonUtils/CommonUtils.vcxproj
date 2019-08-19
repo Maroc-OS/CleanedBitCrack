@@ -19,15 +19,15 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="util.cpp" />
+    <ClCompile Include="CommonUtils.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="util.h" />
+    <ClInclude Include="CommonUtils.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{93B89BF6-32B9-4EBA-AA44-BCFEC4836B76}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>util</RootNamespace>
+    <RootNamespace>CommonUtils</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

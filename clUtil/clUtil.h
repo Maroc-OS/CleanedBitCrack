@@ -21,7 +21,6 @@ typedef struct {
 	int cores;
 	uint64_t mem;
 	std::string name;
-
 } CLDeviceInfo;
 
 class CLException {
