@@ -2,7 +2,7 @@
 #define _COMMON_UTIL_H
 
 #include <string>
-#include <portable_endian.h>
+#include "portable_endian.h"
 
 namespace CommonUtils {
 class Timer {
