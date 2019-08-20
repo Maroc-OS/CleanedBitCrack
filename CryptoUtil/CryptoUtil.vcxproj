@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CryptoUtil.h" />
+    <ClInclude Include="portable_endian.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ripemd160.cpp" />

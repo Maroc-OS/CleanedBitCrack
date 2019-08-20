@@ -23,6 +23,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CommonUtils.h" />
+    <ClInclude Include="portable_endian.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{93B89BF6-32B9-4EBA-AA44-BCFEC4836B76}</ProjectGuid>
