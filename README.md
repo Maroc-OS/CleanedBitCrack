@@ -2,11 +2,9 @@
 
 ## Build Status
 
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/7d7d6b6a74b04571bd855c7786e947b7)](https://www.codacy.com/app/merruk-company/CleanedBitCrack?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Maroc-OS/CleanedBitCrack&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/7d7d6b6a74b04571bd855c7786e947b7)](https://www.codacy.com/app/merruk-company/CleanedBitCrack?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Maroc-OS/CleanedBitCrack&amp;utm_campaign=Badge_Grade) | [![Build status](https://ci.appveyor.com/api/projects/status/r6chsmy618smn3on?svg=true)](https://ci.appveyor.com/project/Maroc-OS/cleanedbitcrack)
 
-[![Build status](https://ci.appveyor.com/api/projects/status/r6chsmy618smn3on?svg=true)](https://ci.appveyor.com/project/Maroc-OS/cleanedbitcrack)
-
-## NOTE
+## Note
 
 This version has been modified and partially fixed by me (Maroc-OS @MerrukTechnolog) except for most of CUDA files it's not tested, only OpenCL has been tested. the main goal is to fix maximum possible issues, style, security and performance. then make it a pool style compatible tool.
 
@@ -20,7 +18,7 @@ A tool for brute-forcing Bitcoin private keys. The main purpose of this project 
 
 Use `cuBitCrack.exe` for CUDA devices and `clBitCrack.exe` for OpenCL devices.
 
-#### Note
+#### Important
 
 **clBitCrack.exe is still EXPERIMENTAL**, as users have reported critial bugs when running on some AMD and Intel devices.
 
@@ -90,44 +88,44 @@ Options:
 
 The simplest usage, the keyspace will begin at 0, and the CUDA parameters will be chosen automatically
 
-```console
+```bash
 xxBitCrack.exe 1FshYsUh3mqgsG29XpZ23eLjWV8Ur3VwH
 ```
 
 Multiple keys can be searched at once with minimal impact to performance. Provide the keys on the command line, or in a file with one address per line
 
-```console
+```bash
 xxBitCrack.exe 1FshYsUh3mqgsG29XpZ23eLjWV8Ur3VwH 15JhYXn6Mx3oF4Y7PcTAv2wVVAuCFFQNiP 19EEC52krRUK1RkUAEZmQdjTyHT7Gp1TYT
 ```
 
 To start the search at a specific private key, use the `--keyspace` option:
 
-```console
+```bash
 xxBitCrack.exe --keyspace 766519C977831678F0000000000 1FshYsUh3mqgsG29XpZ23eLjWV8Ur3VwH
 ```
 
 The `--keyspace` option can also be used to search a specific range:
 
-```console
+```bash
 xxBitCrack.exe --keyspace 80000000:ffffffff 1FshYsUh3mqgsG29XpZ23eLjWV8Ur3VwH
 ```
 
 To start the search randomly, use the `--random` option:
 
-```console
+```bash
 xxBitCrack.exe --random 1FshYsUh3mqgsG29XpZ23eLjWV8Ur3VwH
 ```
 
 The `--keyspace` & `--random` option can also be used to search randomly in a specific range:
 
-```console
+```bash
 xxBitCrack.exe --keyspace 80000000:ffffffff --random 1FshYsUh3mqgsG29XpZ23eLjWV8Ur3VwH
 ```
 
 To periodically save progress, the `--continue` option can be used. This is useful for recovering
 after an unexpected interruption:
 
-```console
+```bash
 xxBitCrack.exe --keyspace 80000000:ffffffff 1FshYsUh3mqgsG29XpZ23eLjWV8Ur3VwH
 ...
 GeForce GT 640   224/1024MB | 1 target 10.33 MKey/s (1,244,659,712 total) [00:01:58]
@@ -139,7 +137,7 @@ GeForce GT 640   224/1024MB | 1 target 10.33 MKey/s (1,357,905,920 total) [00:02
 
 Use the `-b,` `-t` and `-p` options to specify the number of blocks, threads per block, and keys per thread.
 
-```console
+```bash
 xxBitCrack.exe -b 32 -t 256 -p 16 1FshYsUh3mqgsG29XpZ23eLjWV8Ur3VwH
 ```
 
@@ -157,17 +155,17 @@ There are 3 parameters that affect performance: blocks, threads per block, and k
 increases asymptotically with this value. The default is256. Increasing this value will cause the
 kernel to run longer, but more keys will be processed.
 
-### Building
+## Building
 
-## Build dependencies
+### Build dependencies
 
-Visual Studio 2017 (if on Windows)
+Visual Studio 2019 (if on Windows)
 
-For CUDA: CUDA Toolkit 9.2
+For CUDA: CUDA Toolkit 10.1
 
-For OpenCL: An OpenCL SDK
+For OpenCL: An OpenCL SDK (The CUDA toolkit contains an OpenCL SDK).
 
-## Building in Windows
+### Building in Windows
 
 Open the Visual Studio solution.
 
@@ -178,26 +176,7 @@ Build the `cuKeyFinder` project for a CUDA build.
 Note: By default the NVIDIA OpenCL headers are used. You can set the header and library path for
 OpenCL in the `BitCrack.props` property sheet.
 
-Note: CUDA may give the build error,
-
-```text
-unsupported Microsoft Visual Studio version! Only the versions 2012, 2013, 2015 and 2017 are supported!
-```
-
-To fix this, edit `C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.2\include\crt\host_config.h` as
-Administrator and change
-
-```cpp
-#if _MSC_VER < 1600 || _MSC_VER > 1911
-```
-
-to
-
-```cpp
-#if _MSC_VER < 1600 || _MSC_VER > 1916
-```
-
-## Building in macOS & Linux
+### Building in macOS & Linux
 
 Using `make`:
 
@@ -231,7 +210,7 @@ Debug Version:
 make BUILD_DEBUG=1
 ```
 
-### Supporting this project
+## Supporting this project
 
 If you find this project useful and would like to support it, consider making a donation. Your support is greatly appreciated!
 
