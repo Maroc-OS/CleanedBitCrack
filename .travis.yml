@@ -25,6 +25,8 @@ matrix:
 
 before_install:
     - eval "${MATRIX_EVAL}"
+    - brew update
+    - brew install lcov
     - BUILD_DEBUG=1 make clean
 script:
     - BUILD_COVERAGE=1 make all
