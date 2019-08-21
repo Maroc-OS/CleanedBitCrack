@@ -32,7 +32,7 @@ before_build:
   - echo %PLATFORM%
   - echo %CONFIGURATION%
   - echo %CUDA_PATH%
- 
+
 build:
   verbosity: normal
   project: $(APPVEYOR_BUILD_FOLDER)\BitCrack.sln
