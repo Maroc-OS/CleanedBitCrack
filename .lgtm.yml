@@ -2,7 +2,7 @@ extraction:
   cpp:
     configure:
       command:
-        - .echo "Start Building"
+        - echo "Start Building"
     before_index:
       - export BUILD_COVERAGE=1
     index:
