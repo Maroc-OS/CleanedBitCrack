@@ -3,6 +3,7 @@
 
 #include "portable_endian.h"
 #include <cinttypes>
+#include <cstring>
 #include <fstream>
 
 namespace crypto {
@@ -26,6 +27,6 @@ void sha256Init(unsigned int *digest);
 void sha256(unsigned int *msg, unsigned int *digest);
 
 unsigned int checksum(const unsigned int *hash);
-};
+}
 
 #endif

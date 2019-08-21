@@ -1,6 +1,7 @@
 #ifndef _HOST_SECP256K1_H
 #define _HOST_SECP256K1_H
 
+#include <cstring>
 #include <random>
 #include <stdexcept>
 

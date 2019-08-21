@@ -4,7 +4,6 @@
 
 #include <stdexcept>
 
-
 using namespace secp256k1;
 
 static uint256 _ONE(1);

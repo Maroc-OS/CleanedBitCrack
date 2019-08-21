@@ -294,9 +294,12 @@ TestData/
 .vscode
 .cproject
 .project
+.glpath
+queries.xml
 
 addresses.txt
 random.txt
 continue.txt
 
 *.gcda
+*.gcno
