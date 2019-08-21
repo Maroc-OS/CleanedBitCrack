@@ -294,7 +294,7 @@ TestData/
 .vscode
 .cproject
 .project
-.glpath
+.qlpath
 queries.xml
 
 addresses.txt
