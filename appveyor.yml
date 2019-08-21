@@ -2,6 +2,14 @@ version: 1.0.{build}
 
 image: Visual Studio 2019
 
+skip_commits:
+  # Builds just testing something on Travis CI don't need to be
+  # done on AppVeyor
+  message: /\[Travis\]/
+  # Dont build, if only documentation was changed
+  files:
+  - '**/*.md'
+
 environment:
   matrix:
     - PLATFORM: x64
@@ -18,8 +26,7 @@ before_build:
   - echo %PLATFORM%
   - echo %CONFIGURATION%
   - echo %CUDA_PATH%
-  - dir %CUDA_PATH%
-
+ 
 build:
-  verbosity: minimal
+  verbosity: detailed
   project: $(APPVEYOR_BUILD_FOLDER)\BitCrack.sln

@@ -7,7 +7,6 @@
     <OPENCL_INCLUDE>$(CUDA_PATH)\include</OPENCL_INCLUDE>
     <OPENCL_LIB>$(CUDA_PATH)\lib\x64</OPENCL_LIB>
   </PropertyGroup>
-  <PropertyGroup />
   <ItemDefinitionGroup />
   <ItemGroup>
     <BuildMacro Include="OPENCL_INCLUDE">

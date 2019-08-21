@@ -18,5 +18,8 @@ cuda:
 	ar rvs ${LIBDIR}/lib$(NAME).a *.o
 
 clean:
-	rm -f *.o *.cu.o
-	rm -f *.a
+	rm -rf *.a
+	rm -rf *.o
+	rm -rf *.cu.o
+	rm -rf *.gcno
+	rm -rf *.gcda

@@ -10,4 +10,7 @@ all:    ${SRC}
 	ar rvs ${LIBDIR}/lib$(NAME).a ${OBJS}
 
 clean:
+	rm -rf *.a
 	rm -rf *.o
+	rm -rf *.gcno
+	rm -rf *.gcda

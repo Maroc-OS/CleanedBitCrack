@@ -11,7 +11,7 @@
 
 #include "Logger.h"
 
-#include "util.h"
+#include "CommonUtils.h"
 
 #define MAX_TARGETS_CONSTANT_MEM 16
 
@@ -136,7 +136,7 @@ cudaError_t CudaHashLookup::setTargetBloomFilter(const std::vector<struct hash16
     unsigned long long bloomFilterBytes = (unsigned long long)1 << (bloomFilterBits - 3);
     unsigned long long bloomFilterMask = (((unsigned long long)1 << bloomFilterBits) - 1);
 
-    Logger::log(LogLevel::Info, "Allocating bloom filter (" + util::format("%.1f", (double)bloomFilterBytes / (double)(1024 * 1024)) + "MB)");
+    Logger::log(LogLevel::Info, "Allocating bloom filter (" + CommonUtils::format("%.1f", (double)bloomFilterBytes / (double)(1024 * 1024)) + "MB)");
 
     unsigned int* filter = nullptr;
 

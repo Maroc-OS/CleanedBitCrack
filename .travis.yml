@@ -25,9 +25,16 @@ matrix:
 
 before_install:
     - eval "${MATRIX_EVAL}"
-    - make clean
+    - BUILD_DEBUG=1 make clean
 script:
-    - make all
+    - BUILD_COVERAGE=1 make all
 after_success:
+    # Run test
     - ./bin/clunittest
-    - ./bin/clBitCrack 173M3yw1P1SfiPiDHABLGi5LLBAMohVQ7h -d 1 -b 32 -t 128 -p 128
+    # Creating report
+    - cd ${TRAVIS_BUILD_DIR}
+    - lcov --directory . --capture --output-file coverage.info
+    - lcov --remove coverage.info '/usr/*' --output-file coverage.info 
+    - lcov --list coverage.info
+    # Uploading report to CodeCov
+    - bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"

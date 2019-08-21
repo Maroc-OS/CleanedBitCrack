@@ -11,10 +11,16 @@ BINDIR=$(CUR_DIR)/bin
 LIBS+=-L$(LIBDIR)
 
 # C++ options
+LDFLAGS=""
 ifeq ($(BUILD_DEBUG),1)
-        CXXFLAGS=-DDEBUG -g -O2 -std=c++17
+	CXXFLAGS=-DDEBUG -g -O2 -std=c++17
 else
-        CXXFLAGS=-DNDEBUG -O3 -std=c++17
+	CXXFLAGS=-DNDEBUG -O3 -std=c++17
+endif
+
+ifeq ($(BUILD_COVERAGE),1)
+	CXXFLAGS=-DNDEBUG -g -O0 -std=c++17 --coverage -fprofile-arcs -ftest-coverage
+	LDFLAGS=--coverage
 endif
 
 ifeq ($(PLATFORM),Darwin)
@@ -51,24 +57,6 @@ OPENCL_VERSION=220
 
 BUILD_OPENCL=1
 
-export PLATFORM
-export INCLUDE
-export LIBDIR
-export BINDIR
-export NVCC
-export NVCCFLAGS
-export LIBS
-export CXX
-export CXXFLAGS
-export CUDA_LIB
-export CUDA_INCLUDE
-export CUDA_MATH
-export OPENCL_LIB
-export OPENCL_INCLUDE
-export BUILD_OPENCL
-export BUILD_CUDA
-export BUILD_DEBUG
-
 TARGETS=dir_addressutil dir_cmdparse dir_cryptoutil dir_keyfinderlib dir_keyfinder dir_secp256k1lib dir_commonutils dir_logger dir_addrgen
 
 ifeq ($(BUILD_CUDA),1)
@@ -83,6 +71,26 @@ endif
 ifeq ($(BUILD_DEBUG),1)
 	CXXFLAGS:=${CXXFLAGS} -Wconversion
 endif
+
+export PLATFORM
+export INCLUDE
+export LIBDIR
+export BINDIR
+export NVCC
+export NVCCFLAGS
+export LIBS
+export CXX
+export CXXFLAGS
+export LDFLAGS
+export CUDA_LIB
+export CUDA_INCLUDE
+export CUDA_MATH
+export OPENCL_LIB
+export OPENCL_INCLUDE
+export BUILD_OPENCL
+export BUILD_CUDA
+export BUILD_DEBUG
+export BUILD_COVERAGE
 
 all:	${TARGETS}
 
@@ -104,7 +112,7 @@ dir_cmdparse:
 dir_cryptoutil:
 	make --directory CryptoUtil
 
-dir_keyfinderlib:	dir_commonutils dir_secp256k1lib dir_cryptoutil dir_addressutil dir_logger
+dir_keyfinderlib:	dir_commonutils dir_secp256k1lib dir_cryptoutil dir_addressutil dir_logger dir_cmdparse
 	make --directory KeyFinderLib
 
 KEYFINDER_DEPS=dir_keyfinderlib

@@ -7,6 +7,8 @@ all:
 	cp ${NAME} $(BINDIR)/${NAME}
 
 clean:
+	rm -rf *.gcno
+	rm -rf *.gcda
 	rm -rf ${NAME}
 ifeq ($(PLATFORM),Darwin)
 ifeq ($(BUILD_DEBUG),1)

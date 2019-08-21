@@ -13,10 +13,15 @@ all:
 	done
 
 ifeq ($(PLATFORM),Darwin)
-	${CXX} -dynamiclib -undefined suppress -flat_namespace *.o -o ${LIBDIR}/lib$(NAME).dylib
+	${CXX} ${LDFLAGS} -dynamiclib -undefined suppress -flat_namespace *.o -o ${LIBDIR}/lib$(NAME).dylib
 else
 	ar rvs ${LIBDIR}/lib$(NAME).a *.o
 endif
 
 clean:
-	rm -rf *.a *.o bitcrack.cl bitcrack_cl.cpp
+	rm -rf *.a
+	rm -rf *.o
+	rm -rf *.gcno
+	rm -rf *.gcda
+	rm -rf bitcrack.cl
+	rm -rf bitcrack_cl.cpp

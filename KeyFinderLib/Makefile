@@ -10,11 +10,14 @@ cuda:
 	done
 
 ifeq ($(PLATFORM),Darwin)
-	${CXX} -dynamiclib -undefined suppress -flat_namespace *.o -o ${LIBDIR}/lib$(NAME).dylib
+	${CXX} ${LDFLAGS} -dynamiclib -undefined suppress -flat_namespace *.o -o ${LIBDIR}/lib$(NAME).dylib
 else
 	ar rvs ${LIBDIR}/lib$(NAME).a *.o
 endif
 
 clean:
-	rm -f *.o *.cu.o
 	rm -f *.a
+	rm -f *.o
+	rm -rf *.cu.o
+	rm -rf *.gcno
+	rm -rf *.gcda
