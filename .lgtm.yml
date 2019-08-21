@@ -1,0 +1,10 @@
+extraction:
+  cpp:
+    configure:
+      command:
+        - .echo "Start Building"
+    before_index:
+      - export BUILD_COVERAGE=1
+    index:
+      build_command:
+        - BUILD_COVERAGE=1 make all
