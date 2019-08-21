@@ -11,7 +11,7 @@ enum Level {
 bool isValid(int level);
 
 std::string toString(int level);
-};
+}
 
 class Logger {
 private:
