@@ -1,8 +1,10 @@
 #ifndef _COMMON_UTIL_H
 #define _COMMON_UTIL_H
 
-#include <string>
 #include "portable_endian.h"
+#include <cstring>
+#include <string>
+#include <vector>
 
 namespace CommonUtils {
 class Timer {

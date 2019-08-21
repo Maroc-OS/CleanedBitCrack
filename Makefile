@@ -11,7 +11,7 @@ BINDIR=$(CUR_DIR)/bin
 LIBS+=-L$(LIBDIR)
 
 # C++ options
-LDFLAGS=""
+LDFLAGS= 
 ifeq ($(BUILD_DEBUG),1)
 	CXXFLAGS=-DDEBUG -g -O2 -std=c++17
 else

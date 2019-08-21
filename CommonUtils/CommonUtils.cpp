@@ -1,4 +1,5 @@
 #include "CommonUtils.h"
+#include <algorithm>
 #include <cinttypes>
 #include <fstream>
 #include <stdexcept>
@@ -12,7 +13,7 @@
 
 #endif
 
-#include <vector>
+using namespace std;
 
 namespace CommonUtils {
 uint64_t getSystemTime() {
@@ -21,7 +22,7 @@ uint64_t getSystemTime() {
 #else
 	struct timeval t;
 	gettimeofday(&t, nullptr);
-	return (uint64_t) t.tv_sec * 1000 + t.tv_usec / 1000;
+	return (uint64_t) (t.tv_sec * 1000 + t.tv_usec / 1000);
 #endif
 }
 
