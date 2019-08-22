@@ -66,7 +66,6 @@ std::vector<DeviceManager::DeviceInfo> _devices;
 void writeCheckpoint(secp256k1::uint256 nextKey);
 
 static uint64_t _lastUpdate = 0;
-static uint64_t _runningTime = 0;
 static uint64_t _startTime = 0;
 
 /**
@@ -225,8 +224,8 @@ void statusCallback(KeySearchStatus info) {
 			+ (info.targets > 1 ? "s" : "");
 
 	// Fit device name in 16 characters, pad with spaces if less
-	std::string devName = info.deviceName.substr(0, 16);
-	devName += std::string(16 - devName.length(), ' ');
+	/* std::string devName = info.deviceName.substr(0, 16);
+	devName += std::string(16 - devName.length(), ' '); */
 
 	const char *formatStr = NULL;
 

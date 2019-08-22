@@ -1,7 +1,6 @@
 #include "CommonUtils.h"
 #include <algorithm>
 #include <cinttypes>
-#include <fstream>
 #include <stdexcept>
 
 #ifdef _WIN32
@@ -18,7 +17,7 @@ using namespace std;
 namespace CommonUtils {
 uint64_t getSystemTime() {
 #ifdef _WIN32
-        return GetTickCount64();
+    return GetTickCount64();
 #else
 	struct timeval t;
 	gettimeofday(&t, nullptr);
@@ -251,7 +250,7 @@ std::string format(int value) {
 void removeNewline(std::string &s) {
 	size_t len = s.length();
 
-	int toRemove = 0;
+	size_t toRemove = 0;
 
 	if (len >= 2) {
 		if (s[len - 2] == '\r' || s[len - 2] == '\n') {
@@ -363,7 +362,7 @@ int HexToDecString::power(struct number *a, unsigned int n, struct number *b) {
 void HexToDecString::dec(struct number *a) {
 	int i;
 
-	for (i = 0; i < (int) a->num_digits; i++) {
+	for (i = 0; i < static_cast<int>(a->num_digits); i++) {
 		if (a->digits[i] > 0) {
 			a->digits[i]--;
 			break;
@@ -373,7 +372,7 @@ void HexToDecString::dec(struct number *a) {
 	}
 
 	/* Did number of digits get lower */
-	if (i == (int) a->num_digits - 1 && a->digits[i] == 0) {
+	if (i == static_cast<int>(a->num_digits) - 1 && a->digits[i] == 0) {
 		for (i = a->num_digits - 1; i >= 0; i--) {
 			if (a->digits[i] != 0) {
 				a->num_digits = i + 1;

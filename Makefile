@@ -13,14 +13,16 @@ LIBS+=-L$(LIBDIR)
 # C++ options
 LDFLAGS= 
 ifeq ($(BUILD_DEBUG),1)
-	CXXFLAGS=-DDEBUG -g -O2 -std=c++17
+	CXXFLAGS=-DDEBUG -g -ggdb -O0
 else
-	CXXFLAGS=-DNDEBUG -O3 -std=c++17
+	CXXFLAGS=-DNDEBUG -O3
 endif
 
+CXXFLAGS+= -std=c++17 -D_REETRANT -Wall -Wextra -pedantic
+
 ifeq ($(BUILD_COVERAGE),1)
-	CXXFLAGS=-DNDEBUG -g -O0 -std=c++17 --coverage -fprofile-arcs -ftest-coverage
-	LDFLAGS=--coverage
+	CXXFLAGS+= --coverage -fprofile-arcs -ftest-coverage
+	LDFLAGS+=--coverage
 endif
 
 ifeq ($(PLATFORM),Darwin)
@@ -44,6 +46,9 @@ CUDA_INCLUDE=${CUDA_HOME}/include
 CUDA_MATH=$(CUR_DIR)/cudaMath
 
 # OpenCL variables
+OPENCL_VERSION=220
+BUILD_OPENCL=1
+
 ifeq ($(PLATFORM),Darwin)
 	OPENCL_LIB=-framework OpenCL
 	CXXFLAGS+=-Qunused-arguments
@@ -53,10 +58,6 @@ else
 	OPENCL_INCLUDE=${CUDA_INCLUDE}
 endif
 
-OPENCL_VERSION=220
-
-BUILD_OPENCL=1
-
 TARGETS=dir_addressutil dir_cmdparse dir_cryptoutil dir_keyfinderlib dir_keyfinder dir_secp256k1lib dir_commonutils dir_logger dir_addrgen
 
 ifeq ($(BUILD_CUDA),1)
@@ -65,7 +66,7 @@ endif
 
 ifeq ($(BUILD_OPENCL),1)
 	TARGETS:=${TARGETS} dir_embedcl dir_clKeySearchDevice dir_clutil dir_clunittest
-	CXXFLAGS:=${CXXFLAGS} -DCL_TARGET_OPENCL_VERSION=${OPENCL_VERSION} -D_REETRANT -Wall -Wextra -pedantic -pthread
+	CXXFLAGS:=${CXXFLAGS} -DCL_TARGET_OPENCL_VERSION=${OPENCL_VERSION}
 endif
 
 ifeq ($(BUILD_DEBUG),1)

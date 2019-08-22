@@ -1,5 +1,4 @@
 #include "CryptoUtil.h"
-#include <string.h>
 
 unsigned int crypto::checksum(const unsigned int *hash) {
 	unsigned int msg[16] = { 0 };

@@ -1,16 +1,15 @@
 #include "CryptoUtil.h"
 #include <stdexcept>
-#include <string>
 
 #ifdef _WIN32
-#include <Windows.h>
+#include <windows.h>
 #include <bcrypt.h>
 
 static void secureRandom(unsigned char* buf, unsigned int count)
 {
-    BCRYPT_ALG_HANDLE h;
-    BCryptOpenAlgorithmProvider(&h, BCRYPT_RNG_ALGORITHM, NULL, 0);
-    BCryptGenRandom(h, buf, count, 0);
+    BCRYPT_ALG_HANDLE hAlg;
+    BCryptOpenAlgorithmProvider(&hAlg, BCRYPT_RNG_ALGORITHM, NULL, 0);
+    BCryptGenRandom(hAlg, buf, count, 0);
 }
 #else
 

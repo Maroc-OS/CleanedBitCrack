@@ -3,6 +3,7 @@
 
 #include "portable_endian.h"
 #include <cstring>
+#include <fstream>
 #include <string>
 #include <vector>
 
@@ -28,6 +29,8 @@ std::string formatThousands(uint64_t x);
 std::string formatThousands(std::string s);
 
 std::string formatSeconds(unsigned int seconds);
+
+std::ifstream::pos_type getFileSize(const std::string& fileName);
 
 uint32_t parseUInt32(const std::string &s);
 

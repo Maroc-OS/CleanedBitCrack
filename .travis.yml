@@ -26,8 +26,12 @@ matrix:
 
 before_install:
     - eval "${MATRIX_EVAL}"
-    - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew update          ; fi
-    - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install lcov    ; fi
+    - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get update                         ; fi
+    - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get install -qy ocl-icd-opencl-dev ; fi
+    - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get install -qy opencl-headers     ; fi
+    - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get install -qy lcov               ; fi
+    - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew update                                   ; fi
+    - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install lcov                             ; fi
     - BUILD_DEBUG=1 make clean
 script:
     - BUILD_COVERAGE=1 make all

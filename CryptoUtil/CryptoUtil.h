@@ -5,6 +5,7 @@
 #include <cinttypes>
 #include <cstring>
 #include <fstream>
+#include <string>
 
 namespace crypto {
 
