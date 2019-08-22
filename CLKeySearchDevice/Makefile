@@ -9,7 +9,7 @@ all:
 	#sed -i -e 's/bitcrack_cl/_bitcrack_cl/g' bitcrack_cl.cpp
 
 	for file in ${CPPSRC} bitcrack_cl.cpp; do\
-		${CXX} -c $$file ${INCLUDE} -I${OPENCL_INCLUDE} ${CXXFLAGS};\
+		${CXX} -c $$file ${INCLUDE} -I${OPENCL_INCLUDE} ${CXXFLAGS} ${LIBS} ${OPENCL_LIB} -llogger -lclutil -lcommonutils;\
 	done
 
 ifeq ($(PLATFORM),Darwin)

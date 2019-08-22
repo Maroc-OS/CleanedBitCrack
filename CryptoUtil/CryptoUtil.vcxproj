@@ -10,20 +10,6 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="CryptoUtil.h" />
-    <ClInclude Include="..\CommonUtils\portable_endian.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="ripemd160.cpp" />
-    <ClCompile Include="Rng.cpp" />
-    <ClCompile Include="sha256.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\CommonUtils\CommonUtils.vcxproj">
-      <Project>{93b89bf6-32b9-4eba-aa44-bcfec4836b76}</Project>
-    </ProjectReference>
-  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{CA46856A-1D1E-4F6F-A69C-6707D540BF36}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
@@ -85,6 +71,19 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="ripemd160.cpp" />
+    <ClCompile Include="Rng.cpp" />
+    <ClCompile Include="sha256.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CommonUtils\CommonUtils.vcxproj">
+      <Project>{93b89bf6-32b9-4eba-aa44-bcfec4836b76}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="CryptoUtil.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
