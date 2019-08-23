@@ -26,15 +26,10 @@ KeyFinder::KeyFinder(const secp256k1::uint256 &startKey,
 	_totalTime = 0;
 	_statusInterval = 1000;
 	_device = device;
-
 	_compression = compression;
-
 	_statusCallback = nullptr;
-
 	_resultCallback = nullptr;
-
 	_iterCount = 0;
-
 	_randomMode = randomMode;
 }
 

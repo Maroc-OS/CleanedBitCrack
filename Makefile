@@ -65,7 +65,7 @@ ifeq ($(BUILD_CUDA),1)
 endif
 
 ifeq ($(BUILD_OPENCL),1)
-	TARGETS:=${TARGETS} dir_embedcl dir_clKeySearchDevice dir_clutil dir_clunittest
+	TARGETS:=${TARGETS} dir_embedcl dir_clutil dir_clKeySearchDevice dir_clunittest
 	CXXFLAGS:=${CXXFLAGS} -DCL_TARGET_OPENCL_VERSION=${OPENCL_VERSION}
 endif
 
@@ -98,7 +98,7 @@ all:	${TARGETS}
 dir_cudaKeySearchDevice: dir_keyfinderlib dir_cudautil dir_logger
 	make --directory CudaKeySearchDevice
 
-dir_clKeySearchDevice: dir_embedcl dir_keyfinderlib dir_clutil dir_logger
+dir_clKeySearchDevice: dir_embedcl dir_clutil dir_keyfinderlib dir_logger
 	make --directory CLKeySearchDevice
 
 dir_embedcl:

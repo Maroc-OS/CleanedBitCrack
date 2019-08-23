@@ -11,7 +11,7 @@ int main(int argc, char **argv) {
 	bool printPublic = false;
 	bool printAddr = false;
 	bool printAll = true;
-	int count = 1;
+	uint32_t count = 1;
 
 	secp256k1::uint256 k;
 
@@ -47,7 +47,7 @@ int main(int argc, char **argv) {
 			printAll = false;
 			printAddr = true;
 		} else if (arg.equals("-n")) {
-			count = (int) CommonUtils::parseUInt32(arg.arg);
+			count = CommonUtils::parseUInt32(arg.arg);
 		}
 	}
 
@@ -63,17 +63,16 @@ int main(int argc, char **argv) {
 			}
 		}
 	} else {
-		for (int i = 0; i < count; i++) {
+		for (uint32_t i = 0; i < count; i++) {
 			keys.push_back(secp256k1::generatePrivateKey());
 		}
 	}
 
 	for (size_t i = 0; i < keys.size(); i++) {
-		secp256k1::uint256 k = keys[i];
+		k = keys[i];
 
 		if (k.isZero() || k.cmp(secp256k1::N) >= 0) {
 			printf("Error parsing private key: Private key is out of range\n");
-
 			return 1;
 		}
 

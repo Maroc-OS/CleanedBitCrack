@@ -583,9 +583,9 @@ int main(int argc, char **argv) {
 	uint32_t shareIdx = 0;
 	uint32_t numShares = 0;
 
-	// Catch --help first
+	// Catch --help first and Check for arguments
 	for (int i = 1; i < argc; i++) {
-		if (std::string(argv[i]) == "--help") {
+		if ((std::string(argv[i]) == "--help") || (argc == 1)) {
 			usage();
 			return 0;
 		}
@@ -602,12 +602,6 @@ int main(int argc, char **argv) {
 	} catch (DeviceManager::DeviceManagerException &ex) {
 		Logger::log(LogLevel::Error, "Error detecting devices: " + ex.msg);
 		return 1;
-	}
-
-	// Check for arguments
-	if (argc == 1) {
-		usage();
-		return 0;
 	}
 
 	CmdParse parser;
@@ -680,11 +674,9 @@ int main(int argc, char **argv) {
 				if (start.isZero()) {
 					throw std::string("argument is out of range");
 				}
-
 				if (end.cmp(secp256k1::N) > 0) {
 					throw std::string("argument is out of range");
 				}
-
 				if (start.cmp(end) > 0) {
 					throw std::string("Invalid argument");
 				}
@@ -704,11 +696,9 @@ int main(int argc, char **argv) {
 					throw std::string(
 							"invalid argument: : expected hex string");
 				}
-
 				if (_config.stride.cmp(secp256k1::N) >= 0) {
 					throw std::string("argument is out of range");
 				}
-
 				if (_config.stride.cmp(0) == 0) {
 					throw std::string("argument is out of range");
 				}
