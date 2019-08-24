@@ -46,15 +46,15 @@ CUDA_INCLUDE=${CUDA_HOME}/include
 CUDA_MATH=$(CUR_DIR)/cudaMath
 
 # OpenCL variables
-OPENCL_VERSION=220
+OPENCL_VERSION=200
 BUILD_OPENCL=1
 
 ifeq ($(PLATFORM),Darwin)
 	OPENCL_LIB=-framework OpenCL
-	CXXFLAGS+=-Qunused-arguments
+	CXXFLAGS+=-Qunused-arguments -cl-mad-enable
 	OPENCL_INCLUDE=""
 else
-	OPENCL_LIB=-L${CUDA_LIB} -lOpenCL
+	OPENCL_LIB=-L${CUDA_LIB} -lOpenCL -cl-mad-enable
 	OPENCL_INCLUDE=${CUDA_INCLUDE}
 endif
 

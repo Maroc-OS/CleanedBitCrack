@@ -17,7 +17,7 @@ typedef struct {
   unsigned int digest[5];
 } CLDeviceResult;
 
-bool isInList(unsigned int hash[5], __global unsigned int *targetList,
+bool isInList(unsigned int hash[5], __global __read_only unsigned int *targetList,
               size_t numTargets) {
   bool found = false;
 
@@ -38,7 +38,7 @@ bool isInList(unsigned int hash[5], __global unsigned int *targetList,
   return found;
 }
 
-bool isInBloomFilter(unsigned int hash[5], __global unsigned int *targetList,
+bool isInBloomFilter(unsigned int hash[5], __global __read_only unsigned int *targetList,
                      ulong mask) {
   bool foundMatch = true;
 
@@ -68,7 +68,7 @@ bool isInBloomFilter(unsigned int hash[5], __global unsigned int *targetList,
   return foundMatch;
 }
 
-bool checkHash(unsigned int hash[5], __global unsigned int *targetList,
+bool checkHash(unsigned int hash[5], __global __read_only unsigned int *targetList,
                size_t numTargets, ulong mask) {
   if (numTargets > 16) {
     return isInBloomFilter(hash, targetList, mask);
@@ -87,7 +87,7 @@ void doRMD160FinalRound(const unsigned int hIn[5], unsigned int hOut[5]) {
 }
 
 __kernel void multiplyStepKernel(int pointsPerThread, int step,
-                                 __global unsigned int *privateKeys,
+                                 __global __read_only unsigned int *privateKeys,
                                  __global unsigned int *chain,
                                  __global unsigned int *gxPtr,
                                  __global unsigned int *gyPtr,
