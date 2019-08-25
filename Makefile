@@ -2,7 +2,7 @@
 CUR_DIR=$(shell pwd)
 PLATFORM=$(shell uname -s)
 
-DIRS=CommonUtils AddressUtil CmdParse CryptoUtil KeyFinderLib CLKeySearchDevice CudaKeySearchDevice cudaMath clUtil cudaUtil secp256k1lib Logger embedcl
+DIRS=Logger CommonUtils CmdParse CryptoUtil clUtil embedcl secp256k1lib AddressUtil KeyFinderLib CLKeySearchDevice CudaKeySearchDevice cudaMath cudaUtil
 
 INCLUDE = $(foreach d, $(DIRS), -I$(CUR_DIR)/$d)
 
@@ -11,14 +11,14 @@ BINDIR=$(CUR_DIR)/bin
 LIBS+=-L$(LIBDIR)
 
 # C++ options
-LDFLAGS= 
-ifeq ($(BUILD_DEBUG),1)
-	CXXFLAGS=-DDEBUG -g -ggdb -O0
-else
-	CXXFLAGS=-DNDEBUG -O3
-endif
+LDFLAGS=
+CXXFLAGS=-std=c++17 -D_REETRANT -W -Wall -Wextra -pedantic -pthread
 
-CXXFLAGS+= -std=c++17 -D_REETRANT -Wall -Wextra -pedantic
+ifeq ($(BUILD_DEBUG),1)
+	CXXFLAGS+=-DDEBUG -g -ggdb -O0
+else
+	CXXFLAGS+=-DNDEBUG -O3 -ffast-math
+endif
 
 ifeq ($(BUILD_COVERAGE),1)
 	CXXFLAGS+= --coverage -fprofile-arcs -ftest-coverage
@@ -27,10 +27,10 @@ endif
 
 ifeq ($(PLATFORM),Darwin)
     CXX=clang++
-    CXXFLAGS+=-arch x86_64
+    CXXFLAGS+=-arch x86_64 -cl-mad-enable
 else
 ifeq ($(CXX),clang++)
-    CXXFLAGS+=-arch x86_64
+    CXXFLAGS+=-arch x86_64 -cl-mad-enable
 else
     CXX=g++
 endif
@@ -51,17 +51,17 @@ BUILD_OPENCL=1
 
 ifeq ($(PLATFORM),Darwin)
 	OPENCL_LIB=-framework OpenCL
-	CXXFLAGS+=-Qunused-arguments -cl-mad-enable
+	CXXFLAGS+=-Qunused-arguments
 	OPENCL_INCLUDE=""
 else
-	OPENCL_LIB=-L${CUDA_LIB} -lOpenCL -cl-mad-enable
+	OPENCL_LIB=-L${CUDA_LIB} -lOpenCL
 	OPENCL_INCLUDE=${CUDA_INCLUDE}
 endif
 
-TARGETS=dir_addressutil dir_cmdparse dir_cryptoutil dir_keyfinderlib dir_keyfinder dir_secp256k1lib dir_commonutils dir_logger dir_addrgen
+TARGETS=dir_logger dir_commonutils dir_cmdparse dir_secp256k1lib dir_cryptoutil dir_addressutil dir_keyfinderlib dir_keyfinder dir_addrgen
 
 ifeq ($(BUILD_CUDA),1)
-	TARGETS:=${TARGETS} dir_cudaKeySearchDevice dir_cudautil
+	TARGETS:=${TARGETS} dir_cudautil dir_cudaKeySearchDevice
 endif
 
 ifeq ($(BUILD_OPENCL),1)
@@ -95,10 +95,10 @@ export BUILD_COVERAGE
 
 all:	${TARGETS}
 
-dir_cudaKeySearchDevice: dir_keyfinderlib dir_cudautil dir_logger
+dir_cudaKeySearchDevice: dir_logger dir_keyfinderlib dir_cudautil
 	make --directory CudaKeySearchDevice
 
-dir_clKeySearchDevice: dir_embedcl dir_clutil dir_keyfinderlib dir_logger
+dir_clKeySearchDevice: dir_embedcl dir_logger dir_clutil dir_keyfinderlib
 	make --directory CLKeySearchDevice
 
 dir_embedcl:
@@ -113,7 +113,7 @@ dir_cmdparse:
 dir_cryptoutil:
 	make --directory CryptoUtil
 
-dir_keyfinderlib:	dir_commonutils dir_secp256k1lib dir_cryptoutil dir_addressutil dir_logger dir_cmdparse
+dir_keyfinderlib:	dir_commonutils dir_cmdparse dir_secp256k1lib dir_cryptoutil dir_addressutil dir_logger
 	make --directory KeyFinderLib
 
 KEYFINDER_DEPS=dir_keyfinderlib
@@ -149,6 +149,7 @@ dir_logger:
 
 dir_addrgen:	dir_cmdparse dir_addressutil dir_secp256k1lib
 	make --directory AddrGen
+
 dir_clunittest:	dir_clutil
 	make --directory CLUnitTests
 
