@@ -83,13 +83,13 @@ public:
 			t = std::string(64 - t.length(), '0') + t;
 		}
 
-		int len = (int) t.length();
+		int len = static_cast<int>(t.length());
 
 		memset(this->v, 0, sizeof(uint32_t) * 8);
 
 		int j = 0;
 		for (int i = len - 8; i >= 0; i -= 8) {
-			std::string subs = t.substr(i, 8);
+			std::string subs = t.substr(static_cast<size_t>(i), 8);
 			uint32_t val;
 			if (sscanf(subs.c_str(), "%x", &val) != 1) {
 				throw std::runtime_error("Incorrect hex formatting");
@@ -106,13 +106,13 @@ public:
 
 	explicit uint256(uint64_t x) {
 		memset(this->v, 0, sizeof(this->v));
-		this->v[0] = (unsigned int) x;
-		this->v[1] = (unsigned int) (x >> 32u);
+		this->v[0] = static_cast<unsigned int>(x);
+		this->v[1] = static_cast<unsigned int>(x >> 32u);
 	}
 
 	uint256(int x) {
 		memset(this->v, 0, sizeof(this->v));
-		this->v[0] = (unsigned int) x;
+		this->v[0] = static_cast<unsigned int>(x);
 	}
 
 	explicit uint256(const unsigned int x[8], int endian = LittleEndian) {
@@ -285,7 +285,7 @@ public:
 	std::string toString(int base = 16, bool leadingZeros = true);
 
 	uint64_t toUint64() {
-		return ((uint64_t) this->v[1] << 32u) | v[0];
+		return (static_cast<uint64_t>(this->v[1]) << 32u) | v[0];
 	}
 };
 
@@ -322,7 +322,7 @@ public:
 	ecpoint(const ecpoint &p) : x(p.x), y(p.y) {
 	}
 
-	ecpoint operator=(const ecpoint &p) {
+	ecpoint &operator=(const ecpoint &p){
 		this->x = p.x;
 		this->y = p.y;
 
