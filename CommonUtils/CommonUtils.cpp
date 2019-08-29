@@ -1,15 +1,22 @@
 #include "CommonUtils.h"
 #include <algorithm>
 #include <cinttypes>
+#include <iostream>
 #include <stdexcept>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #ifdef _WIN32
 #include <windows.h>
 #else
-
 #include <sys/time.h>
 #include <unistd.h>
+#endif
 
+#ifdef __cplusplus
+}
 #endif
 
 using namespace std;
@@ -21,7 +28,7 @@ uint64_t getSystemTime() {
 #else
 	struct timeval t;
 	gettimeofday(&t, nullptr);
-	return (uint64_t) (t.tv_sec * 1000 + t.tv_usec / 1000);
+    return static_cast<uint64_t>(t.tv_sec * 1000) + static_cast<uint64_t>(t.tv_usec / 1000);
 #endif
 }
 
@@ -56,7 +63,7 @@ std::string formatThousands(uint64_t x) {
 }
 
 std::string formatThousands(std::string s) {
-	int len = (int) s.length();
+	int len = static_cast<int>(s.length());
 
 	int numCommas = (len - 1) / 3;
 
@@ -234,7 +241,7 @@ std::string format(uint32_t value) {
 std::string format(uint64_t value) {
 	char buf[100] = { 0 };
 
-	snprintf(buf, 100, "%" PRIu64 "", (uint64_t) value);
+	snprintf(buf, 100, "%" PRIu64 "", value);
 
 	return std::string(buf);
 }
@@ -284,8 +291,9 @@ std::string trim(const std::string &s, char c) {
 }
 
 int HexToDecString::add(struct number *a, struct number *b, struct number *c) {
-	int i, j;
+	int j;
 	int carry;
+	unsigned int i;
 
 	struct number *t;
 
@@ -295,8 +303,8 @@ int HexToDecString::add(struct number *a, struct number *b, struct number *c) {
 		b = t;
 	}
 
-	for (i = 0, carry = 0; i < (int) a->num_digits; i++) {
-		if (i >= (int) b->num_digits) {
+	for (i = 0, carry = 0; i < a->num_digits; i++) {
+		if (i >= b->num_digits) {
 			j = a->digits[i] + carry;
 		}
 		else {
@@ -310,7 +318,7 @@ int HexToDecString::add(struct number *a, struct number *b, struct number *c) {
 			carry = 0;
 		}
 
-		c->digits[i] = j;
+		c->digits[i] = static_cast<unsigned char>(j);
 	}
 
 	/* Did we overflow? */
@@ -320,7 +328,7 @@ int HexToDecString::add(struct number *a, struct number *b, struct number *c) {
 
 	/* Carry over from last addition? */
 	if (carry > 0) {
-		c->digits[i] = carry;
+		c->digits[i] = static_cast<unsigned char>(carry);
 		c->num_digits = a->num_digits + 1;
 	} else {
 		c->num_digits = a->num_digits;
@@ -330,9 +338,9 @@ int HexToDecString::add(struct number *a, struct number *b, struct number *c) {
 }
 
 void HexToDecString::copy_number(struct number *dst, struct number *src) {
-	int i;
+	unsigned int i;
 
-	for (i = 0; i < (int) src->num_digits; i++) {
+	for (i = 0; i < src->num_digits; i++) {
 		dst->digits[i] = src->digits[i];
 	}
 
@@ -375,7 +383,7 @@ void HexToDecString::dec(struct number *a) {
 	if (i == static_cast<int>(a->num_digits) - 1 && a->digits[i] == 0) {
 		for (i = a->num_digits - 1; i >= 0; i--) {
 			if (a->digits[i] != 0) {
-				a->num_digits = i + 1;
+				a->num_digits = static_cast<int>(i) + 1;
 				break;
 			}
 		}
@@ -425,16 +433,16 @@ std::string HexToDecString::convert(std::string in) {
 	std::string out = "";
 
 	decrep.num_digits = 0;
-	n = in.length();
+	n = static_cast<int>(in.length());
 
-	int currentChar = 0;
+	unsigned int currentChar = 0;
 	while (--n > -1) {
 		/* weight of digit */
 		twopow.num_digits = 2;
 		twopow.digits[0] = 6;
 		twopow.digits[1] = 1;
 
-		power(&twopow, n, &twopow);
+		power(&twopow, static_cast<unsigned int>(n), &twopow);
 
 		char s = in.at(currentChar++);
 

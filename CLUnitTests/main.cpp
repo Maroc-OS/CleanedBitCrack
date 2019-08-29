@@ -1,5 +1,4 @@
 #include "clContext.h"
-#include "clUtil.h"
 #include <iostream>
 #include <vector>
 
@@ -7,7 +6,7 @@
 #define SECTION_MULTIPLY 1
 #define SECTION_INVERSE 2
 
-std::string _sections[] = { "Addition", "Multiplication", "Inverse" };
+static std::string _sections[] = { "Addition", "Multiplication", "Inverse" };
 
 typedef struct {
 	int section;
@@ -15,33 +14,34 @@ typedef struct {
 
 extern char _secp256k1_test_cl[];
 
+int runTest(cl_device_id deviceId);
 int runTest(cl_device_id deviceId) {
 	cl::CLContext ctx(deviceId);
 	cl::CLProgram prog(ctx, _secp256k1_test_cl);
 	cl::CLKernel k(prog, "secp256k1_test");
 
-	cl_mem devNumErrors = ctx.malloc(sizeof(unsigned int));
+	cl_mem devNumErrors = ctx.malloc(sizeof(size_t));
 	cl_mem devErrors = ctx.malloc(sizeof(CLErrorInfo) * 1000);
 
 	std::cout << "Running test kernel..." << std::endl;
 
 	k.call(1, 1, devErrors, devNumErrors);
 
-	unsigned int numErrors = 0;
+	int numErrors = 0;
 	std::vector<CLErrorInfo> errors;
 
-	ctx.copyDeviceToHost(devNumErrors, &numErrors, sizeof(unsigned int));
+	ctx.copyDeviceToHost(devNumErrors, &numErrors, sizeof(size_t));
 
 	std::cout << numErrors << " errors" << std::endl;
 
 	if (numErrors > 0) {
-		errors.resize(numErrors);
+		errors.resize(static_cast<size_t>(numErrors));
 
 		ctx.copyDeviceToHost(devErrors, errors.data(),
-				sizeof(CLErrorInfo) * numErrors);
+				sizeof(CLErrorInfo) * static_cast<size_t>(numErrors));
 
-		for (int i = 0; i < (int) numErrors; i++) {
-			std::cout << _sections[errors[i].section] << " test failed"
+		for (int i = 0; i < numErrors; i++) {
+			std::cout << _sections[errors[static_cast<size_t>(i)].section] << " test failed"
 					<< std::endl;
 		}
 	}

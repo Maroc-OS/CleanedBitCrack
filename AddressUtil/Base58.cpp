@@ -1,5 +1,5 @@
-#include <map>
 #include "AddressUtil.h"
+#include <map>
 
 /*static const char* pszBase58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 static const int8_t mapBase58[256] = {

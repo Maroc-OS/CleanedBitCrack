@@ -2,18 +2,21 @@
 #define _KEY_SEARCH_DEVICE_H
 
 #include "KeySearchTypes.h"
+#include <cstring>
+#include <iostream>
 #include <set>
+#include <vector>
 
 class KeySearchException {
 public:
-	KeySearchException() {
-	}
-
-	KeySearchException(const std::string &msg) {
-		this->msg = msg;
-	}
-
 	std::string msg;
+
+	KeySearchException()
+	{
+	}
+
+	explicit KeySearchException(const std::string &_msg): msg(_msg) {
+	}
 };
 
 typedef struct {

@@ -5,6 +5,10 @@
  * an example on how to get the endian conversion functions on different platforms.
 */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef PORTABLE_ENDIAN_H__
 #define PORTABLE_ENDIAN_H__
 
@@ -119,4 +123,8 @@
 
 #endif
 
+#endif
+
+#ifdef __cplusplus
+}
 #endif

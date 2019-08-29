@@ -12,11 +12,11 @@ typedef struct CLTargetList_ {
 
 class CLKeySearchDevice: public KeySearchDevice {
 private:
-	cl::CLContext *_clContext = NULL;
-	cl::CLProgram *_clProgram = NULL;
-	cl::CLKernel *_initKeysKernel = NULL;
-	cl::CLKernel *_stepKernel = NULL;
-	cl::CLKernel *_stepKernelWithDouble = NULL;
+	cl::CLContext *_clContext = nullptr;
+	cl::CLProgram *_clProgram = nullptr;
+	cl::CLKernel *_initKeysKernel = nullptr;
+	cl::CLKernel *_stepKernel = nullptr;
+	cl::CLKernel *_stepKernelWithDouble = nullptr;
 
 	uint64_t _globalMemSize = 0;
 	uint64_t _pointsMemSize = 0;
@@ -51,27 +51,27 @@ private:
 	std::string _deviceName;
 
 	// Device memory pointers
-	cl_mem _chain = NULL;
+	cl_mem _chain = nullptr;
 
-	cl_mem _x = NULL;
+	cl_mem _x = nullptr;
 
-	cl_mem _y = NULL;
+	cl_mem _y = nullptr;
 
-	cl_mem _xInc = NULL;
+	cl_mem _xInc = nullptr;
 
-	cl_mem _yInc = NULL;
+	cl_mem _yInc = nullptr;
 
-	cl_mem _privateKeys = NULL;
+	cl_mem _privateKeys = nullptr;
 
-	cl_mem _xTable = NULL;
+	cl_mem _xTable = nullptr;
 
-	cl_mem _yTable = NULL;
+	cl_mem _yTable = nullptr;
 
-	cl_mem _deviceResults = NULL;
+	cl_mem _deviceResults = nullptr;
 
-	cl_mem _deviceResultsCount = NULL;
+	cl_mem _deviceResultsCount = nullptr;
 
-	cl_mem _targets = NULL;
+	cl_mem _targets = nullptr;
 
 	void generateStartingPoints();
 

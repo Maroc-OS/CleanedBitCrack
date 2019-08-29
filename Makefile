@@ -11,17 +11,17 @@ BINDIR=$(CUR_DIR)/bin
 LIBS+=-L$(LIBDIR)
 
 # C++ options
-LDFLAGS=
-CXXFLAGS=-std=c++17 -D_REETRANT -W -Wall -Wextra -pedantic -pthread
-
 ifeq ($(BUILD_DEBUG),1)
-	CXXFLAGS+=-DDEBUG -g -ggdb -O0
+	CXXFLAGS=-DDEBUG -g -ggdb -O0
 else
-	CXXFLAGS+=-DNDEBUG -O3 -ffast-math
+	CXXFLAGS=-DNDEBUG -O3 -ffast-math
 endif
 
+LDFLAGS=
+CXXFLAGS+=-std=c++17 -D_REETRANT -W -Wall -Wextra -pedantic -pthread
+
 ifeq ($(BUILD_COVERAGE),1)
-	CXXFLAGS+= --coverage -fprofile-arcs -ftest-coverage
+	CXXFLAGS+=--coverage -fprofile-arcs -ftest-coverage
 	LDFLAGS+=--coverage
 endif
 
@@ -32,6 +32,7 @@ else
 ifeq ($(CXX),clang++)
     CXXFLAGS+=-arch x86_64 -cl-mad-enable
 else
+    CXXFLAGS+=-march=x86-64
     CXX=g++
 endif
 endif
@@ -66,7 +67,7 @@ endif
 
 ifeq ($(BUILD_OPENCL),1)
 	TARGETS:=${TARGETS} dir_embedcl dir_clutil dir_clKeySearchDevice dir_clunittest
-	CXXFLAGS:=${CXXFLAGS} -DCL_TARGET_OPENCL_VERSION=${OPENCL_VERSION}
+	CXXFLAGS:=${CXXFLAGS} -DCL_TARGET_OPENCL_VERSION=${OPENCL_VERSION} -DCL_HPP_TARGET_OPENCL_VERSION=${OPENCL_VERSION}
 endif
 
 ifeq ($(BUILD_DEBUG),1)

@@ -274,7 +274,7 @@ void CLKeySearchDevice::setBloomFilter() {
 
 void CLKeySearchDevice::setTargetsInternal() {
 	// Clean up existing list
-	if (_deviceTargetList.ptr != NULL) {
+	if (_deviceTargetList.ptr != nullptr) {
 		_clContext->free(_deviceTargetList.ptr);
 	}
 

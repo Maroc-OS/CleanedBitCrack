@@ -83,8 +83,8 @@ public:
 
 		clCall(
 				clEnqueueNDRangeKernel(_prog.getContext().getQueue(), _kernel,
-						1, NULL, &blocks, &threads, 0, NULL,
-						NULL));
+						1, nullptr, &blocks, &threads, 0, nullptr,
+						nullptr));
 		clFinish(_prog.getContext().getQueue());
 	}
 
@@ -95,8 +95,8 @@ public:
 
 		clCall(
 				clEnqueueNDRangeKernel(_prog.getContext().getQueue(), _kernel,
-						1, NULL, &blocks, &threads, 0, NULL,
-						NULL));
+						1, nullptr, &blocks, &threads, 0, nullptr,
+						nullptr));
 		clCall(clFinish(_prog.getContext().getQueue()));
 	}
 
@@ -108,8 +108,8 @@ public:
 
 		clCall(
 				clEnqueueNDRangeKernel(_prog.getContext().getQueue(), _kernel,
-						1, NULL, &blocks, &threads, 0, NULL,
-						NULL));
+						1, nullptr, &blocks, &threads, 0, nullptr,
+						nullptr));
 		clCall(clFinish(_prog.getContext().getQueue()));
 	}
 
@@ -124,8 +124,8 @@ public:
 
 		clCall(
 				clEnqueueNDRangeKernel(_prog.getContext().getQueue(), _kernel,
-						1, NULL, &blocks, &threads, 0, NULL,
-						NULL));
+						1, nullptr, &blocks, &threads, 0, nullptr,
+						nullptr));
 		clFinish(_prog.getContext().getQueue());
 	}
 
@@ -146,8 +146,8 @@ public:
 
 		clCall(
 				clEnqueueNDRangeKernel(_prog.getContext().getQueue(), _kernel,
-						1, NULL, &totalThreads, &threads, 0,
-						NULL, NULL));
+						1, nullptr, &totalThreads, &threads, 0,
+						nullptr, nullptr));
 		clCall(clFinish(_prog.getContext().getQueue()));
 	}
 
@@ -170,8 +170,8 @@ public:
 
 		clCall(
 				clEnqueueNDRangeKernel(_prog.getContext().getQueue(), _kernel,
-						1, NULL, &totalThreads, &threads, 0,
-						NULL, NULL));
+						1, nullptr, &totalThreads, &threads, 0,
+						nullptr, nullptr));
 		clCall(clFinish(_prog.getContext().getQueue()));
 	}
 
@@ -196,8 +196,8 @@ public:
 
 		clCall(
 				clEnqueueNDRangeKernel(_prog.getContext().getQueue(), _kernel,
-						1, NULL, &totalThreads, &threads, 0,
-						NULL, NULL));
+						1, nullptr, &totalThreads, &threads, 0,
+						nullptr, nullptr));
 		clCall(clFinish(_prog.getContext().getQueue()));
 	}
 
@@ -224,8 +224,8 @@ public:
 
 		clCall(
 				clEnqueueNDRangeKernel(_prog.getContext().getQueue(), _kernel,
-						1, NULL, &totalThreads, &threads, 0,
-						NULL, NULL));
+						1, nullptr, &totalThreads, &threads, 0,
+						nullptr, nullptr));
 		clCall(clFinish(_prog.getContext().getQueue()));
 	}
 };

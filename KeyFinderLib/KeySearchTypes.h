@@ -12,7 +12,7 @@ enum Value {
 typedef struct hash160 {
 	unsigned int h[5];
 
-	hash160(const unsigned int hash[5]) {
+	explicit hash160(const unsigned int hash[5]) {
 		memcpy(h, hash, sizeof(unsigned int) * 5);
 	}
 } hash160;
@@ -37,7 +37,7 @@ public:
 		memset(value, 0, sizeof(value));
 	}
 
-	KeySearchTarget(const unsigned int h[5]) {
+	explicit KeySearchTarget(const unsigned int h[5]) {
 		for (int i = 0; i < 5; i++) {
 			value[i] = h[i];
 		}

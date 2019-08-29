@@ -33,6 +33,9 @@ typedef struct {
 	// The last key to be checked
 	secp256k1::uint256 endKey = secp256k1::N - 1;
 
+	secp256k1::uint256 stride = 1;
+
+	uint64_t totalkeys = 0;
 	uint64_t statusInterval = 1800;
 	uint64_t checkpointInterval = 60000;
 
@@ -40,21 +43,17 @@ typedef struct {
 	unsigned int blocks = 0;
 	unsigned int pointsPerThread = 0;
 
-	int compression = PointCompressionType::COMPRESSED;
+	unsigned int elapsed = 0;
 
 	std::vector<std::string> targets;
 
 	std::string targetsFile = "";
-
 	std::string checkpointFile = "";
-
-	int device = 0;
-
 	std::string resultsFile = "";
 
-	uint64_t totalkeys = 0;
-	unsigned int elapsed = 0;
-	secp256k1::uint256 stride = 1;
+	int compression = PointCompressionType::COMPRESSED;
+	int device = 0;
+
 	bool randomMode = false;
 	bool follow = false;
 } RunConfig;
@@ -71,7 +70,9 @@ static uint64_t _startTime = 0;
 /**
  * Callback to display the private key
  */
-void resultCallback(KeySearchResult info) {
+void resultCallback(KeySearchResult info);
+void resultCallback(KeySearchResult info)
+    {
 	if (_config.resultsFile.length() != 0) {
 		Logger::log(LogLevel::Info,
 				"Found key for address '" + info.address + "'. Written to '"
@@ -129,17 +130,22 @@ secp256k1::uint256 FACTOR_END(
 		"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
 
 t_time_conversion_t timeConversions = {
-		{ "second", "seconds", 1, -1 },
-		{ "minute", "minutes", FACTOR_MINUTE, -1 }, { "hour", "hours",
-				FACTOR_HOUR, -1 }, { "day", "days", FACTOR_DAY, -1 }, { "week",
-				"weeks", FACTOR_WEEK, -1 }, { "month", "months", FACTOR_MONTH,
-				-1 }, { "year", "years", FACTOR_YEAR, -1 }, { "decade",
-				"decades", FACTOR_DECADE, -1 }, { "century", "centuries",
-				FACTOR_CENTURY, -1 }, { "millenium", "milleniums",
-				FACTOR_MILLENIUM, -1 }, { "millenium", "milleniums and more",
-				FACTOR_MILLENIUM_AND_MORE, 100000000 }, { "END", "END",
-				FACTOR_END, -1 }, };
+	{ "second", "seconds", 1, -1 },
+	{ "minute", "minutes", FACTOR_MINUTE, -1 },
+	{ "hour", "hours", FACTOR_HOUR, -1 },
+	{ "day", "days", FACTOR_DAY, -1 },
+	{ "week", "weeks", FACTOR_WEEK, -1 },
+	{ "month", "months", FACTOR_MONTH, -1 },
+	{ "year", "years", FACTOR_YEAR, -1 },
+	{ "decade", "decades", FACTOR_DECADE, -1 },
+	{ "century", "centuries", FACTOR_CENTURY, -1 },
+	{ "millenium", "milleniums", FACTOR_MILLENIUM, -1 },
+	{ "millenium", "milleniums and more", FACTOR_MILLENIUM_AND_MORE, 100000000 },
+	{ "END", "END", FACTOR_END, -1 },
+};
 
+void getTimeRemaining(secp256k1::uint256 &timeInSeconds, double &outDecimalTime,
+		std::string &outUnit);
 void getTimeRemaining(secp256k1::uint256 &timeInSeconds, double &outDecimalTime,
 		std::string &outUnit) {
 	for (size_t i = 0; i < timeConversions.size() - 1; i++) {
@@ -166,6 +172,7 @@ void getTimeRemaining(secp256k1::uint256 &timeInSeconds, double &outDecimalTime,
 /**
  Callback to display progress
  */
+void statusCallback(KeySearchStatus info);
 void statusCallback(KeySearchStatus info) {
 	std::string speedStr;
 
@@ -193,7 +200,7 @@ void statusCallback(KeySearchStatus info) {
 
 	std::string timeStr = "["
 			+ CommonUtils::formatSeconds(
-					(unsigned int) ((_config.elapsed + info.totalTime) / 1000))
+					static_cast<unsigned int>(_config.elapsed + info.totalTime) / 1000)
 			+ "]";
 
 	std::string timeRemainingStr;
@@ -203,7 +210,7 @@ void statusCallback(KeySearchStatus info) {
 
 	} else {
 		secp256k1::uint256 timeRemainingSeconds = remainingKeys.div(
-				info.speed * 1000000);
+				static_cast<unsigned int>(info.speed) * 1000000);
 
 		double timeRemaining = 0;
 		std::string timeUnit("second");
@@ -227,7 +234,7 @@ void statusCallback(KeySearchStatus info) {
 	/* std::string devName = info.deviceName.substr(0, 16);
 	devName += std::string(16 - devName.length(), ' '); */
 
-	const char *formatStr = NULL;
+	const char *formatStr = nullptr;
 
 	if (_config.follow) {
 		formatStr = "%s %s/%sMB | %s %s %s %s\n";
@@ -258,6 +265,8 @@ void statusCallback(KeySearchStatus info) {
  :+offset
  */
 bool parseKeyspace(const std::string &s, secp256k1::uint256 &start,
+		secp256k1::uint256 &end);
+bool parseKeyspace(const std::string &s, secp256k1::uint256 &start,
 		secp256k1::uint256 &end) {
 	size_t pos = s.find(':');
 
@@ -285,6 +294,7 @@ bool parseKeyspace(const std::string &s, secp256k1::uint256 &start,
 	return true;
 }
 
+void usage();
 void usage() {
 	printf("BitCrack OPTIONS [TARGETS]\n");
 	printf("Where TARGETS is one or more addresses\n\n");
@@ -326,6 +336,7 @@ typedef struct {
 	int pointsPerThread;
 } DeviceParameters;
 
+DeviceParameters getDefaultParameters(const DeviceManager::DeviceInfo &device);
 DeviceParameters getDefaultParameters(const DeviceManager::DeviceInfo &device) {
 	DeviceParameters p = {0,0,0};
 	p.threads = 256;
@@ -362,7 +373,7 @@ static void printDeviceList(
 		printf("ID:     %d\n", devices[i].id);
 		printf("Name:   %s\n", devices[i].name.c_str());
 		printf("Memory: %" PRIu64 "MB\n",
-				devices[i].memory / ((uint64_t) 1024 * 1024));
+				devices[i].memory / static_cast<uint64_t>(1024 * 1024));
 		printf("Compute units: %d\n", devices[i].computeUnits);
 		printf("\n");
 	}

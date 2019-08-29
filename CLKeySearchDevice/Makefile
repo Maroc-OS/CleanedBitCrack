@@ -1,21 +1,21 @@
 NAME=CLKeySearchDevice
-CPPSRC:=$(wildcard *.cpp)
+SRC:=$(wildcard *.cpp)
+OBJS=$(SRC:.cpp=.o)
 
 all:
 	cat ../clMath/sha256.cl ../clMath/secp256k1.cl ../clMath/ripemd160.cl keysearch.cl > bitcrack.cl
 	${BINDIR}/embedcl bitcrack.cl bitcrack_cl.cpp _bitcrack_cl
-	#xxd -i bitcrack.cl | sed "s!\([0-9a-f]\)$!\0, 0x00!" > bitcrack_cl.cpp
-	#xxd -i bitcrack.cl > bitcrack_cl.cpp
-	#sed -i -e 's/bitcrack_cl/_bitcrack_cl/g' bitcrack_cl.cpp
 
-	for file in ${CPPSRC} bitcrack_cl.cpp; do\
-		${CXX} -c $$file ${INCLUDE} -I${OPENCL_INCLUDE} ${CXXFLAGS} ${LIBS} ${OPENCL_LIB} -llogger -lclutil -lcommonutils;\
+	for file in ${SRC} bitcrack_cl.cpp; do\
+		${CXX} ${INCLUDE} -I${OPENCL_INCLUDE} ${CXXFLAGS} ${LIBS} -c $$file ${OPENCL_LIB} -llogger -lcommonutils -lclutil;\
 	done
+	mkdir -p ${LIBDIR}
 
 ifeq ($(PLATFORM),Darwin)
 	${CXX} ${LDFLAGS} -dynamiclib -undefined suppress -flat_namespace *.o -o ${LIBDIR}/lib$(NAME).dylib
 else
-	ar rvs ${LIBDIR}/lib$(NAME).a *.o
+	ar rvcs ${LIBDIR}/lib$(NAME).a *.o
+	ranlib ${LIBDIR}/lib$(NAME).a
 endif
 
 clean:

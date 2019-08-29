@@ -7,9 +7,19 @@
 
 #ifdef __APPLE__
 #define CL_SILENCE_DEPRECATION
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <OpenCL/opencl.h>
+
+#ifdef __cplusplus
+}
+#endif
+
 #else
-#include <CL/cl.h>
+#include <CL/cl2.hpp>
 #endif
 
 #include <string>

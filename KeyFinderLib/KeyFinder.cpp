@@ -1,5 +1,7 @@
+#include <cstring>
 #include <fstream>
 #include <iostream>
+#include <vector>
 
 #include "AddressUtil.h"
 #include "KeyFinder.h"
