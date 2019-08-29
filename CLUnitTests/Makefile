@@ -1,14 +1,29 @@
 NAME=CLUnitTests
-CPPSRC:=$(wildcard *.cpp)
+CPPSRC=$(wildcard *.cpp)
+CPPSRC:=$(wildcard *.cpp) cltest.cpp
+CPPBIN=clunittest
+TARGETBIN=$(NAME).bin
 
-all:
-	cat ../clMath/secp256k1.cl secp256k1test.cl > cltest.cl
-	${BINDIR}/embedcl cltest.cl cltest.cpp _secp256k1_test_cl
+LOADLIBS = $(LIBS)
+ifeq ($(PLATFORM),Darwin)
+CXXFLAGS := $(INCLUDE) -I$(OPENCL_INCLUDE) $(CXXFLAGS) $(LOADLIBS) $(OPENCL_LIB) -llogger -lcommonutils -lclutil
+else
+CXXFLAGS := $(INCLUDE) -I$(OPENCL_INCLUDE) $(CXXFLAGS) $(LOADLIBS) -Wl,--start-group $(OPENCL_LIB) -llogger -lcommonutils -lclutil -Wl,--end-group
+endif
 
-	${CXX} -o clunittest.bin cltest.cpp ${CPPSRC} ${INCLUDE} -I${OPENCL_INCLUDE} ${CXXFLAGS} ${LIBS} ${OPENCL_LIB} -lcommonutils -lclutil
+all:	$(TARGETBIN)
+
+$(TARGETBIN): $(CPPSRC)
+	$(CXX) -o $(TARGETBIN) $(CPPSRC) $(CXXFLAGS)
 	mkdir -p $(BINDIR)
+	cp $(TARGETBIN) $(BINDIR)/$(CPPBIN)
 
-	cp clunittest.bin $(BINDIR)/clunittest
+.PHONEY:
+cltest.cpp:
+	rm -rf cltest.cl
+	rm -rf cltest.cpp
+	cat ../clMath/secp256k1.cl secp256k1test.cl > cltest.cl
+	$(BINDIR)/embedcl cltest.cl cltest.cpp _secp256k1_test_cl
 
 clean:
 	rm -rf *.a
@@ -17,9 +32,9 @@ clean:
 	rm -rf *.gcda
 	rm -rf cltest.cl
 	rm -rf cltest.cpp
-	rm -rf clunittest.bin
+	rm -rf $(TARGETBIN)
 ifeq ($(PLATFORM),Darwin)
 ifeq ($(BUILD_DEBUG),1)
-	rm -rf clunittest.bin.dSYM
+	rm -rf $(TARGETBIN).dSYM
 endif
 endif

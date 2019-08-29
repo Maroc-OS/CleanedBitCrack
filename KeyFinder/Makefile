@@ -2,12 +2,20 @@ CPPSRC:=$(wildcard *.cpp)
 
 all:
 ifeq ($(BUILD_CUDA), 1)
-	${CXX} -DBUILD_CUDA -o cuKeyFinder.bin ${CPPSRC} ${INCLUDE} -I${CUDA_INCLUDE} ${CXXFLAGS} ${LIBS} ${CUDA_LIB} -lkeyfinder -laddressutil -lsecp256k1 -lcryptoutil -lsecp256k1 -lcudautil -llogger -lcommonutils -lclutil -lCudaKeySearchDevice -lcudadevrt -lcudart -lcmdparse
+ifeq ($(PLATFORM),Darwin)
+	${CXX} -DBUILD_CUDA -o cuKeyFinder.bin ${CPPSRC} ${INCLUDE} -I${CUDA_INCLUDE} ${CXXFLAGS} ${LIBS} ${CUDA_LIB} -lkeyfinder -laddressutil -lsecp256k1 -lcryptoutil -lcudautil -llogger -lcommonutils -lclutil -lCudaKeySearchDevice -lcudadevrt -lcudart -lcmdparse
+else
+	${CXX} -DBUILD_CUDA -o cuKeyFinder.bin ${CPPSRC} ${INCLUDE} -I${CUDA_INCLUDE} ${CXXFLAGS} ${LIBS} -Wl,--start-group ${CUDA_LIB} -lkeyfinder -laddressutil -lsecp256k1 -lcryptoutil -lcudautil -llogger -lcommonutils -lclutil -lCudaKeySearchDevice -lcudadevrt -lcudart -lcmdparse -Wl,--end-group
+endif
 	mkdir -p $(BINDIR)
 	cp cuKeyFinder.bin $(BINDIR)/cuBitCrack
 endif
 ifeq ($(BUILD_OPENCL),1)
-	${CXX} -DBUILD_OPENCL -o clKeyFinder.bin ${CPPSRC} ${INCLUDE} -I${OPENCL_INCLUDE} ${CXXFLAGS} ${LIBS} ${OPENCL_LIB} -lkeyfinder -laddressutil -lsecp256k1 -lcryptoutil -lsecp256k1 -llogger -lcommonutils -lclutil -lCLKeySearchDevice -lcmdparse
+ifeq ($(PLATFORM),Darwin)
+	${CXX} -DBUILD_OPENCL -o clKeyFinder.bin ${CPPSRC} ${INCLUDE} -I${OPENCL_INCLUDE} ${CXXFLAGS} ${LIBS} $(OPENCL_LIB) -llogger -lcommonutils -lcmdparse -lsecp256k1 -lcryptoutil -lkeyfinder -laddressutil -lclutil -lCLKeySearchDevice
+else
+	${CXX} -DBUILD_OPENCL -o clKeyFinder.bin ${CPPSRC} ${INCLUDE} -I${OPENCL_INCLUDE} ${CXXFLAGS} ${LIBS} -Wl,--start-group $(OPENCL_LIB) -llogger -lcommonutils -lcmdparse -lsecp256k1 -lcryptoutil -lkeyfinder -laddressutil -lclutil -lCLKeySearchDevice -Wl,--end-group
+endif
 	mkdir -p $(BINDIR)
 	cp clKeyFinder.bin $(BINDIR)/clBitCrack
 endif

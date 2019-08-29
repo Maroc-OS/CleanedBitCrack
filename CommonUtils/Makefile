@@ -4,14 +4,15 @@ OBJS=$(SRC:.cpp=.o)
 
 all:    ${SRC}
 	for file in ${SRC} ; do\
-		${CXX} -c $$file ${INCLUDE} ${CXXFLAGS};\
+		${CXX} ${INCLUDE} ${CXXFLAGS} -c $$file;\
 	done
 	mkdir -p ${LIBDIR}
 
 ifeq ($(PLATFORM),Darwin)
 	${CXX} ${LDFLAGS} -dynamiclib -undefined suppress -flat_namespace ${OBJS} -o ${LIBDIR}/lib$(NAME).dylib
 else
-	ar rvs ${LIBDIR}/lib$(NAME).a ${OBJS} 
+	ar rvcs ${LIBDIR}/lib$(NAME).a ${OBJS}
+	ranlib ${LIBDIR}/lib$(NAME).a
 endif
 
 clean:

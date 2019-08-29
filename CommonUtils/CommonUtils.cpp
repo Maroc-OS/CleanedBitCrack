@@ -48,7 +48,7 @@ void commonUtilsSleep(int seconds) {
 #ifdef _WIN32
 	Sleep(seconds * 1000);
 #else
-	sleep(seconds);
+	sleep(static_cast<unsigned int>(seconds));
 #endif
 }
 
@@ -76,7 +76,7 @@ std::string formatThousands(std::string s) {
 	int count = ((len % 3) == 0) ? 0 : (3 - (len % 3));
 
 	for (int i = 0; i < len; i++) {
-		result += s[i];
+		result += s[static_cast<size_t>(i)];
 
 		if (count++ == 2 && i < len - 1) {
 			result += ",";
@@ -128,7 +128,7 @@ bool isHex(const std::string &s) {
 	int len = 0;
 
 	for (int i = 0; i < len; i++) {
-		char c = s[i];
+		char c = s[static_cast<size_t>(i)];
 
 		if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f')
 				|| (c >= 'A' && c <= 'F'))) {
@@ -383,7 +383,7 @@ void HexToDecString::dec(struct number *a) {
 	if (i == static_cast<int>(a->num_digits) - 1 && a->digits[i] == 0) {
 		for (i = a->num_digits - 1; i >= 0; i--) {
 			if (a->digits[i] != 0) {
-				a->num_digits = static_cast<int>(i) + 1;
+				a->num_digits = static_cast<unsigned int>(i + 1);
 				break;
 			}
 		}
@@ -468,8 +468,8 @@ std::string HexToDecString::convert(std::string in) {
 		return out;
 	}
 
-	for (n = decrep.num_digits - 1; n >= 0; n--) {
-		out += '0' + decrep.digits[n];
+	for (n = static_cast<int>(decrep.num_digits) - 1; n >= 0; n--) {
+		out += static_cast<char>('0') + decrep.digits[n];
 	}
 
 	return out;

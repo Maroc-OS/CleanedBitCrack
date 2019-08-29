@@ -1,21 +1,35 @@
 NAME=CLKeySearchDevice
-SRC:=$(wildcard *.cpp)
-OBJS=$(SRC:.cpp=.o)
+LIBSRC=$(wildcard *.cpp)
+LIBSRC:=$(LIBSRC) bitcrack_cl.cpp
+LIBOBJ=$(LIBSRC:.cpp=.o)
+TARGETLIB=lib$(NAME).a
 
-all:
+LOADLIBS = $(LIBS)
+CXXFLAGS := $(INCLUDE) -I$(OPENCL_INCLUDE) $(CXXFLAGS) $(LOADLIBS) -Wl,--start-group $(OPENCL_LIB) -llogger -lcommonutils -lclutil -Wl,--end-group
+
+$(TARGETLIB): $(LIBSRC)
+
+TARGETS = $(TARGETLIB)
+
+.PHONEY:
+bitcrack_cl.cpp:
+	rm -rf bitcrack.cl
+	rm -rf bitcrack_cl.cpp
 	cat ../clMath/sha256.cl ../clMath/secp256k1.cl ../clMath/ripemd160.cl keysearch.cl > bitcrack.cl
-	${BINDIR}/embedcl bitcrack.cl bitcrack_cl.cpp _bitcrack_cl
+	$(BINDIR)/embedcl bitcrack.cl bitcrack_cl.cpp _bitcrack_cl
 
-	for file in ${SRC} bitcrack_cl.cpp; do\
-		${CXX} ${INCLUDE} -I${OPENCL_INCLUDE} ${CXXFLAGS} ${LIBS} -c $$file ${OPENCL_LIB} -llogger -lcommonutils -lclutil;\
+all:	$(LIBSRC)
+	for file in $(LIBSRC); do\
+		$(CXX) $(CXXFLAGS) -c $$file;\
 	done
-	mkdir -p ${LIBDIR}
 
+$(TARGETS): $(LIBOBJ)
+	mkdir -p $(LIBDIR)
 ifeq ($(PLATFORM),Darwin)
-	${CXX} ${LDFLAGS} -dynamiclib -undefined suppress -flat_namespace *.o -o ${LIBDIR}/lib$(NAME).dylib
+	$(CXX) $(LDFLAGS) -dynamiclib -undefined suppress -flat_namespace $(LIBOBJ) -o $(LIBDIR)/lib$(NAME).dylib
 else
-	ar rvcs ${LIBDIR}/lib$(NAME).a *.o
-	ranlib ${LIBDIR}/lib$(NAME).a
+	ar rcvs $(LIBDIR)/$(TARGETLIB) $(LIBOBJ)
+	ranlib $(LIBDIR)/$(TARGETLIB)
 endif
 
 clean:

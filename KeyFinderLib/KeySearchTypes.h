@@ -2,6 +2,8 @@
 #define _KEY_FINDER_TYPES
 
 #include "secp256k1.h"
+#include <cstring>
+#include <iostream>
 
 namespace PointCompressionType {
 enum Value {

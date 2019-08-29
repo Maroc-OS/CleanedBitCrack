@@ -1,12 +1,11 @@
 NAME=keyfinder
 CPPSRC:=$(wildcard *.cpp)
 
-
 all:	cuda
 
 cuda:
 	for file in ${CPPSRC} ; do\
-		${CXX} -c $$file ${INCLUDE} -I${CUDA_INCLUDE} ${CXXFLAGS};\
+        ${CXX} -DBUILD_OPENCL -c ${CPPSRC} ${INCLUDE} -I${OPENCL_INCLUDE} ${CXXFLAGS} ${LIBS} -Wl,--start-group ${OPENCL_LIB} -llogger -lcommonutils -lcmdparse -lsecp256k1 -lcryptoutil -laddressutil -lclutil -Wl,--end-group;\
 	done
 
 ifeq ($(PLATFORM),Darwin)
