@@ -2,11 +2,11 @@
 
 ## Build Status
 
-[![Build Status](https://travis-ci.com/Maroc-OS/CleanedBitCrack.svg?branch=master)](https://travis-ci.com/Maroc-OS/CleanedBitCrack) [![Build status](https://ci.appveyor.com/api/projects/status/r6chsmy618smn3on?svg=true)](https://ci.appveyor.com/project/Maroc-OS/cleanedbitcrack)
+[![Build Status](https://travis-ci.com/Maroc-OS/CleanedBitCrack.svg?branch=master)](https://travis-ci.com/Maroc-OS/CleanedBitCrack) [![Build status](https://ci.appveyor.com/api/projects/status/r6chsmy618smn3on?svg=true)](https://ci.appveyor.com/project/Maroc-OS/cleanedbitcrack) [![Total alerts](https://img.shields.io/lgtm/alerts/g/Maroc-OS/CleanedBitCrack.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/Maroc-OS/CleanedBitCrack/alerts/)
 
 ## Code Quality
 
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/7d7d6b6a74b04571bd855c7786e947b7)](https://www.codacy.com/app/merruk-company/CleanedBitCrack?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Maroc-OS/CleanedBitCrack&amp;utm_campaign=Badge_Grade) [![CodeFactor](https://www.codefactor.io/repository/github/maroc-os/cleanedbitcrack/badge)](https://www.codefactor.io/repository/github/maroc-os/cleanedbitcrack)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/7d7d6b6a74b04571bd855c7786e947b7)](https://www.codacy.com/app/merruk-company/CleanedBitCrack?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Maroc-OS/CleanedBitCrack&amp;utm_campaign=Badge_Grade) [![CodeFactor](https://www.codefactor.io/repository/github/maroc-os/cleanedbitcrack/badge)](https://www.codefactor.io/repository/github/maroc-os/cleanedbitcrack) [![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/Maroc-OS/CleanedBitCrack.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/Maroc-OS/CleanedBitCrack/context:cpp)
 
 ## Note
 

@@ -20,6 +20,7 @@ endif
 LDFLAGS=
 CXXFLAGS+=-std=c++17 -D_REETRANT -W -Wall -Wextra -pedantic -pthread
 
+# Coverage variables
 ifeq ($(BUILD_COVERAGE),1)
 	CXXFLAGS+=--coverage -fprofile-arcs -ftest-coverage
 	LDFLAGS+=--coverage

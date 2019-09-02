@@ -1,7 +1,7 @@
 NAME=CLUnitTests
 CPPSRC=$(wildcard *.cpp)
 CPPSRC:=$(wildcard *.cpp) cltest.cpp
-CPPBIN=clunittest
+CPPBIN=clunittests
 TARGETBIN=$(NAME).bin
 
 LOADLIBS = $(LIBS)

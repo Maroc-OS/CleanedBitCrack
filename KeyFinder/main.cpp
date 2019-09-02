@@ -172,8 +172,8 @@ void getTimeRemaining(secp256k1::uint256 &timeInSeconds, double &outDecimalTime,
 /**
  Callback to display progress
  */
-void statusCallback(KeySearchStatus info);
-void statusCallback(KeySearchStatus info) {
+void statusCallback(const KeySearchStatus info);
+void statusCallback(const KeySearchStatus info) {
 	std::string speedStr;
 
 	if (info.speed < 0.01) {
@@ -361,7 +361,7 @@ getDeviceContext(DeviceManager::DeviceInfo &device, int blocks, int threads,
     }
 #endif
 
-	return 0;
+	return nullptr;
 }
 
 KeySearchDevice::~KeySearchDevice(){

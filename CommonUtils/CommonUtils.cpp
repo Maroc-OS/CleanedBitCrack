@@ -127,7 +127,7 @@ uint64_t parseUInt64(std::string s) {
 bool isHex(const std::string &s) {
 	int len = 0;
 
-	for (int i = 0; i < len; i++) {
+	for (int i = 0; i <= len; i++) {
 		char c = s[static_cast<size_t>(i)];
 
 		if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f')
@@ -338,9 +338,7 @@ int HexToDecString::add(struct number *a, struct number *b, struct number *c) {
 }
 
 void HexToDecString::copy_number(struct number *dst, struct number *src) {
-	unsigned int i;
-
-	for (i = 0; i < src->num_digits; i++) {
+	for (unsigned int i = 0; i < src->num_digits; i++) {
 		dst->digits[i] = src->digits[i];
 	}
 
@@ -368,7 +366,7 @@ int HexToDecString::power(struct number *a, unsigned int n, struct number *b) {
 }
 
 void HexToDecString::dec(struct number *a) {
-	int i;
+	int i = nullptr;
 
 	for (i = 0; i < static_cast<int>(a->num_digits); i++) {
 		if (a->digits[i] > 0) {
@@ -426,7 +424,7 @@ int HexToDecString::mult(struct number *a, struct number *b, struct number *c) {
 }
 
 std::string HexToDecString::convert(std::string in) {
-	int n;
+	int n = nullptr;
 	struct number decrep;
 	struct number twopow;
 	struct number digit;
