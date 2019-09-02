@@ -366,7 +366,7 @@ int HexToDecString::power(struct number *a, unsigned int n, struct number *b) {
 }
 
 void HexToDecString::dec(struct number *a) {
-	int i = nullptr;
+	int i;
 
 	for (i = 0; i < static_cast<int>(a->num_digits); i++) {
 		if (a->digits[i] > 0) {
@@ -424,7 +424,7 @@ int HexToDecString::mult(struct number *a, struct number *b, struct number *c) {
 }
 
 std::string HexToDecString::convert(std::string in) {
-	int n = nullptr;
+	int n;
 	struct number decrep;
 	struct number twopow;
 	struct number digit;
