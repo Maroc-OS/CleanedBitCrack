@@ -27,14 +27,11 @@ std::string LogLevel::toString(int level) {
 }
 
 std::string Logger::getDateTimeString() {
-	time_t now = time(nullptr);
-	struct tm tm;
-	char buf[80];
-	localtime_r(&now, &tm);
+	std::stringstream ss;
+	std::time_t t = std::time(nullptr);
+	ss << std::put_time(std::gmtime(&t), "%Y-%m-%d.%X");
 
-	strftime(buf, sizeof(buf), "%Y-%m-%d.%X", &tm);
-
-	return std::string(buf);
+	return std::string(ss.str());
 }
 
 std::string Logger::formatLog(int logLevel, const std::string &msg) {

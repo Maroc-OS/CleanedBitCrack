@@ -75,6 +75,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ripemd160.cpp" />
+    <ClCompile Include="checksum.cpp" />
     <ClCompile Include="Rng.cpp" />
     <ClCompile Include="sha256.cpp" />
   </ItemGroup>

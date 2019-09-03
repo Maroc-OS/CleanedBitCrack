@@ -1,6 +1,10 @@
 #ifndef _LOGGER_H
 #define _LOGGER_H
 
+#include <ctime>
+#include <iomanip>
+#include <iostream>
+#include <sstream>
 #include <string>
 
 namespace LogLevel {

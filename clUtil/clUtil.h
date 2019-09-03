@@ -5,21 +5,27 @@
 #define CL_USE_DEPRECATED_OPENCL_1_1_APIS
 #define CL_USE_DEPRECATED_OPENCL_1_2_APIS
 
-#ifdef __APPLE__
+#if defined(__APPLE__)
 #define CL_SILENCE_DEPRECATION
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 #include <OpenCL/opencl.h>
-
 #ifdef __cplusplus
 }
 #endif
 
-#else
+#elif defined(__linux__) || defined(__CYGWIN__)
 #include <CL/cl2.hpp>
+#else
+#ifdef __cplusplus
+extern "C" {
+#endif
+#include <CL/cl.h>
+#ifdef __cplusplus
+}
+#endif
 #endif
 
 #include <string>

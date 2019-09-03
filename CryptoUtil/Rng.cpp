@@ -66,7 +66,7 @@ void crypto::Rng::get(unsigned char *buf, size_t len) {
 			len -= 32;
 		} else {
 			memcpy(&buf[i], (const void *) digest, new_len);
-			i += new_len;
+			i += static_cast<int>(new_len);
 			len -= new_len;
 		}
 	}
