@@ -710,7 +710,7 @@ static void bulkInversionModP(std::vector<uint256> &in) {
 
 	uint256 inverse = secp256k1::invModP(total);
 
-	for (int i = in.size() - 1; i >= 0; i--) {
+	for (int i = static_cast<int>(in.size()) - 1; i >= 0; i--) {
 		if (i > 0) {
 			uint256 newValue = secp256k1::multiplyModP(products[i - 1],
 					inverse);
