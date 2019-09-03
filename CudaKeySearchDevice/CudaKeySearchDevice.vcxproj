@@ -76,7 +76,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;WIN64;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalUsingDirectories>%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
-      <AdditionalIncludeDirectories>$(SolutionDir)\secp256k1lib;$(SolutionDir)\KeyFinderLib;$(SolutionDir)\Logger;$(SolutionDir)\Util;$(SolutionDir)\CudaMath;$(SolutionDir)\cudaUtil;$(SolutionDir)\AddressUtil;$(CUDA_INCLUDE)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\secp256k1lib;$(SolutionDir)\KeyFinderLib;$(SolutionDir)\Logger;$(SolutionDir)\CommonUtils;$(SolutionDir)\CudaMath;$(SolutionDir)\cudaUtil;$(SolutionDir)\AddressUtil;$(CUDA_INCLUDE)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -97,7 +97,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;WIN64;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalUsingDirectories>%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
-      <AdditionalIncludeDirectories>$(SolutionDir)\secp256k1lib;$(SolutionDir)\KeyFinderLib;$(SolutionDir)\Logger;$(SolutionDir)\Util;$(SolutionDir)\CudaMath;$(SolutionDir)\cudaUtil;$(SolutionDir)\AddressUtil;$(CUDA_INCLUDE)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\secp256k1lib;$(SolutionDir)\KeyFinderLib;$(SolutionDir)\Logger;$(SolutionDir)\CommonUtils;$(SolutionDir)\CudaMath;$(SolutionDir)\cudaUtil;$(SolutionDir)\AddressUtil;$(CUDA_INCLUDE)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
