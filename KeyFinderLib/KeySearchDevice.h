@@ -11,8 +11,7 @@ class KeySearchException {
 public:
 	std::string msg;
 
-	KeySearchException()
-	{
+	KeySearchException() {
 	}
 
 	explicit KeySearchException(const std::string &_msg): msg(_msg) {
@@ -34,9 +33,11 @@ public:
 	virtual ~KeySearchDevice() = 0;
 
 	// Initialise the device
-	virtual void init(const secp256k1::uint256 &start,
-			const secp256k1::uint256 &end, int compression,
-			const secp256k1::uint256 &stride, bool randomMode) = 0;
+	virtual void init(const secp256k1::uint256& start,
+                      const secp256k1::uint256& end,
+                      int compression,
+                      const secp256k1::uint256& stride,
+                      bool randomMode) = 0;
 
 	// Perform one iteration
 	virtual void doStep() = 0;

@@ -22,6 +22,7 @@ extern "C" {
 #ifdef __cplusplus
 extern "C" {
 #endif
+#define NVCL_SUPPRESS_USE_DEPRECATED_OPENCL_1_0_APIS_WARNING
 #include <CL/cl.h>
 #ifdef __cplusplus
 }

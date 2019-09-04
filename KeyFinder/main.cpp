@@ -200,7 +200,7 @@ void statusCallback(const KeySearchStatus info) {
 
 	std::string timeStr = "["
 			+ CommonUtils::formatSeconds(
-					static_cast<unsigned int>(_config.elapsed + info.totalTime) / 1000)
+					_config.elapsed + static_cast<unsigned int>(info.totalTime) / 1000)
 			+ "]";
 
 	std::string timeRemainingStr;
