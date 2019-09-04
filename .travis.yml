@@ -38,7 +38,7 @@ script:
     - BUILD_COVERAGE=1 make all
 after_success:
     # Run test
-    - ./bin/clunittest
+    - ./bin/clunittests
     # Creating report
     - cd ${TRAVIS_BUILD_DIR}
     - lcov --directory . --capture --output-file coverage.info

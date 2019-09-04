@@ -1,5 +1,7 @@
 # BitCrack  (macOS Compatible)
 
+Multi-Plateform cracking tool. works on all Operating Systems.
+
 ## Build Status
 
 [![Build Status](https://travis-ci.com/Maroc-OS/CleanedBitCrack.svg?branch=master)](https://travis-ci.com/Maroc-OS/CleanedBitCrack) [![Build status](https://ci.appveyor.com/api/projects/status/r6chsmy618smn3on?svg=true)](https://ci.appveyor.com/project/Maroc-OS/cleanedbitcrack) [![Total alerts](https://img.shields.io/lgtm/alerts/g/Maroc-OS/CleanedBitCrack.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/Maroc-OS/CleanedBitCrack/alerts/)
@@ -10,7 +12,7 @@
 
 ## Note
 
-This version has been modified and partially fixed by me (Maroc-OS @MerrukTechnolog) except for most of CUDA files it's not tested, only OpenCL has been tested. the main goal is to fix maximum possible issues, style, security and performance. then make it a pool style compatible tool.
+This version has been modified and partially fixed by me (Maroc-OS @MerrukTechnolog) except for most of CUDA files they are not tested (Fixed), only OpenCL has been tested. the main goal is to fix maximum possible issues, style, security and performance. then make it a pool style compatible tool.
 
 ## Description
 
