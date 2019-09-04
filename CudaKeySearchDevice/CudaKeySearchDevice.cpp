@@ -12,8 +12,8 @@ void CudaKeySearchDevice::cudaCall(cudaError_t err) {
 	}
 }
 
-CudaKeySearchDevice::CudaKeySearchDevice(int device, int threads, 
-		int pointsPerThread, int blocks, int compression) : _compression(compression) {
+CudaKeySearchDevice::CudaKeySearchDevice(int device, int threads,
+		int pointsPerThread, int blocks, int compression) : _blocks(blocks), _compression(compression) {
 	cuda::CudaDeviceInfo info;
 	try {
 		info = cuda::getDeviceInfo(device);
@@ -60,17 +60,27 @@ CudaKeySearchDevice::CudaKeySearchDevice(int device, int threads,
 	_pointsPerThread = pointsPerThread;
 }
 
-void CudaKeySearchDevice::init(const secp256k1::uint256 &start, int compression,
-		const secp256k1::uint256 &stride) {
+CudaKeySearchDevice::~CudaKeySearchDevice() {
+}
+
+void CudaKeySearchDevice::init(const secp256k1::uint256 &start,
+		const secp256k1::uint256 &end, int compression,
+		const secp256k1::uint256 &stride, bool randomMode) {
 	if (start.cmp(secp256k1::N) >= 0) {
 		throw KeySearchException("Starting key is out of range");
 	}
 
-	_startExponent = start;
+	_start = start;
+
+	_end = end;
+
+	_stride = stride;
 
 	_compression = compression;
 
-	_stride = stride;
+	_randomMode = randomMode;
+
+	_startExponent = start;
 
 	cudaCall(cudaSetDevice(_device));
 
@@ -78,9 +88,9 @@ void CudaKeySearchDevice::init(const secp256k1::uint256 &start, int compression,
 	cudaCall (cudaSetDeviceFlags(cudaDeviceScheduleBlockingSync));
 
 	// Use a larger portion of shared memory for L1 cache
-cudaCall	(cudaDeviceSetCacheConfig(cudaFuncCachePreferL1));
+	cudaCall	(cudaDeviceSetCacheConfig(cudaFuncCachePreferL1));
 
-generateStartingPoints	();
+	generateStartingPoints	();
 
 	cudaCall(allocateChainBuf(_threads * _blocks * _pointsPerThread));
 
@@ -274,14 +284,16 @@ void CudaKeySearchDevice::getResultsInternal() {
 }
 
 // Verify a private key produces the public key and hash
-bool CudaKeySearchDevice::verifyKey(const secp256k1::uint256 &privateKey,
-		const secp256k1::ecpoint &publicKey, const unsigned int hash[5],
-		bool compressed) {
+bool CudaKeySearchDevice::verifyKey(const secp256k1::uint256& privateKey,
+                                    const secp256k1::ecpoint& publicKey,
+                                    const unsigned int hash[5],
+                                    bool compressed)
+{
 	secp256k1::ecpoint g = secp256k1::G();
 
 	secp256k1::ecpoint p = secp256k1::multiplyPoint(privateKey, g);
 
-	if (p != publicKey) {
+	if (!(p == publicKey)) {
 		return false;
 	}
 
