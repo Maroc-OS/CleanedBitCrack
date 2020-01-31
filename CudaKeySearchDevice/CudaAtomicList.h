@@ -2,8 +2,10 @@
 #define _ATOMIC_LIST_HOST_H
 
 #include <cuda_runtime.h>
-#if defined(__APPLE__) || defined(__linux__) || defined(__CYGWIN__)
+#if defined(__APPLE__)
 #include <sys/_types/_null.h>
+#elif defined(__linux__) || defined(__CYGWIN__)
+#include <sys/types.h>
 #endif
 
 /**
