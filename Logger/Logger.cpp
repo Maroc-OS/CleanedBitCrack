@@ -28,8 +28,9 @@ std::string LogLevel::toString(int level) {
 
 std::string Logger::getDateTimeString() {
 	std::stringstream ss;
+	struct std::tm lt = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 	std::time_t t = std::time(nullptr);
-	ss << std::put_time(std::gmtime(&t), "%Y-%m-%d.%X");
+	ss << std::put_time(gmtime_r(&t, &lt), "%Y-%m-%d.%X");
 
 	return std::string(ss.str());
 }

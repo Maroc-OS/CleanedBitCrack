@@ -223,7 +223,7 @@ void CLKeySearchDevice::doStep() {
 	try {
 		uint64_t numKeys = (uint64_t) (_blocks * _threads * _pointsPerThread);
 
-		if (!_randomMode && _iterations < (uint64_t) 2 && _start.cmp(numKeys) <= (uint64_t) 0) {
+		if (!_randomMode && _iterations < (uint64_t) 2 && _start.cmp(numKeys) <= 0) {
 			_stepKernelWithDouble->call(_blocks, _threads, _pointsPerThread,
 					_compression, _chain, _x, _y, _xInc, _yInc,
 					_deviceTargetList.ptr, _deviceTargetList.size,

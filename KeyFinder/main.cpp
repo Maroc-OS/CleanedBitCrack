@@ -22,7 +22,7 @@
 #include "CLKeySearchDevice.h"
 #endif
 
-typedef struct {
+typedef struct RunConfig {
 	// startKey is the first key. We store it so that if the --continue
 	// option is used, the correct progress is displayed. startKey and
 	// nextKey are only equal at the very beginning. nextKey gets saved
