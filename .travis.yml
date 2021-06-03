@@ -15,20 +15,25 @@ jobs:
         apt:
           sources:
             - ubuntu-toolchain-r-test
-            - llvm-toolchain-focal-9
+            - llvm-toolchain-focal-10
           packages:
-            - clang-9
+            - clang-10
             - ocl-icd-opencl-dev
             - opencl-headers
             - lcov
       env:
-        - COMPILER=clang++-9
+        - COMPILER=clang++-10
+
     - os: osx
       osx_image: xcode12.5
       env:
         - COMPILER=clang++
 
 before_install:
+    - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get update                         ; fi
+    - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get install -qy ocl-icd-opencl-dev ; fi
+    - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get install -qy opencl-headers     ; fi
+    - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get install -qy lcov               ; fi
     - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew update                                   ; fi
     - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install lcov                             ; fi
     - BUILD_DEBUG=1 make clean
