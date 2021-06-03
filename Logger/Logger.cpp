@@ -1,4 +1,5 @@
 #include "Logger.h"
+#include <time.h>
 
 bool LogLevel::isValid(int level) {
 	switch (level) {
@@ -30,7 +31,11 @@ std::string Logger::getDateTimeString() {
 	std::stringstream ss;
 	struct std::tm lt = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 	std::time_t t = std::time(nullptr);
+#ifdef _WIN32
+	ss << std::put_time(gmtime_s(&lt, &t), "%Y-%m-%d.%X");
+#else
 	ss << std::put_time(gmtime_r(&t, &lt), "%Y-%m-%d.%X");
+#endif
 
 	return std::string(ss.str());
 }
