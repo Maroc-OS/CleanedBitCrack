@@ -29,11 +29,11 @@ std::string LogLevel::toString(int level) {
 
 std::string Logger::getDateTimeString() {
 	std::stringstream ss;
-	struct std::tm lt = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 	std::time_t t = std::time(nullptr);
 #ifdef _WIN32
-	ss << std::put_time(gmtime_s(&lt, &t), "%Y-%m-%d.%X");
+	ss << std::put_time(gmtime(&t), "%Y-%m-%d.%X");
 #else
+	struct std::tm lt = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 	ss << std::put_time(gmtime_r(&t, &lt), "%Y-%m-%d.%X");
 #endif
 
