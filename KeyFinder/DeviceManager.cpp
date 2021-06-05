@@ -9,7 +9,6 @@
 #endif
 
 std::vector<DeviceManager::DeviceInfo> DeviceManager::getDevices() {
-
 	std::vector<DeviceManager::DeviceInfo> devices;
 
 #ifdef BUILD_CUDA
