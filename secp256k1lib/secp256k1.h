@@ -17,11 +17,11 @@ public:
 		distr = new std::uniform_int_distribution<unsigned int>(0, 0xffffffff);
 	}
 
-	Random operator=(const Random *&old_rand) {
-		gen = new std::mt19937(rd());
-		distr = new std::uniform_int_distribution<unsigned int>(0, 0xffffffff);
+	Random& operator=(const Random &old_rand) {
+		this->gen = old_rand.gen;
+		this->distr = old_rand.distr;
 
-		return **&old_rand;
+		return *this;
 	}
 
 	unsigned int getChunk() {
