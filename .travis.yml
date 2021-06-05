@@ -1,7 +1,5 @@
 version: ~> 1.0
 language: cpp
-dist: focal
-osx_image: xcode12.5
 
 cache:
   - ccache
@@ -9,6 +7,7 @@ cache:
 jobs:
   include:
     - os: linux
+      dist: focal
       addons:
         apt:
           sources:
@@ -24,6 +23,7 @@ jobs:
         - COMPILER=clang++-10
 
     - os: osx
+      osx_image: xcode12.5
       addons:
         homebrew:
           packages:
