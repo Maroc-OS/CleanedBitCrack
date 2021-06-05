@@ -339,9 +339,9 @@ typedef struct {
 DeviceParameters getDefaultParameters(const DeviceManager::DeviceInfo &device);
 DeviceParameters getDefaultParameters(const DeviceManager::DeviceInfo &device) {
 	DeviceParameters p = {0,0,0};
-	p.threads = 256;
-	p.blocks = 32;
-	p.pointsPerThread = 32;
+	p.threads = 32;
+	p.blocks = device.computeUnits * p.threads;
+	p.pointsPerThread = pow(2, floor(log(device.memory / (4 * 1024 * p.blocks)) / log(2))); //best power of 2 based on device memory assuming 4kb per block.
 
 	return p;
 }
