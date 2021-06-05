@@ -14,17 +14,17 @@ bool LogLevel::isValid(int level) {
 
 std::string LogLevel::toString(int level) {
 	switch (level) {
-	case Info:
-		return "Info";
-	case Error:
-		return "Error";
-	case Debug:
-		return "Debug";
-	case Warning:
-		return "Warning";
+		case Info:
+			return "Info";
+		case Error:
+			return "Error";
+		case Debug:
+			return "Debug";
+		case Warning:
+			return "Warning";
+		default:
+			return "";
 	}
-
-	return "";
 }
 
 std::string Logger::getDateTimeString() {
