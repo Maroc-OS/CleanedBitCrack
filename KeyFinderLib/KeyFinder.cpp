@@ -65,7 +65,7 @@ void KeyFinder::setTargets(std::string targetsFile) {
 
 	if (!inFile.is_open()) {
 		Logger::log(LogLevel::Error, "Unable to open '" + targetsFile + "'");
-		throw KeySearchException();
+		throw KeySearchException("FILE", "Unable to open '" + targetsFile + "'");
 	}
 
 	_targets.clear();
