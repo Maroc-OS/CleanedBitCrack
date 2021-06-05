@@ -9,7 +9,7 @@
 
 namespace LogLevel {
 enum Level {
-	Info = 1, Error = 2, Debug = 4, Warning = 8
+	Info = 1, Error = 2, Debug = 4, Warning = 8, Notify = 16
 };
 
 bool isValid(int level);
@@ -21,7 +21,7 @@ class Logger {
 private:
 	static std::string _logFile;
 
-	static std::string formatLog(int logLevel, const std::string &msg);
+	static std::string formatLog(LogLevel::Level logLevel, const std::string &msg);
 
 	static std::string getDateTimeString();
 
@@ -29,7 +29,7 @@ public:
 	Logger() {
 	}
 
-	static void log(int logLevel, const std::string &msg);
+	static void log(LogLevel::Level Level, const std::string &msg);
 
 	static void setLogFile(const std::string &path);
 };

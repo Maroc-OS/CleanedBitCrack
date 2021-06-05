@@ -13,7 +13,7 @@ static const unsigned int _K5 = 0x6d703ef3;
 static const unsigned int _K6 = 0x5c4dd124;
 static const unsigned int _K7 = 0x50a28be6;
 
-static unsigned int rotl(unsigned int x, int n) {
+static unsigned int rotl(unsigned int x, unsigned int n) {
 	return (x << n) | (x >> (32 - n));
 }
 

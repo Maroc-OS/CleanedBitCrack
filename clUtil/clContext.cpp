@@ -84,7 +84,7 @@ cl::CLProgram::CLProgram(cl::CLContext &ctx, std::string &src,
 
 	if (CommonUtils::toLower(_ctx.getDeviceVendor()).find("intel")
 			!= std::string::npos) {
-            options += "-DDEVICE_VENDOR_INTEL -cl-std=CL2.0 -cl-mad-enable -cl-no-signed-zeros -cl-unsafe-math-optimizations";
+            options += " -DDEVICE_VENDOR_INTEL -cl-std=CL2.0 -cl-mad-enable -cl-no-signed-zeros -cl-unsafe-math-optimizations";
         }
 
 	_prog = clCreateProgramWithSource(ctx.getContext(), 1, &ptr, &len, &err);
@@ -117,7 +117,7 @@ cl::CLProgram::CLProgram(cl::CLContext &ctx, const char *src,
 
 	if (CommonUtils::toLower(_ctx.getDeviceVendor()).find("intel")
 			!= std::string::npos) {
-            options += "-DDEVICE_VENDOR_INTEL -cl-std=CL2.0 -cl-mad-enable -cl-no-signed-zeros -cl-unsafe-math-optimizations";
+            options += " -DDEVICE_VENDOR_INTEL -cl-std=CL2.0 -cl-mad-enable -cl-no-signed-zeros -cl-unsafe-math-optimizations";
         }
 
 	_prog = clCreateProgramWithSource(ctx.getContext(), 1, &src, &len, &err);

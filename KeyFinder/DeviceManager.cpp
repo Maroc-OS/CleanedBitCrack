@@ -9,7 +9,6 @@
 #endif
 
 std::vector<DeviceManager::DeviceInfo> DeviceManager::getDevices() {
-	int deviceId = 0;
 
 	std::vector<DeviceManager::DeviceInfo> devices;
 
@@ -18,17 +17,15 @@ std::vector<DeviceManager::DeviceInfo> DeviceManager::getDevices() {
     try {
         std::vector<cuda::CudaDeviceInfo> cudaDevices = cuda::getDevices();
 
-        for (size_t i = 0; i < cudaDevices.size(); i++) {
+        for (size_t deviceId = 0; deviceId < cudaDevices.size(); deviceId++) {
             DeviceManager::DeviceInfo device;
-            device.name = cudaDevices[i].name;
+            device.name = cudaDevices[deviceId].name;
             device.type = DeviceType::CUDA;
             device.id = deviceId;
-            device.physicalId = cudaDevices[i].id;
-            device.memory = cudaDevices[i].mem;
-            device.computeUnits = cudaDevices[i].mpCount;
+            device.physicalId = cudaDevices[deviceId].id;
+            device.memory = cudaDevices[deviceId].mem;
+            device.computeUnits = cudaDevices[deviceId].mpCount;
             devices.push_back(device);
-
-            deviceId++;
         }
     } catch (cuda::CudaException &ex) {
         throw DeviceManager::DeviceManagerException(ex.msg);
@@ -40,17 +37,15 @@ std::vector<DeviceManager::DeviceInfo> DeviceManager::getDevices() {
     try {
         std::vector<cl::CLDeviceInfo> clDevices = cl::getDevices();
 
-        for (size_t i = 0; i < clDevices.size(); i++) {
+        for (size_t deviceId = 0; deviceId < clDevices.size(); deviceId++) {
             DeviceManager::DeviceInfo device;
-            device.name = clDevices[i].name;
+            device.name = clDevices[deviceId].name;
             device.type = DeviceType::OpenCL;
             device.id = deviceId;
-            device.physicalId = (uint64_t)clDevices[i].id;
-            device.memory = clDevices[i].mem;
-            device.computeUnits = clDevices[i].cores;
+            device.physicalId = (uint64_t)clDevices[deviceId].id;
+            device.memory = clDevices[deviceId].mem;
+            device.computeUnits = clDevices[deviceId].cores;
             devices.push_back(device);
-
-            deviceId++;
         }
     } catch (cl::CLException &ex) {
         throw DeviceManager::DeviceManagerException(ex.msg);

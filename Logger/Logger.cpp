@@ -6,6 +6,8 @@ bool LogLevel::isValid(int level) {
 	case Info:
 	case Error:
 	case Debug:
+	case Warning:
+	case Notify:
 		return true;
 	default:
 		return false;
@@ -22,6 +24,8 @@ std::string LogLevel::toString(int level) {
 			return "Debug";
 		case Warning:
 			return "Warning";
+		case Notify:
+			return "Notify";
 		default:
 			return "";
 	}
@@ -40,15 +44,13 @@ std::string Logger::getDateTimeString() {
 	return std::string(ss.str());
 }
 
-std::string Logger::formatLog(int logLevel, const std::string &msg) {
+std::string Logger::formatLog(LogLevel::Level logLevel, const std::string &msg) {
 	std::string dateTime = getDateTimeString();
 
 	std::string prefix = "[" + dateTime + "] [" + LogLevel::toString(logLevel)
 			+ "] ";
 
-	size_t prefixLen = prefix.length();
-
-	std::string padding(prefixLen, ' ');
+	std::string padding(prefix.length(), ' ');
 
 	if (msg.find('\n', 0) != std::string::npos) {
 		size_t pos = 0;
@@ -67,9 +69,11 @@ std::string Logger::formatLog(int logLevel, const std::string &msg) {
 	return prefix;
 }
 
-void Logger::log(int logLevel, const std::string &msg) {
-	std::string str = formatLog(logLevel, msg);
-
+void Logger::log(LogLevel::Level Level, const std::string &msg) {
+	std::string str = formatLog(Level, msg);
+	if (Level == LogLevel::Level::Notify) {
+		fprintf(stderr, "\a");
+	}
 	fprintf(stderr, "%s\n", str.c_str());
 }
 
