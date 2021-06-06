@@ -340,12 +340,25 @@ typedef struct {
 
 DeviceParameters getDefaultParameters(const DeviceManager::DeviceInfo &device);
 DeviceParameters getDefaultParameters(const DeviceManager::DeviceInfo &device) {
-	DeviceParameters p = {0,0,0};
-	p.threads = 32;
-	p.blocks = device.computeUnits * p.threads;
-	p.pointsPerThread = pow(2, floor(log(device.memory / (4 * 1024 * p.blocks)) / log(2))); //best power of 2 based on device memory assuming 4kb per block.
+	DeviceParameters parameters = {0,0,0};
 
-	return p;
+#ifdef BUILD_CUDA
+    if (device.type == DeviceManager::DeviceType::CUDA) {
+        parameters.threads = 256;
+    }
+#endif
+
+#ifdef BUILD_OPENCL
+    if (device.type == DeviceManager::DeviceType::OpenCL) {
+        parameters.threads = device.maxWorkingGroupSize / 32;
+        //parameters.threads = 32;
+	}
+#endif
+
+	parameters.blocks = device.computeUnits * parameters.threads;
+	parameters.pointsPerThread = pow(2, floor(log(device.memory / (4 * 1024 * parameters.blocks)) / log(2))); //best power of 2 based on device memory assuming 4kb per block.
+
+	return parameters;
 }
 
 static KeySearchDevice *
@@ -410,12 +423,12 @@ PointCompressionType::Value  parseCompressionString(const std::string &s) {
 
 static std::string getCompressionString(int mode) {
 	switch (mode) {
-	case PointCompressionType::BOTH:
-		return "both";
-	case PointCompressionType::UNCOMPRESSED:
-		return "uncompressed";
-	case PointCompressionType::COMPRESSED:
-		return "compressed";
+		case PointCompressionType::BOTH:
+			return "both";
+		case PointCompressionType::UNCOMPRESSED:
+			return "uncompressed";
+		case PointCompressionType::COMPRESSED:
+			return "compressed";
 	}
 
 	throw std::string(

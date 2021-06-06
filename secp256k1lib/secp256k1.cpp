@@ -736,7 +736,7 @@ void secp256k1::generateKeyPairsBulk(unsigned int count,
 
 void secp256k1::generateKeyPairsBulk(const ecpoint &basePoint,
 		std::vector<uint256> &privKeys, std::vector<ecpoint> &pubKeysOut) {
-	unsigned int count = (unsigned int) privKeys.size();
+	size_t count = privKeys.size();
 
 	//privKeysOut.clear();
 	pubKeysOut.clear();
@@ -745,7 +745,7 @@ void secp256k1::generateKeyPairsBulk(const ecpoint &basePoint,
 	std::vector<ecpoint> table;
 
 	table.push_back(basePoint);
-	for (int i = 1; i < 256; i++) {
+	for (size_t i = 1; i < 256; i++) {
 		ecpoint p = doublePoint(table[i - 1]);
 
 		try {
@@ -823,6 +823,9 @@ void secp256k1::generateKeyPairsBulk(const ecpoint &basePoint,
 				}
 			}
 		}
+
+		table.clear();
+		table.shrink_to_fit();
 	}
 }
 
@@ -831,11 +834,11 @@ void secp256k1::generateKeyPairsBulk(const ecpoint &basePoint,
  */
 secp256k1::ecpoint secp256k1::parsePublicKey(const std::string &pubKeyString) {
 	if (pubKeyString.length() != 130) {
-		throw std::runtime_error("Invalid public key");
+		throw std::runtime_error("Invalid public key. Length of public key is not 130 characters.");
 	}
 
 	if (pubKeyString[0] != '0' || pubKeyString[1] != '4') {
-		throw std::runtime_error("Invalid public key");
+		throw std::runtime_error("Invalid public key. Expecting uncompressed format.");
 	}
 
 	std::string xString = pubKeyString.substr(2, 64);
@@ -846,11 +849,8 @@ secp256k1::ecpoint secp256k1::parsePublicKey(const std::string &pubKeyString) {
 
 	ecpoint p(x, y);
 
-	try {
-		pointExists(p);
-	}
-	catch (...) {
-		throw std::runtime_error("Invalid public key");
+	if(!pointExists(p)) {
+		throw std::string("Invalid public key. Point is not on secp256k1-curve.");
 	}
 
 	return p;

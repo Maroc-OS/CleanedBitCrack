@@ -17,7 +17,7 @@ extern "C" {
 #endif
 
 #elif defined(__linux__) || defined(__CYGWIN__)
-#include <CL/cl2.hpp>
+#include <CL/cl.hpp>
 #else
 #ifdef __cplusplus
 extern "C" {
@@ -40,6 +40,7 @@ typedef struct {
 	int cores;
 	uint64_t mem;
 	std::string name;
+	size_t maxWorkingGroupSize;
 } CLDeviceInfo;
 
 class CLException {

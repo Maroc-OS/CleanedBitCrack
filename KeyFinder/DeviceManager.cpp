@@ -44,6 +44,7 @@ std::vector<DeviceManager::DeviceInfo> DeviceManager::getDevices() {
             device.physicalId = (uint64_t)clDevices[deviceId].id;
             device.memory = clDevices[deviceId].mem;
             device.computeUnits = clDevices[deviceId].cores;
+            device.maxWorkingGroupSize = clDevices[deviceId].maxWorkingGroupSize;
             devices.push_back(device);
         }
     } catch (cl::CLException &ex) {

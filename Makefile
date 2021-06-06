@@ -33,8 +33,8 @@ else
 ifeq ($(CXX),clang++)
     CXXFLAGS+=-arch x86_64 -cl-mad-enable
 else
-    CXXFLAGS+=-march=x86-64
     CXX=g++
+    CXXFLAGS+=-march=x86-64
 endif
 endif
 
@@ -48,7 +48,7 @@ CUDA_INCLUDE=${CUDA_HOME}/include
 CUDA_MATH=$(CUR_DIR)/cudaMath
 
 # OpenCL variables
-OPENCL_VERSION=200
+OPENCL_VERSION=120
 BUILD_OPENCL=1
 
 ifeq ($(PLATFORM),Darwin)
@@ -68,7 +68,7 @@ endif
 
 ifeq ($(BUILD_OPENCL),1)
 	TARGETS:=${TARGETS} dir_embedcl dir_clutil dir_clKeySearchDevice dir_clunittest
-	CXXFLAGS:=${CXXFLAGS} -DCL_TARGET_OPENCL_VERSION=${OPENCL_VERSION} -DCL_HPP_TARGET_OPENCL_VERSION=${OPENCL_VERSION}
+	CXXFLAGS:=${CXXFLAGS}  -DCL_TARGET_OPENCL_VERSION=${OPENCL_VERSION} -DCL_HPP_MINIMUM_OPENCL_VERSION=${OPENCL_VERSION} -DCL_HPP_TARGET_OPENCL_VERSION=${OPENCL_VERSION}
 endif
 
 ifeq ($(BUILD_DEBUG),1)

@@ -49,8 +49,6 @@ CLKeySearchDevice::CLKeySearchDevice(uint64_t device, int threads,
 
 		// Load the kernels
 		_initKeysKernel = new cl::CLKernel(*_clProgram, "multiplyStepKernel");
-		_initKeysKernel->getWorkGroupSize();
-
 		_stepKernel = new cl::CLKernel(*_clProgram, "keyFinderKernel");
 		_stepKernelWithDouble = new cl::CLKernel(*_clProgram,
 				"keyFinderKernelWithDouble");
@@ -546,11 +544,16 @@ void CLKeySearchDevice::initializeBasePoints() {
 		}
 	}
 
+    table.clear();
+    table.shrink_to_fit();
+
 	_clContext->copyHostToDevice(tmpX, _xTable,
 			count * 8 * sizeof(unsigned int));
+    delete[] tmpX;
 
 	_clContext->copyHostToDevice(tmpY, _yTable,
 			count * 8 * sizeof(unsigned int));
+    delete[] tmpY;
 }
 
 int CLKeySearchDevice::getIndex(int block, int thread, int idx) {

@@ -48,12 +48,21 @@ std::vector<cl::CLDeviceInfo> cl::getDevices() {
 
 			info.name = std::string(buf, size);
 
+			// Get device cores
 			int cores = 0;
 			clCall(
 					clGetDeviceInfo(devices[j], CL_DEVICE_MAX_COMPUTE_UNITS,
 							sizeof(cores), &cores, nullptr));
 
 			info.cores = cores;
+
+			// Get max working group size
+			size_t maxWorkingGroupSize = 0;
+			clCall(
+					clGetDeviceInfo(devices[j], CL_DEVICE_MAX_WORK_GROUP_SIZE,
+							sizeof(maxWorkingGroupSize), &maxWorkingGroupSize, NULL));
+
+			info.maxWorkingGroupSize = maxWorkingGroupSize;
 
 			cl_ulong mem;
 			clCall(
