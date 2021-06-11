@@ -87,7 +87,6 @@ std::string formatThousands(std::string s) {
 	return result;
 }
 
-
 uint32_t parseUInt32(const std::string &s) {
 	  uint64_t num = parseUInt64(s);
 	  if ((num >> 32ULL) == 0) {

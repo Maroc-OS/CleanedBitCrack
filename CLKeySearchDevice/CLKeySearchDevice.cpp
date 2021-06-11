@@ -18,8 +18,9 @@ typedef struct {
 
 static void undoRMD160FinalRound(const unsigned int hIn[5],
 		unsigned int hOut[5]) {
-	unsigned int iv[5] = { 0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476,
-			0xc3d2e1f0 };
+	unsigned int iv[5] = {
+		0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476,0xc3d2e1f0
+	};
 
 	for (int i = 0; i < 5; i++) {
 		hOut[i] = be32toh(hIn[i]) - iv[(i + 1) % 5];
@@ -48,10 +49,10 @@ CLKeySearchDevice::CLKeySearchDevice(uint64_t device, int threads,
 		_clProgram = new cl::CLProgram(*_clContext, _bitcrack_cl);
 
 		// Load the kernels
-		_initKeysKernel = new cl::CLKernel(*_clProgram, "multiplyStepKernel");
-		_stepKernel = new cl::CLKernel(*_clProgram, "keyFinderKernel");
+		_initKeysKernel = new cl::CLKernel(*_clProgram, "_initKeysKernel");
+		_stepKernel = new cl::CLKernel(*_clProgram, "_stepKernel");
 		_stepKernelWithDouble = new cl::CLKernel(*_clProgram,
-				"keyFinderKernelWithDouble");
+				"_stepKernelWithDouble");
 
 		_globalMemSize = _clContext->getGlobalMemorySize();
 
@@ -199,7 +200,8 @@ void CLKeySearchDevice::init(const secp256k1::uint256 &start,
 		const secp256k1::uint256 &end, int compression,
 		const secp256k1::uint256 &stride, bool randomMode) {
 	if (start.cmp(secp256k1::N) >= 0) {
-		throw KeySearchException("Starting key is out of range");
+				throw KeySearchException(
+						"Starting key is out of range");
 	}
 
 	_start = start;
@@ -241,17 +243,33 @@ void CLKeySearchDevice::doStep() {
 		uint64_t numKeys = (uint64_t) (_blocks * _threads * _pointsPerThread);
 
 		if (!_randomMode && _iterations < (uint64_t) 2 && _start.cmp(numKeys) <= 0) {
-			_stepKernelWithDouble->call(_blocks, _threads, _pointsPerThread,
-					_compression, _chain, _x, _y, _xInc, _yInc,
-					_deviceTargetList.ptr, _deviceTargetList.size,
-					_deviceTargetList.mask, _deviceResults,
-					_deviceResultsCount);
-
+			_stepKernelWithDouble->set_args(
+					_pointsPerThread,
+					_chain,
+					_x,
+					_y,
+					_xInc,
+					_yInc,
+					_deviceTargetList.ptr,
+					_deviceTargetList.mask,
+					_deviceResults,
+					_deviceResultsCount
+			);
+			_stepKernelWithDouble->call(_blocks, _threads);
 		} else {
-			_stepKernel->call(_blocks, _threads, _pointsPerThread, _compression,
-					_chain, _x, _y, _xInc, _yInc, _deviceTargetList.ptr,
-					_deviceTargetList.size, _deviceTargetList.mask,
-					_deviceResults, _deviceResultsCount);
+			_stepKernel->set_args(
+					_pointsPerThread,
+					_chain,
+					_x,
+					_y,
+					_xInc,
+					_yInc,
+					_deviceTargetList.ptr,
+					_deviceTargetList.mask,
+					_deviceResults,
+					_deviceResultsCount
+			);
+			_stepKernel->call(_blocks, _threads);
 		}
 		fflush(stdout);
 
@@ -643,8 +661,9 @@ void CLKeySearchDevice::generateStartingPoints() {
 	// Show progress in 10% increments
 	double pct = 10.0;
 	for (int i = 0; i < 256; i++) {
-		_initKeysKernel->call(_blocks, _threads, _pointsPerThread, i,
-				_privateKeys, _chain, _xTable, _yTable, _x, _y);
+		_initKeysKernel->set_args(_pointsPerThread, i, _privateKeys,
+				_chain, _xTable, _yTable, _x, _y);
+		_initKeysKernel->call(_blocks, _threads);
 
 		if (((double) (i + 1) / 256.0) * 100.0 >= pct) {
 			Logger::log(LogLevel::Info, CommonUtils::format("%.1f%%", pct));

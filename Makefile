@@ -14,11 +14,11 @@ LIBS+=-L$(LIBDIR)
 ifeq ($(BUILD_DEBUG),1)
 	CXXFLAGS=-DDEBUG -g -ggdb -O0
 else
-	CXXFLAGS=-DNDEBUG -O3 -ffast-math
+	CXXFLAGS=-DNDEBUG -Os -ffast-math
 endif
 
 LDFLAGS=
-CXXFLAGS+=-std=c++17 -D_REETRANT -W -Wall -Wextra -pedantic -pthread
+CXXFLAGS+=-std=c++17 -m64 -mssse3 -D_REETRANT -W -Wall -Wextra -pedantic -pthread
 
 # Coverage variables
 ifeq ($(BUILD_COVERAGE),1)

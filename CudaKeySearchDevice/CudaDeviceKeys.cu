@@ -22,7 +22,7 @@ __device__ unsigned int* ec::getYPtr()
     return _yPtr[0];
 }
 
-__global__ void multiplyStepKernel(const unsigned int* privateKeys, int pointsPerThread, int step, unsigned int* chain, const unsigned int* gxPtr, const unsigned int* gyPtr);
+__global__ void _initKeysKernel(const unsigned int* privateKeys, int pointsPerThread, int step, unsigned int* chain, const unsigned int* gxPtr, const unsigned int* gyPtr);
 
 
 int CudaDeviceKeys::getIndex(int block, int thread, int idx)
@@ -274,7 +274,7 @@ void CudaDeviceKeys::clearPrivateKeys()
 
 cudaError_t CudaDeviceKeys::doStep()
 {
-    multiplyStepKernel<<<_blocks, _threads>>>(_devPrivate, _pointsPerThread, _step, _devChain, _devBasePointX, _devBasePointY);
+    _initKeysKernel<<<_blocks, _threads>>>(_devPrivate, _pointsPerThread, _step, _devChain, _devBasePointX, _devBasePointY);
 
     // Wait for kernel to complete
     cudaError_t err = cudaDeviceSynchronize();
@@ -283,7 +283,7 @@ cudaError_t CudaDeviceKeys::doStep()
     return err;
 }
 
-__global__ void multiplyStepKernel(const unsigned int* privateKeys, int pointsPerThread, int step, unsigned int* chain, const unsigned int* gxPtr, const unsigned int* gyPtr)
+__global__ void _initKeysKernel(const unsigned int* privateKeys, int pointsPerThread, int step, unsigned int* chain, const unsigned int* gxPtr, const unsigned int* gyPtr)
 {
     unsigned int* xPtr = ec::getXPtr();
 

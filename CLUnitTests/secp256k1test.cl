@@ -16,9 +16,9 @@ bool addTest() {
                          0x7288814a, 0x62ec9d8a, 0x899ca54a, 0x7d67312a};
     unsigned int k[8];
 
-    addModP(x, y, k);
+    addModP256k(x, y, k);
 
-    return equal(z, k);
+    return equal256k(z, k);
 }
 
 bool multiplyTest() {
@@ -32,7 +32,7 @@ bool multiplyTest() {
 
     mulModP(x, y, k);
 
-    return equal(z, k);
+    return equal256k(z, k);
 }
 
 bool inverseTest() {
@@ -46,56 +46,34 @@ bool inverseTest() {
         k[i] = x[i];
     }
 
-    invModP(k);
+    invModP256k(k);
 
-    return equal(z, k);
+    return equal256k(z, k);
 }
 
-void addError(__global CLErrorInfo
+void addError(__global CLErrorInfo *errInfo, __global unsigned int *numErrors,
+              int section) {
+    unsigned int idx = atomic_add(numErrors, 1);
 
-*errInfo,
-__global unsigned int *numErrors,
-int section
-) {
-unsigned int idx = atomic_add(numErrors, 1);
+    CLErrorInfo info;
+    info.
+    section = section;
 
-CLErrorInfo info;
-info.
-section = section;
-
-errInfo[idx] =
-info;
+    errInfo[idx] =
+    info;
 }
 
-__kernel void secp256k1_test(__global CLErrorInfo
+__kernel void secp256k1_test(__global CLErrorInfo *errInfo,
+                                __global unsigned int *numErrors) {
+    if (!addTest()) {
+        addError(errInfo, numErrors, SECTION_ADD);
+    }
 
-*errInfo,
-__global unsigned int *numErrors
-) {
-if (!
+    if (!multiplyTest()) {
+        addError(errInfo, numErrors, SECTION_MULTIPLY);
+    }
 
-addTest()
-
-) {
-addError(errInfo, numErrors,
-SECTION_ADD);
-}
-
-if (!
-
-multiplyTest()
-
-) {
-addError(errInfo, numErrors,
-SECTION_MULTIPLY);
-}
-
-if (!
-
-inverseTest()
-
-) {
-addError(errInfo, numErrors,
-SECTION_INVERSE);
-}
+    if (!inverseTest()) {
+        addError(errInfo, numErrors, SECTION_INVERSE);
+    }
 }

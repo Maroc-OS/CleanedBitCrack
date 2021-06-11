@@ -17,7 +17,7 @@ extern "C" {
 #endif
 
 #elif defined(__linux__) || defined(__CYGWIN__)
-#include <CL/cl.hpp>
+#include <CL/cl2.hpp>
 #else
 #ifdef __cplusplus
 extern "C" {
@@ -35,7 +35,7 @@ extern "C" {
 namespace cl {
 std::string getErrorString(cl_int err);
 
-typedef struct {
+typedef struct CLDeviceInfo {
 	cl_device_id id;
 	int cores;
 	uint64_t mem;

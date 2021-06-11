@@ -332,7 +332,7 @@ void usage() {
 /**
  Finds default parameters depending on the device
  */
-typedef struct {
+typedef struct DeviceParameters {
 	unsigned int threads;
 	unsigned int blocks;
 	unsigned int pointsPerThread;
@@ -350,13 +350,17 @@ DeviceParameters getDefaultParameters(const DeviceManager::DeviceInfo &device) {
 
 #ifdef BUILD_OPENCL
     if (device.type == DeviceManager::DeviceType::OpenCL) {
-        parameters.threads = device.maxWorkingGroupSize / 32;
-        //parameters.threads = 32;
+		size_t maxWorkingGroupUnrecomendedSize = 256;
+		if (sizeof(device.maxWorkingGroupSize) == maxWorkingGroupUnrecomendedSize) {
+			parameters.threads = device.maxWorkingGroupSize / 2;
+		} else {
+			parameters.threads = device.maxWorkingGroupSize;
+		}
 	}
 #endif
 
 	parameters.blocks = device.computeUnits * parameters.threads;
-	parameters.pointsPerThread = pow(2, floor(log(device.memory / (4 * 1024 * parameters.blocks)) / log(2))); //best power of 2 based on device memory assuming 4kb per block.
+	parameters.pointsPerThread = pow(2, floor(log(device.memory / (32 * 1024 * parameters.blocks)) / log(2))); //best power of 2 based on device memory assuming 4kb per block.
 
 	return parameters;
 }

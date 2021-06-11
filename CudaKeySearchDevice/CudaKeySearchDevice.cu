@@ -244,12 +244,12 @@ __device__ void doIterationWithDouble(int pointsPerThread, int compression)
 /**
 * Performs a single iteration
 */
-__global__ void keyFinderKernel(int points, int compression)
+__global__ void _stepKernel(int points, int compression)
 {
     doIteration(points, compression);
 }
 
-__global__ void keyFinderKernelWithDouble(int points, int compression)
+__global__ void _stepKernelWithDouble(int points, int compression)
 {
     doIterationWithDouble(points, compression);
 }

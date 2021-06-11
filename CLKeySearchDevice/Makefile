@@ -15,7 +15,7 @@ TARGETS = $(TARGETLIB)
 bitcrack_cl.cpp:
 	rm -rf bitcrack.cl
 	rm -rf bitcrack_cl.cpp
-	cat ../clMath/sha256.cl ../clMath/secp256k1.cl ../clMath/ripemd160.cl keysearch.cl > bitcrack.cl
+	cat ../clMath/sha256.cl ../clMath/secp256k1.cl ../clMath/ripemd160.cl bloomfilter.cl bitcoin.cl keysearch.cl > bitcrack.cl
 	$(BINDIR)/embedcl bitcrack.cl bitcrack_cl.cpp _bitcrack_cl
 
 all:	$(LIBSRC)

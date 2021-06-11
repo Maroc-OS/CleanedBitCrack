@@ -2,14 +2,7 @@
 #define UNCOMPRESSED 1
 #define BOTH 2
 
-unsigned int be32toh(unsigned int x) {
-    return (x << 24u) | ((x << 8u) & 0x00ff0000) | ((x >> 8u) & 0x0000ff00) |
-           (x >> 24u);
-}
-
 typedef struct {
-  int thread;
-  int block;
   int idx;
   bool compressed;
   unsigned int x[8];
@@ -17,346 +10,199 @@ typedef struct {
   unsigned int digest[5];
 } CLDeviceResult;
 
-bool isInList(unsigned int hash[5], __global __read_only unsigned int *targetList,
-              size_t numTargets) {
-  bool found = false;
+void setResultFound(const int idx, const bool compressed, const uint256_t x,
+                    const uint256_t y, const unsigned int digest[5],
+                    __global CLDeviceResult *results,
+                    __global unsigned int *numResults) {
+  CLDeviceResult r;
 
-  for (size_t i = 0; i < numTargets; i++) {
-    int equal = 0;
+  r.idx = idx;
+  r.compressed = compressed;
 
-    for (int j = 0; j < 5; j++) {
-      if (hash[j] == targetList[5 * i + j]) {
-        equal++;
-      }
-    }
+  r.x[0] = x.v[0];
+  r.x[1] = x.v[1];
+  r.x[2] = x.v[2];
+  r.x[3] = x.v[3];
+  r.x[4] = x.v[4];
+  r.x[5] = x.v[5];
+  r.x[6] = x.v[6];
+  r.x[7] = x.v[7];
 
-    if (equal == 5) {
-      found = true;
-    }
-  }
+  r.y[0] = y.v[0];
+  r.y[1] = y.v[1];
+  r.y[2] = y.v[2];
+  r.y[3] = y.v[3];
+  r.y[4] = y.v[4];
+  r.y[5] = y.v[5];
+  r.y[6] = y.v[6];
+  r.y[7] = y.v[7];
 
-  return found;
+  ripemd160FinalRound(digest, r.digest);
+
+  results[atomic_add(numResults, 1)] = r;
 }
 
-bool isInBloomFilter(unsigned int hash[5], __global __read_only unsigned int *targetList,
-                     ulong mask) {
-  bool foundMatch = true;
+__kernel void _initKeysKernel(const unsigned int totalPoints,
+                              const unsigned int step,
+                              __global uint256_t *privateKeys,
+                              __global uint256_t *chain,
+                              __global uint256_t *gxPtr,
+                              __global uint256_t *gyPtr,
+                              __global uint256_t *xPtr,
+                              __global uint256_t *yPtr) {
+  uint256_t gx;
+  uint256_t gy;
+  int i = get_local_size(0) * get_group_id(0) + get_local_id(0);
+  int dim = get_global_size(0);
 
-  unsigned int h5 = 0;
+  gx = gxPtr[step];
+  gy = gyPtr[step];
 
-  for (int i = 0; i < 5; i++) {
-    h5 += hash[i];
-  }
-
-  uint64_t idx[5];
-
-  idx[0] = ((hash[0] << 6u) | (h5 & 0x3f)) & mask;
-  idx[1] = ((hash[1] << 6u) | ((h5 >> 6u) & 0x3f)) & mask;
-  idx[2] = ((hash[2] << 6u) | ((h5 >> 12u) & 0x3f)) & mask;
-  idx[3] = ((hash[3] << 6u) | ((h5 >> 18u) & 0x3f)) & mask;
-  idx[4] = ((hash[4] << 6u) | ((h5 >> 24u) & 0x3f)) & mask;
-
-  for (int i = 0; i < 5; i++) {
-    unsigned int j = idx[i];
-    unsigned int f = targetList[j / 32];
-
-    if ((f & (0x01 << (j % 32u))) == 0) {
-      foundMatch = false;
-    }
-  }
-
-  return foundMatch;
-}
-
-bool checkHash(unsigned int hash[5], __global __read_only unsigned int *targetList,
-               size_t numTargets, ulong mask) {
-  if (numTargets > 16) {
-    return isInBloomFilter(hash, targetList, mask);
-  } else {
-    return isInList(hash, targetList, numTargets);
-  }
-}
-
-void doRMD160FinalRound(const unsigned int hIn[5], unsigned int hOut[5]) {
-  const unsigned int iv[5] = {0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476,
-                              0xc3d2e1f0};
-
-  for (int i = 0; i < 5; i++) {
-    hOut[i] = be32toh(hIn[i] + iv[(i + 1) % 5]);
-  }
-}
-
-__kernel void multiplyStepKernel(int pointsPerThread, int step,
-                                 __global __read_only unsigned int *privateKeys,
-                                 __global unsigned int *chain,
-                                 __global unsigned int *gxPtr,
-                                 __global unsigned int *gyPtr,
-                                 __global unsigned int *xPtr,
-                                 __global unsigned int *yPtr) {
-  unsigned int gx[8];
-  unsigned int gy[8];
-
-  for (int i = 0; i < 8; i++) {
-    gx[i] = gxPtr[step * 8 + i];
-    gy[i] = gyPtr[step * 8 + i];
-  }
-
-  // Multiply together all (_Gx - x) and then invert
-  unsigned int inverse[8] = {0, 0, 0, 0, 0, 0, 0, 1};
+  uint256_t inverse = {{0, 0, 0, 0, 0, 0, 0, 1}};
 
   int batchIdx = 0;
-  for (int i = 0; i < pointsPerThread; i++) {
-    unsigned int p[8];
-    readInt(privateKeys, i, p);
 
-    unsigned int bit = p[7 - step / 32] & (1 << (step % 32));
-
-    unsigned int x[8];
-    readInt(xPtr, i, x);
-
-    if (bit != 0) {
-      if (!isInfinity(x)) {
-        beginBatchAddWithDouble(gx, gy, xPtr, chain, i, batchIdx, inverse);
+  for (; i < totalPoints; i += dim) {
+    if (((readWord256k(privateKeys, i, 7 - step / 32)) & (1 << (step % 32))) !=
+        0) {
+      if (!isInfinity256k(xPtr[i].v)) {
+        beginBatchAddWithDouble256k(gx, gy, xPtr, chain, i, batchIdx, &inverse);
         batchIdx++;
       }
     }
   }
 
-  doBatchInverse(inverse);
+  doBatchInverse256k(inverse.v);
 
-  for (int i = pointsPerThread - 1; i >= 0; i--) {
-    unsigned int newX[8];
-    unsigned int newY[8];
-
-    unsigned int p[8];
-    readInt(privateKeys, i, p);
-    unsigned int bit = p[7 - step / 32] & (1 << (step % 32));
-
-    unsigned int x[8];
-    readInt(xPtr, i, x);
-
-    bool infinity = isInfinity(x);
-
-    if (bit != 0) {
-      if (!infinity) {
+  uint256_t newX;
+  uint256_t newY;
+  i -= dim;
+  for (; i >= 0; i -= dim) {
+    if (((readWord256k(privateKeys, i, 7 - step / 32)) & (1 << (step % 32))) !=
+        0) {
+      if (!isInfinity256k(xPtr[i].v)) {
         batchIdx--;
-        completeBatchAddWithDouble(gx, gy, xPtr, yPtr, i, batchIdx, chain,
-                                   inverse, newX, newY);
+        completeBatchAddWithDouble256k(gx, gy, xPtr, yPtr, i, batchIdx, chain,
+                                       &inverse, &newX, &newY);
       } else {
-        copyBigInt(gx, newX);
-        copyBigInt(gy, newY);
+        newX = gx;
+        newY = gy;
       }
 
-      writeInt(xPtr, i, newX);
-      writeInt(yPtr, i, newY);
+      xPtr[i] = newX;
+      yPtr[i] = newY;
     }
   }
 }
 
-void hashPublicKey(const unsigned int *x, const unsigned int *y,
-                   unsigned int *digestOut) {
-  unsigned int hash[8];
+__kernel void _stepKernel(const unsigned int totalPoints,
+                          __global uint256_t *chain,
+                          __global uint256_t *xPtr,
+                          __global uint256_t *yPtr,
+                          __global uint256_t *incXPtr,
+                          __global uint256_t *incYPtr,
+                          __global unsigned int *targetList,
+                          const ulong mask,
+                          __global CLDeviceResult *results,
+                          __global unsigned int *numResults) {
+  int i = get_local_size(0) * get_group_id(0) + get_local_id(0);
+  int dim = get_global_size(0);
 
-  sha256PublicKey(x, y, hash);
-
-  // Swap to little-endian
-  for (int i = 0; i < 8; i++) {
-    hash[i] = be32toh(hash[i]);
-  }
-
-  ripemd160sha256NoFinal(hash, digestOut);
-}
-
-void hashPublicKeyCompressed(const unsigned int *x, unsigned int yParity,
-                             unsigned int *digestOut) {
-  unsigned int hash[8];
-
-  sha256PublicKeyCompressed(x, yParity, hash);
-
-  // Swap to little-endian
-  for (int i = 0; i < 8; i++) {
-    hash[i] = be32toh(hash[i]);
-  }
-
-  ripemd160sha256NoFinal(hash, digestOut);
-}
-
-void atomicListAdd(__global CLDeviceResult *results,
-                   __global unsigned int *numResults, CLDeviceResult *r) {
-  unsigned int count = atomic_add(numResults, 1);
-
-  results[count] = *r;
-}
-
-void setResultFound(int idx, bool compressed, unsigned int x[8],
-                    unsigned int y[8], unsigned int digest[5],
-                    __global CLDeviceResult *results,
-                    __global unsigned int *numResults) {
-  CLDeviceResult r;
-
-  r.block = get_group_id(0);
-  r.thread = get_local_id(0);
-  r.idx = idx;
-  r.compressed = compressed;
-
-  for (int i = 0; i < 8; i++) {
-    r.x[i] = x[i];
-    r.y[i] = y[i];
-  }
-
-  doRMD160FinalRound(digest, r.digest);
-
-  atomicListAdd(results, numResults, &r);
-}
-
-void doIteration(size_t pointsPerThread, int compression,
-                 __global unsigned int *chain, __global unsigned int *xPtr,
-                 __global unsigned int *yPtr, __global unsigned int *incXPtr,
-                 __global unsigned int *incYPtr,
-                 __global unsigned int *targetList, size_t numTargets,
-                 ulong mask,
-                 __global CLDeviceResult *results,
-                 __global unsigned int *numResults) {
-  unsigned int incX[8];
-  unsigned int incY[8];
-
-  for (int i = 0; i < 8; i++) {
-    incX[i] = incXPtr[i];
-    incY[i] = incYPtr[i];
-  }
+  uint256_t incX = *incXPtr;
+  uint256_t incY = *incYPtr;
 
   // Multiply together all (_Gx - x) and then invert
-  unsigned int inverse[8] = {0, 0, 0, 0, 0, 0, 0, 1};
-  for (int i = 0; i < pointsPerThread; i++) {
-    unsigned int x[8];
+  uint256_t inverse = {{0, 0, 0, 0, 0, 0, 0, 1}};
+  int batchIdx = 0;
 
-    unsigned int digest[5];
+  unsigned int digest[5];
 
-    readInt(xPtr, i, x);
+  for (; i < totalPoints; i += dim) {
 
-    if ((compression == UNCOMPRESSED) || (compression == BOTH)) {
-      unsigned int y[8];
-      readInt(yPtr, i, y);
-
-      hashPublicKey(x, y, digest);
-
-      if (checkHash(digest, targetList, numTargets, mask)) {
-        setResultFound(i, false, x, y, digest, results, numResults);
-      }
+#if defined(COMPRESSION_UNCOMPRESSED) || defined(COMPRESSION_BOTH)
+    hashPublicKey(xPtr[i], yPtr[i], digest);
+    if (isInBloomFilter(digest, targetList, &mask)) {
+      setResultFound(i, false, xPtr[i], yPtr[i], digest, results, numResults);
     }
-
-    if ((compression == COMPRESSED) || (compression == BOTH)) {
-      hashPublicKeyCompressed(x, readLSW(yPtr, i), digest);
-
-      if (checkHash(digest, targetList, numTargets, mask)) {
-        unsigned int y[8];
-        readInt(yPtr, i, y);
-        setResultFound(i, true, x, y, digest, results, numResults);
-      }
+#endif
+#if defined(COMPRESSION_COMPRESSED) || defined(COMPRESSION_BOTH)
+    hashPublicKeyCompressed(xPtr[i], yPtr[i].v[7], digest);
+    if (isInBloomFilter(digest, targetList, &mask)) {
+      setResultFound(i, true, xPtr[i], yPtr[i], digest, results, numResults);
     }
-
-    beginBatchAdd(incX, x, chain, i, i, inverse);
+#endif
+    beginBatchAdd256k(incX, xPtr[i], chain, i, batchIdx, &inverse);
+    batchIdx++;
   }
 
-  doBatchInverse(inverse);
+  doBatchInverse256k(inverse.v);
 
-  for (int i = pointsPerThread - 1; i >= 0; i--) {
-    unsigned int newX[8];
-    unsigned int newY[8];
+  i -= dim;
+  uint256_t newX;
+  uint256_t newY;
+  for (; i >= 0; i -= dim) {
 
-    completeBatchAdd(incX, incY, xPtr, yPtr, i, i, chain, inverse, newX, newY);
+    batchIdx--;
+    completeBatchAdd256k(incX, incY, xPtr, yPtr, i, batchIdx, chain, &inverse,
+                         &newX, &newY);
 
-    writeInt(xPtr, i, newX);
-    writeInt(yPtr, i, newY);
+    xPtr[i] = newX;
+    yPtr[i] = newY;
   }
 }
 
-void doIterationWithDouble(
-    size_t pointsPerThread, int compression, __global unsigned int *chain,
-    __global unsigned int *xPtr, __global unsigned int *yPtr,
-    __global unsigned int *incXPtr, __global unsigned int *incYPtr,
-    __global unsigned int *targetList, size_t numTargets, ulong mask,
+__kernel void _stepKernelWithDouble(
+    const unsigned int totalPoints, __global uint256_t *chain,
+    __global uint256_t *xPtr,
+    __global uint256_t *yPtr,
+    __global uint256_t *incXPtr,
+    __global uint256_t *incYPtr,
+    __global unsigned int *targetList, const ulong mask,
     __global CLDeviceResult *results,
     __global unsigned int *numResults) {
-  unsigned int incX[8];
-  unsigned int incY[8];
+  int i = get_local_size(0) * get_group_id(0) + get_local_id(0);
+  int dim = get_global_size(0);
 
-  for (int i = 0; i < 8; i++) {
-    incX[i] = incXPtr[i];
-    incY[i] = incYPtr[i];
-  }
+  uint256_t incX = *incXPtr;
+  uint256_t incY = *incYPtr;
 
   // Multiply together all (_Gx - x) and then invert
-  unsigned int inverse[8] = {0, 0, 0, 0, 0, 0, 0, 1};
-  for (int i = 0; i < pointsPerThread; i++) {
-    unsigned int x[8];
+  uint256_t inverse = {{0, 0, 0, 0, 0, 0, 0, 1}};
 
-    unsigned int digest[5];
+  int batchIdx = 0;
+  unsigned int digest[5];
 
-    readInt(xPtr, i, x);
+  for (; i < totalPoints; i += dim) {
 
-    // uncompressed
-    if ((compression == UNCOMPRESSED) || (compression == BOTH)) {
-      unsigned int y[8];
-      readInt(yPtr, i, y);
-      hashPublicKey(x, y, digest);
-
-      if (checkHash(digest, targetList, numTargets, mask)) {
-        setResultFound(i, false, x, y, digest, results, numResults);
-      }
+#if defined(COMPRESSION_UNCOMPRESSED) || defined(COMPRESSION_BOTH)
+    hashPublicKey(xPtr[i], yPtr[i], digest);
+    if (isInBloomFilter(digest, targetList, &mask)) {
+      setResultFound(i, false, xPtr[i], yPtr[i], digest, results, numResults);
     }
-
-    // compressed
-    if ((compression == COMPRESSED) || (compression == BOTH)) {
-      hashPublicKeyCompressed(x, readLSW(yPtr, i), digest);
-
-      if (checkHash(digest, targetList, numTargets, mask)) {
-        unsigned int y[8];
-        readInt(yPtr, i, y);
-
-        setResultFound(i, true, x, y, digest, results, numResults);
-      }
+#endif
+#if defined(COMPRESSION_COMPRESSED) || defined(COMPRESSION_BOTH)
+    hashPublicKeyCompressed(xPtr[i], yPtr[i].v[7], digest);
+    if (isInBloomFilter(digest, targetList, &mask)) {
+      setResultFound(i, true, xPtr[i], yPtr[i], digest, results, numResults);
     }
+#endif
 
-    beginBatchAddWithDouble(incX, incY, xPtr, chain, i, i, inverse);
+    beginBatchAddWithDouble256k(incX, incY, xPtr, chain, i, batchIdx, &inverse);
+    batchIdx++;
   }
 
-  doBatchInverse(inverse);
+  doBatchInverse256k(inverse.v);
 
-  for (int i = pointsPerThread - 1; i >= 0; i--) {
-    unsigned int newX[8];
-    unsigned int newY[8];
+  i -= dim;
 
-    completeBatchAddWithDouble(incX, incY, xPtr, yPtr, i, i, chain, inverse,
-                               newX, newY);
+  uint256_t newX;
+  uint256_t newY;
+  for (; i >= 0; i -= dim) {
+    batchIdx--;
+    completeBatchAddWithDouble256k(incX, incY, xPtr, yPtr, i, batchIdx, chain,
+                                   &inverse, &newX, &newY);
 
-    writeInt(xPtr, i, newX);
-    writeInt(yPtr, i, newY);
+    xPtr[i] = newX;
+    yPtr[i] = newY;
   }
-}
-
-/**
- * Performs a single iteration
- */
-__kernel void keyFinderKernel(
-    unsigned int pointsPerThread, int compression, __global unsigned int *chain,
-    __global unsigned int *xPtr, __global unsigned int *yPtr,
-    __global unsigned int *incXPtr, __global unsigned int *incYPtr,
-    __global unsigned int *targetList, ulong numTargets, ulong mask,
-    __global CLDeviceResult *results,
-    __global unsigned int *numResults) {
-  doIteration(pointsPerThread, compression, chain, xPtr, yPtr, incXPtr, incYPtr,
-              targetList, numTargets, mask, results, numResults);
-}
-
-__kernel void keyFinderKernelWithDouble(
-    unsigned int pointsPerThread, int compression, __global unsigned int *chain,
-    __global unsigned int *xPtr, __global unsigned int *yPtr,
-    __global unsigned int *incXPtr, __global unsigned int *incYPtr,
-    __global unsigned int *targetList, ulong numTargets, ulong mask,
-    __global CLDeviceResult *results,
-    __global unsigned int *numResults) {
-  doIterationWithDouble(pointsPerThread, compression, chain, xPtr, yPtr,
-                        incXPtr, incYPtr, targetList, numTargets, mask, results,
-                        numResults);
 }

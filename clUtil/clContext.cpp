@@ -65,7 +65,9 @@ void cl::CLContext::copyDeviceToHost(cl_mem devicePtr, void *hostPtr,
 
 void cl::CLContext::memset(cl_mem devicePtr, unsigned char value, size_t size) {
 #if CL_TARGET_OPENCL_VERSION >= 120
-    clCall(clEnqueueFillBuffer(_queue, devicePtr, &value, sizeof(unsigned char), 0, size, 0, nullptr, nullptr));
+	clCall(
+			clEnqueueFillBuffer(_queue, devicePtr, &value, sizeof(unsigned char),
+					0, size, 0, nullptr, nullptr));
 #else
 	unsigned char *ptr = new unsigned char[size];
 	std::memset(ptr, value, size);
@@ -82,10 +84,12 @@ cl::CLProgram::CLProgram(cl::CLContext &ctx, std::string &src,
 	const size_t len = srcFile.length();
 	cl_int err = CL_SUCCESS;
 
+	options += " -cl-kernel-arg-info -cl-std=CL1.2 -cl-mad-enable -cl-no-signed-zeros -cl-unsafe-math-optimizations";
+
 	if (CommonUtils::toLower(_ctx.getDeviceVendor()).find("intel")
 			!= std::string::npos) {
-            options += " -g -DDEVICE_VENDOR_INTEL -cl-kernel-arg-info -cl-std=CL1.2 -cl-mad-enable -cl-no-signed-zeros -cl-unsafe-math-optimizations";
-        }
+		options += " -DDEVICE_VENDOR_INTEL";
+	}
 
 	_prog = clCreateProgramWithSource(ctx.getContext(), 1, &ptr, &len, &err);
 	clCall(err);
@@ -115,10 +119,12 @@ cl::CLProgram::CLProgram(cl::CLContext &ctx, const char *src,
 	size_t len = strlen(src);
 	cl_int err = CL_SUCCESS;
 
+	options += " -cl-kernel-arg-info -cl-std=CL1.2 -cl-mad-enable -cl-no-signed-zeros -cl-unsafe-math-optimizations";
+
 	if (CommonUtils::toLower(_ctx.getDeviceVendor()).find("intel")
 			!= std::string::npos) {
-            options += " -g -DDEVICE_VENDOR_INTEL -cl-kernel-arg-info -cl-std=CL1.2 -cl-mad-enable -cl-no-signed-zeros -cl-unsafe-math-optimizations";
-        }
+		options += " -DDEVICE_VENDOR_INTEL";
+	}
 
 	_prog = clCreateProgramWithSource(ctx.getContext(), 1, &src, &len, &err);
 	clCall(err);
@@ -190,6 +196,28 @@ std::string cl::CLContext::getDeviceVendor() {
 	return std::string(name);
 }
 
+int cl::CLContext::get_mp_count()
+{
+	size_t count = 1;
+
+	clCall(clGetDeviceInfo(_device, CL_DEVICE_MAX_COMPUTE_UNITS, sizeof(count), &count, nullptr));
+
+	return (int)count;
+}
+
+// TODO: This is for 1 dimension only
+int cl::CLContext::get_max_block_size()
+{
+	size_t count[3] = { 1,1,1 };
+	size_t max_items = 1;
+
+	clCall(clGetDeviceInfo(_device, CL_DEVICE_MAX_WORK_ITEM_SIZES, sizeof(count), &count, nullptr));
+
+	clCall(clGetDeviceInfo(_device, CL_DEVICE_MAX_WORK_GROUP_SIZE, sizeof(max_items), &max_items, nullptr));
+
+	return (int)std::min(count[0], max_items);
+}
+
 cl::CLProgram::~CLProgram() {
 	clReleaseProgram(_prog);
 }
@@ -197,7 +225,7 @@ cl::CLProgram::~CLProgram() {
 cl::CLKernel::CLKernel(cl::CLProgram &prog, std::string entry) :
 		_prog(prog), _entry(entry) {
 	const char *ptr = entry.c_str();
-	cl_int err = 0;
+	cl_int err = CL_SUCCESS;
 	_kernel = clCreateKernel(_prog.getProgram(), ptr, &err);
 	clCall(err);
 }

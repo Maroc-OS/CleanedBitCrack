@@ -22,7 +22,7 @@ public:
 	};
 };
 
-typedef struct {
+typedef struct DeviceInfo {
 	int type;
 	int id;
 
