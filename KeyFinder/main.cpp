@@ -343,13 +343,13 @@ DeviceParameters getDefaultParameters(const DeviceManager::DeviceInfo &device) {
 	DeviceParameters parameters = {0,0,0};
 
 #ifdef BUILD_CUDA
-    if (device.type == DeviceManager::DeviceType::CUDA) {
-        parameters.threads = 256;
-    }
+	if (device.type == DeviceManager::DeviceType::CUDA) {
+		parameters.threads = 256;
+	}
 #endif
 
 #ifdef BUILD_OPENCL
-    if (device.type == DeviceManager::DeviceType::OpenCL) {
+	if (device.type == DeviceManager::DeviceType::OpenCL) {
 		size_t maxWorkingGroupUnrecomendedSize = 256;
 		if (sizeof(device.maxWorkingGroupSize) == maxWorkingGroupUnrecomendedSize) {
 			parameters.threads = device.maxWorkingGroupSize / 2;
