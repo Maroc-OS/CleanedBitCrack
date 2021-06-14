@@ -2,7 +2,7 @@
 #define UNCOMPRESSED 1
 #define BOTH 2
 
-typedef struct {
+typedef struct CLDeviceResult {
   int idx;
   bool compressed;
   unsigned int x[8];

@@ -17,7 +17,7 @@ extern "C" {
 #endif
 
 #elif defined(__linux__) || defined(__CYGWIN__)
-#include <CL/cl2.hpp>
+#include <CL/cl.h>
 #else
 #ifdef __cplusplus
 extern "C" {

@@ -39,12 +39,11 @@ endif
 endif
 
 # CUDA variables
-COMPUTE_CAP=30
-NVCC=nvcc
-NVCCFLAGS=-std=c++11 -arch=sm_${COMPUTE_CAP} -gencode=arch=compute_${COMPUTE_CAP},code=sm_${COMPUTE_CAP} -Xptxas="-v" -Xcompiler "${CXXFLAGS}"
 CUDA_HOME=/usr/local/cuda
 CUDA_LIB=${CUDA_HOME}/lib64
 CUDA_INCLUDE=${CUDA_HOME}/include
+NVCC=${CUDA_HOME}/bin/nvcc
+NVCCFLAGS=-std=c++17 -arch=sm_52 -gencode=arch=compute_52,code=sm_52 -gencode=arch=compute_60,code=sm_60 -gencode=arch=compute_61,code=sm_61 -gencode=arch=compute_70,code=sm_70 -gencode=arch=compute_75,code=sm_75 -gencode=arch=compute_80,code=sm_80 -gencode=arch=compute_86,code=sm_86 -gencode=arch=compute_86,code=compute_86 -Xptxas="-v" -Xcompiler "${CXXFLAGS}"
 CUDA_MATH=$(CUR_DIR)/cudaMath
 
 # OpenCL variables
