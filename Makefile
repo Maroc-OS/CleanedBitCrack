@@ -14,7 +14,7 @@ LIBS+=-L$(LIBDIR)
 ifeq ($(BUILD_DEBUG),1)
 	CXXFLAGS=-DDEBUG -g -ggdb -O0
 else
-	CXXFLAGS=-DNDEBUG -Os -ffast-math
+	CXXFLAGS=-DNDEBUG -O3 -flto -ffast-math
 endif
 
 LDFLAGS=
@@ -34,7 +34,7 @@ ifeq ($(CXX),clang++)
     CXXFLAGS+=-arch x86_64 -cl-mad-enable
 else
     CXX=g++
-    CXXFLAGS+=-march=x86-64
+    CXXFLAGS+=-march=x86-64 -fgcse-sm
 endif
 endif
 

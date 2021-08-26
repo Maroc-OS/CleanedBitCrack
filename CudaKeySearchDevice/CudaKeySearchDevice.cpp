@@ -321,7 +321,7 @@ bool CudaKeySearchDevice::verifyKey(const secp256k1::uint256& privateKey,
 
 size_t CudaKeySearchDevice::getResults(
 		std::vector<KeySearchResult> &resultsOut) {
-	for (int i = 0; i < _results.size(); i++) {
+	for (size_t i = 0; i < _results.size(); i++) {
 		resultsOut.push_back(_results[i]);
 	}
 	_results.clear();

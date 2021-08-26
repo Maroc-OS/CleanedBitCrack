@@ -18,7 +18,7 @@ public:
 	}
 };
 
-typedef struct {
+typedef struct KeySearchResult {
 	std::string address;
 	secp256k1::ecpoint publicKey;
 	secp256k1::uint256 privateKey;
@@ -30,7 +30,7 @@ typedef struct {
 class KeySearchDevice {
 public:
 	// Destructor
-	virtual ~KeySearchDevice() = 0;
+	virtual ~KeySearchDevice(){};
 
 	// Initialise the device
 	virtual void init(const secp256k1::uint256& start,

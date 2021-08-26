@@ -19,7 +19,7 @@ typedef struct hash160 {
 	}
 } hash160;
 
-typedef struct {
+typedef struct KeySearchStatus {
 	int device;
 	double speed;
 	uint64_t total;

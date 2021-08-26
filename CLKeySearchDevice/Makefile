@@ -5,7 +5,7 @@ LIBOBJ=$(LIBSRC:.cpp=.o)
 TARGETLIB=lib$(NAME).a
 
 LOADLIBS = $(LIBS)
-CXXFLAGS := $(INCLUDE) -I$(OPENCL_INCLUDE) $(CXXFLAGS) $(LOADLIBS) -Wl,--start-group $(OPENCL_LIB) -llogger -lcommonutils -lclutil -Wl,--end-group
+CXXFLAGS := $(INCLUDE) -I$(OPENCL_INCLUDE) $(CXXFLAGS) $(LOADLIBS) -Wl,--start-group $(OPENCL_LIB) -llogger -lcommonutils -lsecp256k1 -lcryptoutil -laddressutil -lclutil -lkeyfinder -Wl,--end-group
 
 $(TARGETLIB): $(LIBSRC)
 
@@ -26,7 +26,7 @@ all:	$(LIBSRC)
 $(TARGETS): $(LIBOBJ)
 	mkdir -p $(LIBDIR)
 ifeq ($(PLATFORM),Darwin)
-	$(CXX) $(LDFLAGS) -dynamiclib -undefined suppress -flat_namespace $(LIBOBJ) -o $(LIBDIR)/lib$(NAME).dylib
+	$(CXX)$(LDFLAGS) $(LOADLIBS) $(OPENCL_LIB) -llogger -lcommonutils -lsecp256k1 -lcryptoutil -laddressutil -lclutil -lkeyfinder -dynamiclib -undefined suppress -flat_namespace $(LIBOBJ) -o $(LIBDIR)/lib$(NAME).dylib
 else
 	ar rcvs $(LIBDIR)/$(TARGETLIB) $(LIBOBJ)
 	ranlib $(LIBDIR)/$(TARGETLIB)

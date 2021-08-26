@@ -11,7 +11,7 @@
 #include <vector>
 
 // Structures that exist on both host and device side
-struct CudaDeviceResult {
+typedef struct CudaDeviceResult {
 	int thread;
 	int block;
 	int idx;
@@ -19,7 +19,7 @@ struct CudaDeviceResult {
 	unsigned int x[8];
 	unsigned int y[8];
 	unsigned int digest[5];
-};
+} CudaDeviceResult;
 
 class CudaKeySearchDevice: public KeySearchDevice {
 private:

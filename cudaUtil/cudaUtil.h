@@ -8,7 +8,7 @@
 #include <vector>
 
 namespace cuda {
-typedef struct {
+typedef struct CudaDeviceInfo {
 	int id;
 	int major;
 	int minor;

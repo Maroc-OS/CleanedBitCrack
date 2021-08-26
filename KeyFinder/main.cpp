@@ -383,9 +383,6 @@ getDeviceContext(DeviceManager::DeviceInfo &device, int blocks, int threads,
 	return nullptr;
 }
 
-KeySearchDevice::~KeySearchDevice(){
-}
-
 static void printDeviceList(
 		const std::vector<DeviceManager::DeviceInfo> &devices) {
 	for (size_t i = 0; i < devices.size(); i++) {
@@ -496,7 +493,7 @@ void readCheckpointFile() {
 		_config.elapsed = CommonUtils::parseUInt32(entries["elapsed"].value);
 	}
 	if (entries.find("stride") != entries.end()) {
-		_config.stride = CommonUtils::parseUInt64(entries["stride"].value);
+		_config.stride = secp256k1::uint256(entries["stride"].value);
 	}
 
 	_config.totalkeys = (_config.nextKey - _config.startKey).toUint64();

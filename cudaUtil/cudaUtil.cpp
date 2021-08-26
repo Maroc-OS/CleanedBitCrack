@@ -37,21 +37,28 @@ cuda::CudaDeviceInfo cuda::getDeviceInfo(int device) {
 			cores = 48;
 		}
 		break;
-	case 3:
+	case 3: // "Kepler"
 		cores = 192;
 		break;
-	case 5:
+	case 5: // "Maxwell"
 		cores = 128;
 		break;
-	case 6:
+	case 6: // "Pascal"
 		if (devInfo.minor == 1 || devInfo.minor == 2) {
 			cores = 128;
 		} else {
 			cores = 64;
 		}
 		break;
-	case 7:
+	case 7: // "Volta" & "Xavier" & "Turing"
 		cores = 64;
+		break;
+	case 8: // "Ampere"
+		if (devInfo.minor == 6) {
+			cores = 128;
+		} else {
+			cores = 64;
+		}
 		break;
 	default:
 		cores = 8;

@@ -6,7 +6,7 @@
 // Defined in bitcrack_cl.cpp which gets build in the pre-build event
 extern char _bitcrack_cl[];
 
-typedef struct {
+typedef struct CLDeviceResult {
 	int thread;
 	int block;
 	int idx;
