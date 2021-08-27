@@ -365,7 +365,7 @@ int HexToDecString::power(struct number *a, unsigned int n, struct number *b) {
 }
 
 void HexToDecString::dec(struct number *a) {
-	unsigned int i;
+	unsigned int i ,j;
 
 	for (i = 0; i < a->num_digits; i++) {
 		if (a->digits[i] > 0) {
@@ -378,7 +378,7 @@ void HexToDecString::dec(struct number *a) {
 
 	/* Did number of digits get lower */
 	if (i == a->num_digits - 1 && a->digits[i] == 0) {
-		for (i = a->num_digits - 1; i >= 0; i--) {
+		for (j = a->num_digits, i = j - 1; j > 0; j--, i = j - 1){
 			if (a->digits[i] != 0) {
 				a->num_digits = i + 1;
 				break;
