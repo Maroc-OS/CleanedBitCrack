@@ -33,8 +33,8 @@ extern "C" {
 #include <vector>
 
 namespace cl {
-std::string getErrorString(cl_int err);
-
+std::string getOpenCLErrorName(cl_int errorCode);
+std::string getOpenCLErrorDescription(cl_int errorCode);
 typedef struct CLDeviceInfo {
 	cl_device_id id;
 	int cores;
@@ -47,11 +47,15 @@ class CLException {
 public:
 	int error;
 	std::string msg;
+	std::string description;
 
-	explicit CLException(cl_int err) : error(err), msg(getErrorString(err)) {
+	explicit CLException(cl_int errorCode) : error(errorCode), msg(getOpenCLErrorName(errorCode)), description(getOpenCLErrorDescription(errorCode)) {
 	}
 
-	CLException(cl_int err, const std::string &cl_msg) : error(err), msg(cl_msg) {
+	CLException(cl_int errorCode, const std::string &cl_msg) : error(errorCode), msg(cl_msg), description(getOpenCLErrorDescription(errorCode)){
+	}
+
+	CLException(cl_int errorCode, const std::string &cl_msg, const std::string &cl_description) : error(errorCode), msg(cl_msg), description(cl_description){
 	}
 };
 
@@ -61,7 +65,7 @@ std::vector<CLDeviceInfo> getDevices();
 
 int getDeviceCount();
 
-void clCall(cl_int err);
+void clCall(cl_int errorCode);
 
 }
 

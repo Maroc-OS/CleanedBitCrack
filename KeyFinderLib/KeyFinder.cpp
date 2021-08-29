@@ -39,7 +39,7 @@ KeyFinder::~KeyFinder() = default;
 
 void KeyFinder::setTargets(std::vector<std::string> &targets) {
 	if (targets.size() == 0) {
-		throw KeySearchException("Requires at least 1 target");
+		throw KeySearchException("KEYSEARCH_NO_TARGET", "Requires at least 1 target");
 	}
 
 	_targets.clear();
@@ -47,7 +47,7 @@ void KeyFinder::setTargets(std::vector<std::string> &targets) {
 	// Convert each address from base58 encoded form to a 160-bit integer
 	for (unsigned int i = 0; i < targets.size(); i++) {
 		if (!Address::verifyAddress(targets[i])) {
-			throw KeySearchException("Invalid address '" + targets[i] + "'");
+			throw KeySearchException("KEYSEARCH_INVALID_ADDRESS", "Invalid address '" + targets[i] + "'");
 		}
 
 		KeySearchTarget t;
@@ -66,7 +66,7 @@ void KeyFinder::setTargets(std::string targetsFile) {
 
 	if (!inFile.is_open()) {
 		Logger::log(LogLevel::Error, "Unable to open '" + targetsFile + "'");
-		throw KeySearchException();
+		throw KeySearchException("FILE", "Unable to open '" + targetsFile + "'");
 	}
 
 	_targets.clear();

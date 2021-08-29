@@ -10,11 +10,12 @@
 class KeySearchException {
 public:
 	std::string msg;
+	std::string description;
 
 	KeySearchException() {
 	}
 
-	explicit KeySearchException(const std::string &_msg): msg(_msg) {
+	explicit KeySearchException(const std::string &_msg, const std::string &_description): msg(_msg), description(_description) {
 	}
 };
 
@@ -30,7 +31,7 @@ typedef struct KeySearchResult {
 class KeySearchDevice {
 public:
 	// Destructor
-	virtual ~KeySearchDevice(){};
+	virtual ~KeySearchDevice() {};
 
 	// Initialise the device
 	virtual void init(const secp256k1::uint256& start,

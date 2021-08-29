@@ -40,9 +40,9 @@ typedef struct RunConfig {
 	uint64_t statusInterval = 1800;
 	uint64_t checkpointInterval = 60000;
 
-	unsigned int threads = 0;
-	unsigned int blocks = 0;
-	unsigned int pointsPerThread = 0;
+	unsigned int threads = 64;
+	unsigned int blocks = 32;
+	unsigned int pointsPerThread = 1024;
 
 	unsigned int elapsed = 0;
 
@@ -298,7 +298,7 @@ bool parseKeyspace(const std::string &s, secp256k1::uint256 &start,
 
 void usage();
 void usage() {
-	printf("BitCrack OPTIONS [TARGETS]\n");
+	printf("CleanedBitCrack OPTIONS [TARGETS]\n");
 	printf("Where TARGETS is one or more addresses\n\n");
 
 	printf("--help                  Display this message\n");
@@ -351,7 +351,8 @@ DeviceParameters getDefaultParameters(const DeviceManager::DeviceInfo &device) {
 #ifdef BUILD_OPENCL
 	if (device.type == DeviceManager::DeviceType::OpenCL) {
 		size_t maxWorkingGroupUnrecomendedSize = 256;
-		if (sizeof(device.maxWorkingGroupSize) == maxWorkingGroupUnrecomendedSize) {
+		size_t maxWorkingGroupSizeDefaultSize = sizeof(device.maxWorkingGroupSize);
+		if (maxWorkingGroupSizeDefaultSize == maxWorkingGroupUnrecomendedSize) {
 			parameters.threads = device.maxWorkingGroupSize / 2;
 		} else {
 			parameters.threads = device.maxWorkingGroupSize;
@@ -567,7 +568,7 @@ int run() {
 
 		delete d;
 	} catch (KeySearchException &ex) {
-		Logger::log(LogLevel::Info, "Error: " + ex.msg);
+		Logger::log(LogLevel::Info, ex.msg + ": " + ex.description);
 		return 1;
 	}
 

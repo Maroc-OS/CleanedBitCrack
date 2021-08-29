@@ -4,11 +4,11 @@
 #include "cudabridge.h"
 #include "AddressUtil.h"
 
-void CudaKeySearchDevice::cudaCall(cudaError_t err) {
-	if (err) {
-		std::string errStr = cudaGetErrorString(err);
+void CudaKeySearchDevice::cudaCall(cudaError_t errorCode) {
+	if (errorCode) {
+		std::string errorString = cudaGetErrorString(errorCode);
 
-		throw KeySearchException(errStr);
+		throw KeySearchException(errorString);
 	}
 }
 
@@ -19,16 +19,19 @@ CudaKeySearchDevice::CudaKeySearchDevice(int device, int threads,
 		info = cuda::getDeviceInfo(device);
 		_deviceName = info.name;
 	} catch (cuda::CudaException &ex) {
-		throw KeySearchException(ex.msg);
+		throw KeySearchException(ex.msg, ex.description);
 	}
 
 	if (threads <= 0 || threads % 32 != 0) {
 		throw KeySearchException(
+				"KEYSEARCH_THREAD_MULTIPLE_EXCEPTION",
 				"The number of threads must be a multiple of 32");
 	}
 
 	if (pointsPerThread <= 0) {
-		throw KeySearchException("At least 1 point per thread required");
+		throw KeySearchException(
+				"KEYSEARCH_MINIMUM_POINT_EXCEPTION",
+				"At least 1 point per thread required");
 	}
 
 	// Specifying blocks on the commandline is deprecated but still supported. If there is no value for
@@ -36,6 +39,7 @@ CudaKeySearchDevice::CudaKeySearchDevice(int device, int threads,
 	if (blocks == 0) {
 		if (threads % info.mpCount != 0) {
 			throw KeySearchException(
+					"KEYSEARCH_THREAD_MULTIPLE_EXCEPTION",
 					"The number of threads must be a multiple of "
 							+ CommonUtils::format("%d", info.mpCount));
 		}
@@ -67,7 +71,9 @@ void CudaKeySearchDevice::init(const secp256k1::uint256 &start,
 		const secp256k1::uint256 &end, int compression,
 		const secp256k1::uint256 &stride, bool randomMode) {
 	if (start.cmp(secp256k1::N) >= 0) {
-		throw KeySearchException("Starting key is out of range");
+		throw KeySearchException(
+			"KEYSEARCH_STARTINGKEY_OUT_OF_RANGE",
+			"Starting key is out of range");
 	}
 
 	_start = start;
@@ -170,7 +176,7 @@ void CudaKeySearchDevice::doStep() {
 					_compression);
 		}
 	} catch (cuda::CudaException &ex) {
-		throw KeySearchException(ex.msg);
+		throw KeySearchException(ex.msg, ex.description);
 	}
 
 	getResultsInternal();

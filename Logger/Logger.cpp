@@ -3,14 +3,14 @@
 
 bool LogLevel::isValid(int level) {
 	switch (level) {
-	case Info:
-	case Error:
-	case Debug:
-	case Warning:
-	case Notify:
-		return true;
-	default:
-		return false;
+		case Info:
+		case Error:
+		case Debug:
+		case Warning:
+		case Notify:
+			return true;
+		default:
+			return false;
 	}
 }
 

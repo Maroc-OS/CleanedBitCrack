@@ -5,12 +5,12 @@
 #include "CommonUtils.h"
 
 cl::CLContext::CLContext(cl_device_id device) : _device(device) {
-	cl_int err = 0;
-	_ctx = clCreateContext(nullptr, 1, &_device, nullptr, nullptr, &err);
-	clCall(err);
+	cl_int errorCode = CL_SUCCESS;
+	_ctx = clCreateContext(nullptr, 1, &_device, nullptr, nullptr, &errorCode);
+	clCall(errorCode);
 
-	_queue = clCreateCommandQueue(_ctx, _device, 0, &err);
-	clCall(err);
+	_queue = clCreateCommandQueue(_ctx, _device, 0, &errorCode);
+	clCall(errorCode);
 }
 
 cl::CLContext::~CLContext() {
@@ -31,9 +31,9 @@ cl_context cl::CLContext::getContext() {
 }
 
 cl_mem cl::CLContext::malloc(size_t size, cl_mem_flags flags) {
-	cl_int err = 0;
-	cl_mem ptr = clCreateBuffer(_ctx, flags, size, nullptr, &err);
-	clCall(err);
+	cl_int errorCode = CL_SUCCESS;
+	cl_mem ptr = clCreateBuffer(_ctx, flags, size, nullptr, &errorCode);
+	clCall(errorCode);
 	this->memset(ptr, 0, size);
 	return ptr;
 }
@@ -82,7 +82,7 @@ cl::CLProgram::CLProgram(cl::CLContext &ctx, std::string &src,
 	std::string srcFile = loadSource(src);
 	const char *ptr = srcFile.c_str();
 	const size_t len = srcFile.length();
-	cl_int err = CL_SUCCESS;
+	cl_int errorCode = CL_SUCCESS;
 
 	options += " -cl-kernel-arg-info -cl-std=CL1.2 -cl-mad-enable -cl-no-signed-zeros -cl-unsafe-math-optimizations";
 
@@ -91,12 +91,12 @@ cl::CLProgram::CLProgram(cl::CLContext &ctx, std::string &src,
 		options += " -DDEVICE_VENDOR_INTEL";
 	}
 
-	_prog = clCreateProgramWithSource(ctx.getContext(), 1, &ptr, &len, &err);
-	clCall(err);
+	_prog = clCreateProgramWithSource(ctx.getContext(), 1, &ptr, &len, &errorCode);
+	clCall(errorCode);
 
-    err = clBuildProgram(_prog, 0, nullptr, options.c_str(), nullptr, nullptr);
+    errorCode = clBuildProgram(_prog, 0, nullptr, options.c_str(), nullptr, nullptr);
 
-    if ((err == CL_BUILD_PROGRAM_FAILURE) || (err != CL_SUCCESS)) {
+    if ((errorCode == CL_BUILD_PROGRAM_FAILURE) || (errorCode != CL_SUCCESS)) {
 		size_t logSize = 0;
 		clGetProgramBuildInfo(_prog, ctx.getDevice(), CL_PROGRAM_BUILD_LOG, 0,
 				nullptr, &logSize);
@@ -108,16 +108,16 @@ cl::CLProgram::CLProgram(cl::CLContext &ctx, std::string &src,
 		_buildLog = std::string(log, logSize);
 		delete[] log;
 
-		throw CLException(err, _buildLog);
+		throw CLException(errorCode, _buildLog);
 	}
-	clCall(err);
+	clCall(errorCode);
 }
 
 cl::CLProgram::CLProgram(cl::CLContext &ctx, const char *src,
 		std::string options) :
 		_ctx(ctx) {
 	size_t len = strlen(src);
-	cl_int err = CL_SUCCESS;
+	cl_int errorCode = CL_SUCCESS;
 
 	options += " -cl-kernel-arg-info -cl-std=CL1.2 -cl-mad-enable -cl-no-signed-zeros -cl-unsafe-math-optimizations";
 
@@ -126,12 +126,12 @@ cl::CLProgram::CLProgram(cl::CLContext &ctx, const char *src,
 		options += " -DDEVICE_VENDOR_INTEL";
 	}
 
-	_prog = clCreateProgramWithSource(ctx.getContext(), 1, &src, &len, &err);
-	clCall(err);
+	_prog = clCreateProgramWithSource(ctx.getContext(), 1, &src, &len, &errorCode);
+	clCall(errorCode);
 
-	err = clBuildProgram(_prog, 0, nullptr, options.c_str(), nullptr, nullptr);
+	errorCode = clBuildProgram(_prog, 0, nullptr, options.c_str(), nullptr, nullptr);
 
-	if ((err == CL_BUILD_PROGRAM_FAILURE) || (err != CL_SUCCESS)) {
+	if ((errorCode == CL_BUILD_PROGRAM_FAILURE) || (errorCode != CL_SUCCESS)) {
 		size_t logSize = 0;
 		clGetProgramBuildInfo(_prog, ctx.getDevice(), CL_PROGRAM_BUILD_LOG, 0,
 				nullptr, &logSize);
@@ -143,9 +143,9 @@ cl::CLProgram::CLProgram(cl::CLContext &ctx, const char *src,
 		_buildLog = std::string(log, logSize);
 		delete[] log;
 
-		throw CLException(err, _buildLog);
+		throw CLException(errorCode, _buildLog);
 	}
-	clCall(err);
+	clCall(errorCode);
 }
 
 std::string cl::CLProgram::loadSource(const std::string &srcFile) {
@@ -225,19 +225,19 @@ cl::CLProgram::~CLProgram() {
 cl::CLKernel::CLKernel(cl::CLProgram &prog, std::string entry) :
 		_prog(prog), _entry(entry) {
 	const char *ptr = entry.c_str();
-	cl_int err = CL_SUCCESS;
-	_kernel = clCreateKernel(_prog.getProgram(), ptr, &err);
-	clCall(err);
+	cl_int errorCode = CL_SUCCESS;
+	_kernel = clCreateKernel(_prog.getProgram(), ptr, &errorCode);
+	clCall(errorCode);
 }
 
 size_t cl::CLKernel::getWorkGroupSize() {
 	size_t size = 0;
 
-	cl_int err = clGetKernelWorkGroupInfo(_kernel,
+	cl_int errorCode = clGetKernelWorkGroupInfo(_kernel,
 			_prog.getContext().getDevice(), CL_KERNEL_WORK_GROUP_SIZE,
 			sizeof(size_t), &size, nullptr);
 
-	clCall(err);
+	clCall(errorCode);
 
 	return size;
 }

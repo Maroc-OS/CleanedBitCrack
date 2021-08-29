@@ -8,7 +8,7 @@ Multi-Plateform cracking tool. works on all Operating Systems.
 
 ## Code Quality
 
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/7d7d6b6a74b04571bd855c7786e947b7)](https://www.codacy.com/app/merruk-company/CleanedBitCrack?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Maroc-OS/CleanedBitCrack&amp;utm_campaign=Badge_Grade) [![CodeFactor](https://www.codefactor.io/repository/github/maroc-os/cleanedbitcrack/badge)](https://www.codefactor.io/repository/github/maroc-os/cleanedbitcrack) [![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/Maroc-OS/CleanedBitCrack.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/Maroc-OS/CleanedBitCrack/context:cpp)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/57cbb61099d64b1d8c3c20f75aaf0f92)](https://www.codacy.com/gh/Maroc-OS/CleanedBitCrack/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Maroc-OS/CleanedBitCrack&amp;utm_campaign=Badge_Grade) [![CodeFactor](https://www.codefactor.io/repository/github/maroc-os/cleanedbitcrack/badge)](https://www.codefactor.io/repository/github/maroc-os/cleanedbitcrack) [![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/Maroc-OS/CleanedBitCrack.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/Maroc-OS/CleanedBitCrack/context:cpp)
 
 ## Note
 
@@ -28,7 +28,7 @@ Use `cuBitCrack.exe` for CUDA devices and `clBitCrack.exe` for OpenCL devices.
 
 **clBitCrack.exe is still EXPERIMENTAL**, as users have reported critial bugs when running on some AMD and Intel devices.
 
-**Note for Intel users:**
+***Note for Intel users:***
 
 There is bug in Intel's OpenCL implementation which affects BitCrack. Details here: <https://github.com/brichard19/BitCrack/issues/123>
 

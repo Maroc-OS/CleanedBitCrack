@@ -35,11 +35,14 @@ CLKeySearchDevice::CLKeySearchDevice(uint64_t device, int threads,
 
 	if (threads <= 0 || threads % 32 != 0) {
 		throw KeySearchException(
+				"KEYSEARCH_THREAD_MULTIPLE_EXCEPTION",
 				"The number of threads must be a multiple of 32");
 	}
 
 	if (pointsPerThread <= 0) {
-		throw KeySearchException("At least 1 point per thread required");
+		throw KeySearchException(
+				"KEYSEARCH_MINIMUM_POINT_EXCEPTION",
+				"At least 1 point per thread required");
 	}
 
 	try {
@@ -58,7 +61,7 @@ CLKeySearchDevice::CLKeySearchDevice(uint64_t device, int threads,
 
 		_deviceName = _clContext->getDeviceName();
 	} catch (cl::CLException &ex) {
-		throw KeySearchException(ex.msg);
+		throw KeySearchException(ex.msg, ex.description);
 	}
 
 	_iterations = 0;
@@ -201,6 +204,7 @@ void CLKeySearchDevice::init(const secp256k1::uint256 &start,
 		const secp256k1::uint256 &stride, bool randomMode) {
 	if (start.cmp(secp256k1::N) >= 0) {
 				throw KeySearchException(
+						"KEYSEARCH_STARTINGKEY_OUT_OF_RANGE",
 						"Starting key is out of range");
 	}
 
@@ -234,7 +238,7 @@ void CLKeySearchDevice::init(const secp256k1::uint256 &start,
 
 		setIncrementor(p);
 	} catch (cl::CLException &ex) {
-		throw KeySearchException(ex.msg);
+		throw KeySearchException(ex.msg, ex.description);
 	}
 }
 
@@ -277,7 +281,7 @@ void CLKeySearchDevice::doStep() {
 
 		_iterations++;
 	} catch (cl::CLException &ex) {
-		throw KeySearchException(ex.msg);
+		throw KeySearchException(ex.msg, ex.description);
 	}
 }
 
@@ -328,7 +332,7 @@ void CLKeySearchDevice::setTargets(const std::set<KeySearchTarget> &targets) {
 
 		setTargetsInternal();
 	} catch (cl::CLException &ex) {
-		throw KeySearchException(ex.msg);
+		throw KeySearchException(ex.msg, ex.description);
 	}
 }
 
@@ -453,6 +457,8 @@ void CLKeySearchDevice::getResultsInternal() {
 
 			_results.push_back(minerResult);
 		}
+
+        delete[] ptr;
 
 		// Reset device counter
 		numResults = 0;
@@ -665,7 +671,7 @@ void CLKeySearchDevice::generateStartingPoints() {
 				_chain, _xTable, _yTable, _x, _y);
 		_initKeysKernel->call(_blocks, _threads);
 
-		if (((double) (i + 1) / 256.0) * 100.0 >= pct) {
+		if (((double) (i + 1.0) / 256.0) * 100.0 >= pct) {
 			Logger::log(LogLevel::Info, CommonUtils::format("%.1f%%", pct));
 			pct += 10.0;
 		}
@@ -679,7 +685,5 @@ void CLKeySearchDevice::generateStartingPoints() {
 }
 
 secp256k1::uint256 CLKeySearchDevice::getNextKey() {
-	uint64_t totalPoints = (uint64_t) _pointsPerThread * _threads * _blocks;
-
-	return _start + secp256k1::uint256(totalPoints) * _iterations * _stride;
+	return _start + secp256k1::uint256((uint64_t)_pointsPerThread) * _iterations * _stride;
 }

@@ -1,8 +1,8 @@
 #include "clUtil.h"
 
-void cl::clCall(cl_int err) {
-	if (err != CL_SUCCESS) {
-		throw cl::CLException(err);
+void cl::clCall(cl_int errorCode) {
+	if (errorCode != CL_SUCCESS) {
+		throw cl::CLException(errorCode);
 	}
 }
 
