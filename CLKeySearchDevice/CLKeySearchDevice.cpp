@@ -244,7 +244,7 @@ void CLKeySearchDevice::init(const secp256k1::uint256 &start,
 
 void CLKeySearchDevice::doStep() {
 	try {
-		uint64_t numKeys = (uint64_t) (_blocks * _threads * _pointsPerThread);
+		uint64_t numKeys = (uint64_t)_blocks * _threads * _pointsPerThread;
 		unsigned int totalPoints = (unsigned int) numKeys;
 
 		if (!_randomMode && _iterations < (uint64_t) 2 && _start.cmp(numKeys) <= 0) {
