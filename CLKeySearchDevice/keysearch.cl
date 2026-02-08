@@ -3,6 +3,8 @@
 #define BOTH 2
 
 typedef struct CLDeviceResult {
+  int thread;
+  int block;
   int idx;
   bool compressed;
   unsigned int x[8];
@@ -10,12 +12,15 @@ typedef struct CLDeviceResult {
   unsigned int digest[5];
 } CLDeviceResult;
 
-void setResultFound(const int idx, const bool compressed, const uint256_t x,
+void setResultFound(const int thread, const int block, const int idx,
+                    const bool compressed, const uint256_t x,
                     const uint256_t y, const unsigned int digest[5],
                     __global CLDeviceResult *results,
                     __global unsigned int *numResults) {
   CLDeviceResult r;
 
+  r.thread = thread;
+  r.block = block;
   r.idx = idx;
   r.compressed = compressed;
 
@@ -105,8 +110,10 @@ __kernel void _stepKernel(const unsigned int totalPoints,
                           const ulong mask,
                           __global CLDeviceResult *results,
                           __global unsigned int *numResults) {
-  int i = get_local_size(0) * get_group_id(0) + get_local_id(0);
+  int gid = get_local_size(0) * get_group_id(0) + get_local_id(0);
   int dim = get_global_size(0);
+  int threadId = get_local_id(0);
+  int blockId = get_group_id(0);
 
   uint256_t incX = *incXPtr;
   uint256_t incY = *incYPtr;
@@ -114,30 +121,32 @@ __kernel void _stepKernel(const unsigned int totalPoints,
   // Multiply together all (_Gx - x) and then invert
   uint256_t inverse = {{0, 0, 0, 0, 0, 0, 0, 1}};
   int batchIdx = 0;
+  int pointIdx = 0;
 
   unsigned int digest[5];
 
-  for (; i < totalPoints; i += dim) {
+  for (int i = gid; i < totalPoints; i += dim) {
 
 #if defined(COMPRESSION_UNCOMPRESSED) || defined(COMPRESSION_BOTH)
     hashPublicKey(xPtr[i], yPtr[i], digest);
     if (isInBloomFilter(digest, targetList, &mask)) {
-      setResultFound(i, false, xPtr[i], yPtr[i], digest, results, numResults);
+      setResultFound(threadId, blockId, pointIdx, false, xPtr[i], yPtr[i], digest, results, numResults);
     }
 #endif
 #if defined(COMPRESSION_COMPRESSED) || defined(COMPRESSION_BOTH)
     hashPublicKeyCompressed(xPtr[i], yPtr[i].v[7], digest);
     if (isInBloomFilter(digest, targetList, &mask)) {
-      setResultFound(i, true, xPtr[i], yPtr[i], digest, results, numResults);
+      setResultFound(threadId, blockId, pointIdx, true, xPtr[i], yPtr[i], digest, results, numResults);
     }
 #endif
     beginBatchAdd256k(incX, xPtr[i], chain, i, batchIdx, &inverse);
     batchIdx++;
+    pointIdx++;
   }
 
   doBatchInverse256k(inverse.v);
 
-  i -= dim;
+  int i = gid + (batchIdx - 1) * dim;
   uint256_t newX;
   uint256_t newY;
   for (; i >= 0; i -= dim) {
@@ -160,8 +169,10 @@ __kernel void _stepKernelWithDouble(
     __global unsigned int *targetList, const ulong mask,
     __global CLDeviceResult *results,
     __global unsigned int *numResults) {
-  int i = get_local_size(0) * get_group_id(0) + get_local_id(0);
+  int gid = get_local_size(0) * get_group_id(0) + get_local_id(0);
   int dim = get_global_size(0);
+  int threadId = get_local_id(0);
+  int blockId = get_group_id(0);
 
   uint256_t incX = *incXPtr;
   uint256_t incY = *incYPtr;
@@ -170,30 +181,32 @@ __kernel void _stepKernelWithDouble(
   uint256_t inverse = {{0, 0, 0, 0, 0, 0, 0, 1}};
 
   int batchIdx = 0;
+  int pointIdx = 0;
   unsigned int digest[5];
 
-  for (; i < totalPoints; i += dim) {
+  for (int i = gid; i < totalPoints; i += dim) {
 
 #if defined(COMPRESSION_UNCOMPRESSED) || defined(COMPRESSION_BOTH)
     hashPublicKey(xPtr[i], yPtr[i], digest);
     if (isInBloomFilter(digest, targetList, &mask)) {
-      setResultFound(i, false, xPtr[i], yPtr[i], digest, results, numResults);
+      setResultFound(threadId, blockId, pointIdx, false, xPtr[i], yPtr[i], digest, results, numResults);
     }
 #endif
 #if defined(COMPRESSION_COMPRESSED) || defined(COMPRESSION_BOTH)
     hashPublicKeyCompressed(xPtr[i], yPtr[i].v[7], digest);
     if (isInBloomFilter(digest, targetList, &mask)) {
-      setResultFound(i, true, xPtr[i], yPtr[i], digest, results, numResults);
+      setResultFound(threadId, blockId, pointIdx, true, xPtr[i], yPtr[i], digest, results, numResults);
     }
 #endif
 
     beginBatchAddWithDouble256k(incX, incY, xPtr, chain, i, batchIdx, &inverse);
     batchIdx++;
+    pointIdx++;
   }
 
   doBatchInverse256k(inverse.v);
 
-  i -= dim;
+  int i = gid + (batchIdx - 1) * dim;
 
   uint256_t newX;
   uint256_t newY;
