@@ -45,6 +45,8 @@ private:
 
 	bool _randomMode = false;
 
+	bool _initialized = false;
+
 	uint64_t _iterations = 0;
 
 	secp256k1::uint256 _stride = 1;
@@ -124,6 +126,10 @@ public:
 	virtual void init(const secp256k1::uint256 &start,
 			const secp256k1::uint256 &end, int compression,
 			const secp256k1::uint256 &stride, bool randomMode);
+
+	// Free all device resources. Safe to call multiple times.
+	// After cleanup(), init() can be called again with a new starting point.
+	virtual void cleanup();
 
 	// Perform one iteration
 	virtual void doStep();

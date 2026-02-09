@@ -68,19 +68,68 @@ CLKeySearchDevice::CLKeySearchDevice(uint64_t device, int threads,
 }
 
 CLKeySearchDevice::~CLKeySearchDevice() {
-	_clContext->free(_x);
-	_clContext->free(_y);
-	_clContext->free(_xTable);
-	_clContext->free(_yTable);
-	_clContext->free(_xInc);
-	_clContext->free(_yInc);
-	_clContext->free(_deviceResults);
-	_clContext->free(_deviceResultsCount);
+	cleanup();
 
 	delete _stepKernel;
 	delete _stepKernelWithDouble;
 	delete _initKeysKernel;
 	delete _clContext;
+}
+
+void CLKeySearchDevice::cleanup() {
+	if (!_initialized) {
+		return;
+	}
+
+	if (_x != nullptr) {
+		_clContext->free(_x);
+		_x = nullptr;
+	}
+	if (_y != nullptr) {
+		_clContext->free(_y);
+		_y = nullptr;
+	}
+	if (_chain != nullptr) {
+		_clContext->free(_chain);
+		_chain = nullptr;
+	}
+	if (_privateKeys != nullptr) {
+		_clContext->free(_privateKeys);
+		_privateKeys = nullptr;
+	}
+	if (_xTable != nullptr) {
+		_clContext->free(_xTable);
+		_xTable = nullptr;
+	}
+	if (_yTable != nullptr) {
+		_clContext->free(_yTable);
+		_yTable = nullptr;
+	}
+	if (_xInc != nullptr) {
+		_clContext->free(_xInc);
+		_xInc = nullptr;
+	}
+	if (_yInc != nullptr) {
+		_clContext->free(_yInc);
+		_yInc = nullptr;
+	}
+	if (_deviceResults != nullptr) {
+		_clContext->free(_deviceResults);
+		_deviceResults = nullptr;
+	}
+	if (_deviceResultsCount != nullptr) {
+		_clContext->free(_deviceResultsCount);
+		_deviceResultsCount = nullptr;
+	}
+	if (_deviceTargetList.ptr != nullptr) {
+		_clContext->free(_deviceTargetList.ptr);
+		_deviceTargetList.ptr = nullptr;
+	}
+
+	exponents.clear();
+
+	_iterations = 0;
+	_initialized = false;
 }
 
 uint64_t CLKeySearchDevice::getOptimalBloomFilterMask(double p, size_t n) {
@@ -208,6 +257,10 @@ void CLKeySearchDevice::init(const secp256k1::uint256 &start,
 						"Starting key is out of range");
 	}
 
+	// Clean up any previous state so init() can be called multiple times
+	// (e.g., to change the starting point at runtime)
+	cleanup();
+
 	_start = start;
 
 	_end = end;
@@ -237,6 +290,8 @@ void CLKeySearchDevice::init(const secp256k1::uint256 &start,
 		}
 
 		setIncrementor(p);
+
+		_initialized = true;
 	} catch (cl::CLException &ex) {
 		throw KeySearchException(ex.msg, ex.description);
 	}
