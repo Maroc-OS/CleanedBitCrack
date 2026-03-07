@@ -299,11 +299,12 @@ void CLKeySearchDevice::init(const secp256k1::uint256 &start,
 
 void CLKeySearchDevice::doStep() {
 	try {
-		uint64_t numKeys = (uint64_t) (_blocks * _threads * _pointsPerThread);
+		uint64_t numKeys = (uint64_t)_blocks * _threads * _pointsPerThread;
+		unsigned int totalPoints = (unsigned int) numKeys;
 
 		if (!_randomMode && _iterations < (uint64_t) 2 && _start.cmp(numKeys) <= 0) {
 			_stepKernelWithDouble->set_args(
-					_pointsPerThread,
+					totalPoints,
 					_chain,
 					_x,
 					_y,
@@ -317,7 +318,7 @@ void CLKeySearchDevice::doStep() {
 			_stepKernelWithDouble->call(_blocks, _threads);
 		} else {
 			_stepKernel->set_args(
-					_pointsPerThread,
+					totalPoints,
 					_chain,
 					_x,
 					_y,
@@ -720,9 +721,10 @@ void CLKeySearchDevice::generateStartingPoints() {
 	delete[] privateKeys;
 
 	// Show progress in 10% increments
+	unsigned int totalPointsInit = (unsigned int) totalPoints;
 	double pct = 10.0;
 	for (int i = 0; i < 256; i++) {
-		_initKeysKernel->set_args(_pointsPerThread, i, _privateKeys,
+		_initKeysKernel->set_args(totalPointsInit, i, _privateKeys,
 				_chain, _xTable, _yTable, _x, _y);
 		_initKeysKernel->call(_blocks, _threads);
 
@@ -740,5 +742,6 @@ void CLKeySearchDevice::generateStartingPoints() {
 }
 
 secp256k1::uint256 CLKeySearchDevice::getNextKey() {
-	return _start + secp256k1::uint256((uint64_t)_pointsPerThread) * _iterations * _stride;
+	uint64_t totalPoints = (uint64_t) _pointsPerThread * _threads * _blocks;
+	return _start + secp256k1::uint256(totalPoints) * _iterations * _stride;
 }
