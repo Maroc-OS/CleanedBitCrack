@@ -65,6 +65,27 @@ CudaKeySearchDevice::CudaKeySearchDevice(int device, int threads,
 }
 
 CudaKeySearchDevice::~CudaKeySearchDevice() {
+	cleanup();
+}
+
+void CudaKeySearchDevice::cleanup() {
+	if (!_initialized) {
+		return;
+	}
+
+	cudaSetDevice(_device);
+
+	// Free the global chain buffer used during search iterations
+	cleanupChainBuf();
+
+	// Free the result list (pinned host memory + device pointers)
+	_resultList.cleanup();
+
+	// Free the public keys remaining on the device
+	_deviceKeys.clearPublicKeys();
+
+	_iterations = 0;
+	_initialized = false;
 }
 
 void CudaKeySearchDevice::init(const secp256k1::uint256 &start,
@@ -75,6 +96,10 @@ void CudaKeySearchDevice::init(const secp256k1::uint256 &start,
 			"KEYSEARCH_STARTINGKEY_OUT_OF_RANGE",
 			"Starting key is out of range");
 	}
+
+	// Clean up any previous state so init() can be called multiple times
+	// (e.g., to change the starting point at runtime)
+	cleanup();
 
 	_start = start;
 
@@ -109,6 +134,8 @@ void CudaKeySearchDevice::init(const secp256k1::uint256 &start,
 	cudaCall(_resultList.init(sizeof(CudaDeviceResult), 16));
 
 	cudaCall(setIncrementorPoint(p.x, p.y));
+
+	_initialized = true;
 }
 
 void CudaKeySearchDevice::generateStartingPoints() {

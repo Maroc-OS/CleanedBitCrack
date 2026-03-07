@@ -40,6 +40,10 @@ public:
                       const secp256k1::uint256& stride,
                       bool randomMode) = 0;
 
+	// Free all device resources. Safe to call multiple times.
+	// After cleanup(), init() can be called again with a new starting point.
+	virtual void cleanup() = 0;
+
 	// Perform one iteration
 	virtual void doStep() = 0;
 

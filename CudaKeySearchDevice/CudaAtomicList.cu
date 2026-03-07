@@ -107,10 +107,14 @@ unsigned int CudaAtomicList::read(void* ptr, unsigned int count)
 void CudaAtomicList::cleanup()
 {
     cudaFreeHost(_countHostPtr);
+    _countHostPtr = nullptr;
 
     cudaFree(_countDevPtr);
+    _countDevPtr = nullptr;
 
     cudaFreeHost(_hostPtr);
+    _hostPtr = nullptr;
 
     cudaFree(_devPtr);
+    _devPtr = nullptr;
 }

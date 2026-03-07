@@ -67,6 +67,8 @@ private:
 
 	bool _randomMode = false;
 
+	bool _initialized = false;
+
 	bool isTargetInList(const unsigned int hash[5]);
 
 	bool
@@ -85,6 +87,10 @@ public:
                       int compression,
                       const secp256k1::uint256& stride,
                       bool randomMode);
+
+	// Free all GPU resources. Safe to call multiple times.
+	// After cleanup(), init() can be called again with a new starting point.
+	virtual void cleanup();
 
 	virtual void doStep();
 
